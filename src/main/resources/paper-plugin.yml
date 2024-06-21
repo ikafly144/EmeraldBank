@@ -1,0 +1,48 @@
+name: EmeraldBank
+authors:
+  - ikafly144
+version: '${version}'
+main: net.sabafly.emeraldbank.EmeraldBank
+bootstrapper: net.sabafly.emeraldbank.EmeraldBootstrapper
+api-version: '1.21'
+load: STARTUP
+dependencies:
+  server:
+    Vault:
+      load: BEFORE
+      required: true
+    OpenInv:
+      load: BEFORE
+      required: true
+permissions:
+  emeraldbank.admin:
+    default: op
+    description: Allows the player to use all EmeraldBank command
+    children:
+      emeraldbank.balance.all: true
+      emeraldbank.reload: true
+      emeraldbank.default:
+        default: true
+        description: Allows the player to use the EmeraldBank command
+        children:
+          emeraldbank.balance: true
+          emeraldbank.pay: true
+          emeraldbank.banking:
+            default: true
+            description: Allows the player to use the EmeraldBank command
+            children:
+              emeraldbank.banking.account":
+                default: true
+                description: Allows the player to use the EmeraldBank command
+                children:
+                  emeraldbank.banking.account.create: true
+                  emeraldbank.banking.account.delete: true
+                  emeraldbank.banking.account.add: true
+                  emeraldbank.banking.account.remove: true
+                  emeraldbank.banking.account.list: true
+                  emeraldbank.banking.account.transfer: true
+              emeraldbank.banking.withdraw: true
+              emeraldbank.banking.deposit: true
+              emeraldbank.banking.balance: true
+              emeraldbank.banking.send: true
+              emeraldbank.banking.pay: true
