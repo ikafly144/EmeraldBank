@@ -31,7 +31,7 @@ permissions:
             default: true
             description: Allows the player to use the EmeraldBank command
             children:
-              emeraldbank.banking.account":
+              emeraldbank.banking.account:
                 default: true
                 description: Allows the player to use the EmeraldBank command
                 children:
