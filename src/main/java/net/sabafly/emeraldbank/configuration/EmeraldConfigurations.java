@@ -23,8 +23,7 @@ public class EmeraldConfigurations extends Configurations<GlobalConfiguration, M
 
     private static final String GLOBAL_HEADER = """
             This is the main configuration file for EmeraldBank.
-            As you can see, there's a lot to configure. Some options may impact gameplay, so use
-            with caution, and make sure you know what each option does before configuring.
+            Here you can configure the plugin to your liking.
             """;
 
     public EmeraldConfigurations(final Path globalFolder) {
