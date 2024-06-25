@@ -6,24 +6,39 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.Tag;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.milkbowl.vault.economy.Economy;
+import net.sabafly.emeraldbank.configuration.EmeraldConfigurations;
+import net.sabafly.emeraldbank.configuration.GlobalConfiguration;
 import net.sabafly.emeraldbank.configuration.Messages;
 import net.sabafly.emeraldbank.economy.EmeraldEconomy;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
+import org.spongepowered.configurate.ConfigurateException;
 
+import java.io.IOException;
 import java.nio.file.Path;
 
 public final class EmeraldBank extends JavaPlugin {
 
     @Getter
     private Messages messages;
+    @Getter
+    @NotNull
+    private GlobalConfiguration globalConfiguration;
+    private final EmeraldConfigurations configurations;
     private final Path dataDir;
     @Getter
     private final EmeraldEconomy economy = new EmeraldEconomy();
 
-    public EmeraldBank(Path dataDir, Messages messages) {
+    public EmeraldBank(Path dataDir, Messages messages, EmeraldConfigurations configurations) {
         this.dataDir = dataDir;
         this.messages = messages;
+        this.configurations = configurations;
+        try {
+            this.globalConfiguration = this.configurations.initializeGlobalConfiguration();
+        } catch (ConfigurateException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -60,11 +75,8 @@ public final class EmeraldBank extends JavaPlugin {
         return getPlugin(EmeraldBank.class);
     }
 
-    public void reloadMessages() {
-        try {
-            messages = EmeraldBootstrapper.loadMessages(this.dataDir.resolve("messages.yml"));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    public void reloadConfiguration() throws IOException {
+        messages = EmeraldBootstrapper.loadMessages(this.dataDir.resolve("messages.yml"));
+        this.globalConfiguration = configurations.initializeGlobalConfiguration();
     }
 }

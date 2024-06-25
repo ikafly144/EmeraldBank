@@ -37,8 +37,8 @@ public class EmeraldUtils {
         return getEconomy().withdrawPlayer(account, amount).transactionSuccess();
     }
 
-    public static boolean payPlayer(Player from, Player to, double amount) {
-        return withdrawPlayer(from, amount) && depositPlayer(to, amount);
+    public static boolean payPlayer(Player from, Player to, double amount, int cost) {
+        return withdrawPlayer(from, amount) && depositPlayer(to, amount - cost);
     }
 
     public static Component deserializeMiniMessage(String message, TagResolver... resolvers) {

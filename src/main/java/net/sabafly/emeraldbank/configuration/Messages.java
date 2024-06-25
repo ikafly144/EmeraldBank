@@ -1,13 +1,21 @@
 package net.sabafly.emeraldbank.configuration;
 
+import com.mojang.logging.LogUtils;
+import org.slf4j.Logger;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Setting;
 
 @ConfigSerializable
-public class Messages {
+public class Messages extends ConfigurationPart {
+    private static final Logger LOGGER = LogUtils.getClassLogger();
+    static final int CURRENT_VERSION = 1;
+
+    @Setting(Configuration.VERSION_FIELD)
+    public int version = CURRENT_VERSION;
 
     public String name = "EmeraldBank";
 
-    public String reload = "<green>Reloaded messages";
+    public String reload = "<green>Reloaded configuration and messages";
 
     public String economyFormat = "<value> <green><currency></green>";
     public String currencyName = "Emerald";
@@ -49,4 +57,11 @@ public class Messages {
     public String errorBankingSend = "<red>Failed to send <value> from bank <bank_from> to bank <bank_to>!";
     public String errorBankingPay = "<red>Failed to pay <value> from bank <bank> to <player>!";
     public String errorBankingRemoveOwner = "<red><player> is the owner of bank <bank>!";
+    public String errorBankingCreateCost = "<red>Failed to create bank due to insufficient funds <value>!";
+    public String errorBankingAddMemberCost = "<red>Failed to add member <player> to bank <bank> due to insufficient funds <value>!";
+    public String errorBankingTransferCost = "<red>Failed to transfer bank <bank> to <player> due to insufficient funds <value>!";
+    public String errorBankingDepositCost = "<red>Failed to deposit <value> to bank <bank> due to insufficient funds <cost>!";
+    public String errorBankingWithdrawCost = "<red>Failed to withdraw <value> from bank <bank> due to insufficient funds <cost>!";
+    public String errorBankingPayCost = "<red>Failed to pay <value> from bank <bank> to <player> due to insufficient funds <cost>!";
+    public String errorPayCost = "<red>Failed to pay <value> to <player> due to insufficient funds <cost>!";
 }

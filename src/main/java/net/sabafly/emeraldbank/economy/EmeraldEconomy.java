@@ -35,7 +35,7 @@ public class EmeraldEconomy implements Economy {
 
     @Override
     public boolean hasBankSupport() {
-        return true;
+        return EmeraldBank.getInstance().getGlobalConfiguration().banking.enabled && isEnabled();
     }
 
     @Override
@@ -212,12 +212,14 @@ public class EmeraldEconomy implements Economy {
 
     @Override
     public EconomyResponse createBank(String name, OfflinePlayer offlinePlayer) {
+        if (!hasBankSupport()) return new EconomyResponse(0, 0, EconomyResponse.ResponseType.NOT_IMPLEMENTED, "Banking is not enabled");
         final var account = createAccountData(name, offlinePlayer);
         return new EconomyResponse(0, account.balance(), EconomyResponse.ResponseType.SUCCESS, null);
     }
 
     @Override
     public EconomyResponse deleteBank(String s) {
+        if (!hasBankSupport()) return new EconomyResponse(0, 0, EconomyResponse.ResponseType.NOT_IMPLEMENTED, "Banking is not enabled");
         var balance = bankBalance(s).balance;
         removeAccountData(s);
         return new EconomyResponse(0, balance, EconomyResponse.ResponseType.SUCCESS, null);
@@ -225,18 +227,21 @@ public class EmeraldEconomy implements Economy {
 
     @Override
     public EconomyResponse bankBalance(String s) {
+        if (!hasBankSupport()) return new EconomyResponse(0, 0, EconomyResponse.ResponseType.NOT_IMPLEMENTED, "Banking is not enabled");
         var balance = getAccountData(s).balance();
         return new EconomyResponse(balance, balance, EconomyResponse.ResponseType.SUCCESS, null);
     }
 
     @Override
     public EconomyResponse bankHas(String s, double v) {
+        if (!hasBankSupport()) return new EconomyResponse(0, 0, EconomyResponse.ResponseType.NOT_IMPLEMENTED, "Banking is not enabled");
         final double balance = getAccountData(s).balance();
         return new EconomyResponse(balance, balance, balance >= v ? EconomyResponse.ResponseType.SUCCESS : EconomyResponse.ResponseType.FAILURE, null);
     }
 
     @Override
     public EconomyResponse bankWithdraw(String s, double v) {
+        if (!hasBankSupport()) return new EconomyResponse(0, 0, EconomyResponse.ResponseType.NOT_IMPLEMENTED, "Banking is not enabled");
         final BankAccount account = getAccountData(s);
         final double amount = account.withdraw(v);
         account.save();
@@ -245,6 +250,7 @@ public class EmeraldEconomy implements Economy {
 
     @Override
     public EconomyResponse bankDeposit(String s, double v) {
+        if (!hasBankSupport()) return new EconomyResponse(0, 0, EconomyResponse.ResponseType.NOT_IMPLEMENTED, "Banking is not enabled");
         final BankAccount account = getAccountData(s);
         account.deposit(v);
         account.save();
@@ -258,6 +264,7 @@ public class EmeraldEconomy implements Economy {
 
     @Override
     public EconomyResponse isBankOwner(String s, OfflinePlayer offlinePlayer) {
+        if (!hasBankSupport()) return new EconomyResponse(0, 0, EconomyResponse.ResponseType.NOT_IMPLEMENTED, "Banking is not enabled");
         return new EconomyResponse(0, bankBalance(s).balance, getAccountData(s).isOwner(offlinePlayer) ? EconomyResponse.ResponseType.SUCCESS : EconomyResponse.ResponseType.FAILURE, null);
     }
 
@@ -268,11 +275,13 @@ public class EmeraldEconomy implements Economy {
 
     @Override
     public EconomyResponse isBankMember(String s, OfflinePlayer offlinePlayer) {
+        if (!hasBankSupport()) return new EconomyResponse(0, 0, EconomyResponse.ResponseType.NOT_IMPLEMENTED, "Banking is not enabled");
         return new EconomyResponse(0, bankBalance(s).balance, getAccountData(s).isMember(offlinePlayer) ? EconomyResponse.ResponseType.SUCCESS : EconomyResponse.ResponseType.FAILURE, null);
     }
 
     @Override
     public List<String> getBanks() {
+        if (!hasBankSupport()) return null;
         return getAccounts();
     }
 
@@ -307,9 +316,7 @@ public class EmeraldEconomy implements Economy {
 
     public boolean bankRemoveMember(String account, OfflinePlayer player) {
         var bank = getAccountData(account);
-        final Collection<UUID> members = bank.members();
-        if (members.contains(player.getUniqueId())) {
-            members.remove(player.getUniqueId());
+        if (bank.removeMember(player)) {
             bank.save();
             return true;
         }
@@ -322,6 +329,8 @@ public class EmeraldEconomy implements Economy {
 
     public boolean bankTransfer(String account, OfflinePlayer target) {
         var bank = getAccountData(account);
+        bank.removeMember(target);
+        bank.addMember(bank.owner());
         bank.setOwner(target);
         bank.save();
         return true;

@@ -81,6 +81,16 @@ public class BankAccount {
         return true;
     }
 
+    public boolean removeMember(OfflinePlayer player) {
+        var members = container.getOrDefault(MEMBERS_KEY, PersistentDataType.LIST.strings(), new ArrayList<>());
+        if (!members.contains(player.getUniqueId().toString())) {
+            return false;
+        }
+        members.remove(player.getUniqueId().toString());
+        container.set(MEMBERS_KEY, PersistentDataType.LIST.strings(), members);
+        return true;
+    }
+
     public void save() {
         pdc.set(EmeraldEconomy.getBankKey(account), PersistentDataType.TAG_CONTAINER, container);
         EmeraldEconomy.savePDC(pdc);
