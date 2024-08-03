@@ -4,15 +4,12 @@ import io.papermc.paper.plugin.bootstrap.BootstrapContext;
 import io.papermc.paper.plugin.bootstrap.PluginBootstrap;
 import io.papermc.paper.plugin.bootstrap.PluginProviderContext;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
-import net.minecraft.core.RegistryAccess;
-import net.sabafly.emeraldbank.commands.EmeraldCommand;
+import net.sabafly.emeraldbank.commands.EmeraldCommands;
 import net.sabafly.emeraldbank.configuration.EmeraldConfigurations;
-import net.sabafly.emeraldbank.configuration.GlobalConfiguration;
 import net.sabafly.emeraldbank.configuration.Messages;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.configurate.CommentedConfigurationNode;
-import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.loader.HeaderMode;
 import org.spongepowered.configurate.yaml.NodeStyle;
 import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
@@ -25,7 +22,7 @@ public class EmeraldBootstrapper implements PluginBootstrap {
 
     @Override
     public void bootstrap(@NotNull BootstrapContext context) {
-        context.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, new EmeraldCommand());
+        context.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, new EmeraldCommands());
     }
 
     @Override

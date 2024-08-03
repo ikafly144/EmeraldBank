@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'net.sabafly'
-version = '0.2.0'
+version = '0.2.1'
 
 repositories {
     mavenCentral()
@@ -17,11 +17,13 @@ repositories {
         name = "sonatype"
         url = "https://oss.sonatype.org/content/groups/public/"
     }
-    maven { url 'https://jitpack.io' }
+    maven {
+        url = 'https://jitpack.io'
+    }
 }
 
 dependencies {
-    compileOnly "com.github.MilkBowl:VaultAPI:1.7.1"
+    implementation "com.github.MilkBowl:VaultAPI:1.7.1"
     implementation 'com.github.Jikoo:OpenInv:4.4.3'
     implementation 'org.spongepowered:configurate-yaml:4.2.0-SNAPSHOT'
     compileOnly 'org.projectlombok:lombok:1.18.32'
@@ -59,7 +61,7 @@ processResources {
 tasks {
     runServer {
         downloadPlugins {
-            github("Jikoo", "OpenInv", "4.4.7", "OpenInv.jar")
+            github("Jikoo", "OpenInv", "5.0.0", "OpenInv.jar")
             github("MilkBowl", "Vault", "1.7.3", "Vault.jar")
         }
         minecraftVersion("1.21")

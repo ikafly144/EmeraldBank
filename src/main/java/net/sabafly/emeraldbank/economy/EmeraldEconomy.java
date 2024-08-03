@@ -329,6 +329,7 @@ public class EmeraldEconomy implements Economy {
 
     public boolean bankTransfer(String account, OfflinePlayer target) {
         var bank = getAccountData(account);
+        if (bank.isOwner(target)) return false;
         bank.removeMember(target);
         bank.addMember(bank.owner());
         bank.setOwner(target);
