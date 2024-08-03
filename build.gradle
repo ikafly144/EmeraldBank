@@ -9,6 +9,10 @@ version = '0.2.1'
 
 repositories {
     mavenCentral()
+    mavenLocal()
+    maven {
+        url = 'https://jitpack.io'
+    }
     maven {
         name = "papermc-repo"
         url = "https://repo.papermc.io/repository/maven-public/"
@@ -17,14 +21,11 @@ repositories {
         name = "sonatype"
         url = "https://oss.sonatype.org/content/groups/public/"
     }
-    maven {
-        url = 'https://jitpack.io'
-    }
 }
 
 dependencies {
     implementation "com.github.MilkBowl:VaultAPI:1.7.1"
-    implementation 'com.github.Jikoo:OpenInv:4.4.3'
+    implementation 'com.lishid:openinvplugin:5.1.0-SNAPSHOT'
     implementation 'org.spongepowered:configurate-yaml:4.2.0-SNAPSHOT'
     compileOnly 'org.projectlombok:lombok:1.18.32'
     annotationProcessor 'org.projectlombok:lombok:1.18.32'
