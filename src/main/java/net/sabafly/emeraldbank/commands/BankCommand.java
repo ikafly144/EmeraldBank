@@ -41,7 +41,8 @@ public class BankCommand {
                                                                         .requires(context -> context.getSender().hasPermission("emeraldbank.banking.account.create") && context.getSender() instanceof Player)
                                                                         .executes(context -> {
                                                                             final String account = context.getArgument("account", String.class);
-                                                                            final Player player = (Player) context.getSource().getSender();
+                                                                            if (!(context.getSource().getExecutor() instanceof Player player))
+                                                                                throw net.minecraft.commands.CommandSourceStack.ERROR_NOT_PLAYER.create();
                                                                             if (!EmeraldBank.getInstance().getEconomy().hasBankSupport())
                                                                                 throw createCommandException(getMessages().errorBankingDisabled);
                                                                             if (EmeraldBank.getInstance().getEconomy().getBanks().contains(account))
@@ -327,7 +328,7 @@ public class BankCommand {
                                                 Commands.argument("account", new BankAccountArgumentType())
                                                         .requires(context -> context.getSender().hasPermission("emeraldbank.banking.pay"))
                                                         .then(
-                                                                Commands.argument("player", ArgumentTypes.player())
+                                                                Commands.argument("target", ArgumentTypes.player())
                                                                         .requires(context -> context.getSender().hasPermission("emeraldbank.banking.pay"))
                                                                         .then(
                                                                                 Commands.argument("amount", IntegerArgumentType.integer(1))
@@ -335,7 +336,7 @@ public class BankCommand {
                                                                                         .executes(context -> {
                                                                                             final isBankMember result = getIsBankMember(context);
                                                                                             final int amount = context.getArgument("amount", Integer.class);
-                                                                                            final Player target = context.getArgument("player", PlayerSelectorArgumentResolver.class).resolve(context.getSource()).getFirst();
+                                                                                            final Player target = context.getArgument("target", PlayerSelectorArgumentResolver.class).resolve(context.getSource()).getFirst();
                                                                                             return payBank(context, amount, result.account, target);
                                                                                         })
                                                                                         .build()
@@ -346,7 +347,7 @@ public class BankCommand {
                                                                                         .executes(context -> {
                                                                                             final isBankMember result = getIsBankMember(context);
                                                                                             final int amount = (int) getEconomy().bankBalance(result.account).balance;
-                                                                                            final Player target = context.getArgument("player", PlayerSelectorArgumentResolver.class).resolve(context.getSource()).getFirst();
+                                                                                            final Player target = context.getArgument("target", PlayerSelectorArgumentResolver.class).resolve(context.getSource()).getFirst();
                                                                                             return payBank(context, amount, result.account, target);
                                                                                         })
                                                                                         .build()
@@ -397,7 +398,8 @@ public class BankCommand {
 
     private static @NotNull isBankOwner getIsBankOwner(CommandContext<CommandSourceStack> context, boolean ignoreAdmin) throws CommandSyntaxException {
         final String account = context.getArgument("account", String.class);
-        final Player owner = (Player) context.getSource().getSender();
+        if (!(context.getSource().getExecutor() instanceof Player owner))
+            throw net.minecraft.commands.CommandSourceStack.ERROR_NOT_PLAYER.create();
         if (!EmeraldBank.getInstance().getEconomy().hasBankSupport())
             throw createCommandException(getMessages().errorBankingDisabled);
         if (!EmeraldBank.getInstance().getEconomy().getBanks().contains(account))
@@ -417,7 +419,8 @@ public class BankCommand {
 
     private static @NotNull isBankMember getIsBankMember(CommandContext<CommandSourceStack> context, boolean ignoreAdmin) throws CommandSyntaxException {
         final String account = context.getArgument("account", String.class);
-        final Player player = (Player) context.getSource().getSender();
+        if (!(context.getSource().getExecutor() instanceof Player player))
+            throw net.minecraft.commands.CommandSourceStack.ERROR_NOT_PLAYER.create();
         if (!EmeraldBank.getInstance().getEconomy().hasBankSupport())
             throw createCommandException(getMessages().errorBankingDisabled);
         if (!EmeraldBank.getInstance().getEconomy().isBankMember(account, player).transactionSuccess() && !(ignoreAdmin && player.hasPermission("emeraldbank.admin")))

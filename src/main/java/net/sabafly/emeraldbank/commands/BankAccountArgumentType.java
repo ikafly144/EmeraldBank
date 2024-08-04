@@ -32,13 +32,18 @@ public class BankAccountArgumentType implements CustomArgumentType<String, Strin
             return builder.buildFuture();
         if (!(context.getSource() instanceof PaperCommandSourceStack source))
             return builder.buildFuture();
-        if (!(source.getBukkitSender() instanceof Player player))
-            return builder.buildFuture();
-        var banks = getEconomy().getBanks().stream()
+        if (!(source.getBukkitSender() instanceof Player player)) {
+            getEconomy().getBanks().stream()
+                    .filter(bank -> bank.startsWith(builder.getRemaining()))
+                    .toList()
+                    .forEach(builder::suggest);
+        } else {
+            getEconomy().getBanks().stream()
                 .filter(bank -> bank.startsWith(builder.getRemaining()))
                 .filter(bank -> getEconomy().isBankMember(bank, player).transactionSuccess() || player.hasPermission("emeraldbank.admin"))
-                .toList();
-        banks.forEach(builder::suggest);
+                    .toList()
+                    .forEach(builder::suggest);
+        }
         return builder.buildFuture();
     }
 

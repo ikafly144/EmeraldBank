@@ -14,16 +14,17 @@ public class PayCommand {
         return Commands.literal("pay")
                         .requires(context -> context.getSender().hasPermission("emeraldbank.pay"))
                         .then(
-                                Commands.argument("player", ArgumentTypes.player())
+                                Commands.argument("target", ArgumentTypes.player())
                                         .requires(context -> context.getSender().hasPermission("emeraldbank.pay") && context.getSender() instanceof Player)
                                         .then(
                                                 Commands.argument("amount", IntegerArgumentType.integer(1))
                                                         .requires(context -> context.getSender().hasPermission("emeraldbank.pay"))
                                                         .executes(context -> {
-                                                            final Player target = context.getArgument("player", PlayerSelectorArgumentResolver.class).resolve(context.getSource()).getFirst();
-                                                            final Player self = (Player) context.getSource().getSender();
+                                                            final Player target = context.getArgument("target", PlayerSelectorArgumentResolver.class).resolve(context.getSource()).getFirst();
+                                                            if (!(context.getSource().getExecutor() instanceof Player player))
+                                                                throw net.minecraft.commands.CommandSourceStack.ERROR_NOT_PLAYER.create();
                                                             final int amount = context.getArgument("amount", Integer.class);
-                                                            return EmeraldCommands.pay(context, amount, self, target);
+                                                            return EmeraldCommands.pay(context, amount, player, target);
                                                         })
                                                         .build()
                                         )
@@ -31,10 +32,11 @@ public class PayCommand {
                                                 Commands.literal("all")
                                                         .requires(context -> context.getSender().hasPermission("emeraldbank.pay"))
                                                         .executes(context -> {
-                                                            final Player target = context.getArgument("player", PlayerSelectorArgumentResolver.class).resolve(context.getSource()).getFirst();
-                                                            final Player self = (Player) context.getSource().getSender();
-                                                            final int amount = (int) EmeraldBank.getInstance().getEconomy().getBalance(self);
-                                                            return EmeraldCommands.pay(context, amount, self, target);
+                                                            final Player target = context.getArgument("target", PlayerSelectorArgumentResolver.class).resolve(context.getSource()).getFirst();
+                                                            if (!(context.getSource().getExecutor() instanceof Player player))
+                                                                throw net.minecraft.commands.CommandSourceStack.ERROR_NOT_PLAYER.create();
+                                                            final int amount = (int) EmeraldBank.getInstance().getEconomy().getBalance(player);
+                                                            return EmeraldCommands.pay(context, amount, player, target);
                                                         })
                                         )
                                         .build()

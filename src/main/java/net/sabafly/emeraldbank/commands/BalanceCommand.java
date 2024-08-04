@@ -13,10 +13,9 @@ public class BalanceCommand {
         return Commands.literal("balance")
                 .requires(context -> context.getSender().hasPermission("emeraldbank.balance"))
                 .executes(context -> {
-                    if (!(context.getSource().getSender() instanceof Player self)) {
-                        throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownCommand().create();
-                    }
-                    return EmeraldCommands.printBalance(context, self);
+                    if (!(context.getSource().getExecutor() instanceof Player player))
+                        throw net.minecraft.commands.CommandSourceStack.ERROR_NOT_PLAYER.create();
+                    return EmeraldCommands.printBalance(context, player);
                 })
                 .then(
                         Commands.argument("player", ArgumentTypes.player())
