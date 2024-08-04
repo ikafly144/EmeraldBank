@@ -23,7 +23,6 @@ import java.util.List;
 
 import static net.sabafly.emeraldbank.economy.EmeraldEconomy.formatCurrency;
 import static net.sabafly.emeraldbank.util.EmeraldUtils.*;
-import static net.sabafly.emeraldbank.util.EmeraldUtils.getEconomy;
 
 public class BankCommand {
     static LiteralCommandNode<CommandSourceStack> command() {
@@ -71,7 +70,7 @@ public class BankCommand {
                                                                 Commands.argument("account", new BankAccountArgumentType())
                                                                         .requires(context -> context.getSender().hasPermission("emeraldbank.banking.account.delete"))
                                                                         .executes(context -> {
-                                                                            final isBankOwner result = getIsBankOwner(context, true);
+                                                                            final isBankOwner result = getIsBankOwner(context);
                                                                             final var balance = getEconomy().bankBalance(result.account).balance;
                                                                             if (balance > 0)
                                                                                 throw createCommandException(getMessages().errorBankingDeleteRemaining, tagResolver("bank", Component.text(result.account)), tagResolver("value", formatCurrency(balance)));
@@ -182,11 +181,11 @@ public class BankCommand {
                                                                 Commands.argument("account", new BankAccountArgumentType())
                                                                         .requires(context -> context.getSender().hasPermission("emeraldbank.banking.transfer"))
                                                                         .then(
-                                                                                Commands.argument("player", ArgumentTypes.player())
+                                                                                Commands.argument("target", ArgumentTypes.player())
                                                                                         .requires(context -> context.getSender().hasPermission("emeraldbank.banking.transfer"))
                                                                                         .executes(context -> {
-                                                                                            final isBankOwner result = getIsBankOwner(context, true);
-                                                                                            final Player target = context.getArgument("player", PlayerSelectorArgumentResolver.class).resolve(context.getSource()).getFirst();
+                                                                                            final isBankOwner result = getIsBankOwner(context);
+                                                                                            final Player target = context.getArgument("target", PlayerSelectorArgumentResolver.class).resolve(context.getSource()).getFirst();
                                                                                             final int cost = EmeraldBank.getInstance().getGlobalConfiguration().banking.tax.transferBankCost.or(0);
                                                                                             if (cost > 0) {
                                                                                                 final EconomyResponse response = getEconomy().withdrawPlayer(target, cost);
@@ -393,18 +392,14 @@ public class BankCommand {
     }
 
     private static @NotNull isBankOwner getIsBankOwner(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        return getIsBankOwner(context, false);
-    }
-
-    private static @NotNull isBankOwner getIsBankOwner(CommandContext<CommandSourceStack> context, boolean ignoreAdmin) throws CommandSyntaxException {
         final String account = context.getArgument("account", String.class);
-        if (!(context.getSource().getExecutor() instanceof Player owner))
+        if (!(context.getSource().getSender() instanceof Player owner))
             throw net.minecraft.commands.CommandSourceStack.ERROR_NOT_PLAYER.create();
         if (!EmeraldBank.getInstance().getEconomy().hasBankSupport())
             throw createCommandException(getMessages().errorBankingDisabled);
         if (!EmeraldBank.getInstance().getEconomy().getBanks().contains(account))
             throw createCommandException(getMessages().errorBankingNoBank, tagResolver("bank", Component.text(account)));
-        if (!EmeraldBank.getInstance().getEconomy().isBankOwner(account, owner).transactionSuccess() && !(ignoreAdmin && owner.hasPermission("emeraldbank.admin")))
+        if (!EmeraldBank.getInstance().getEconomy().isBankOwner(account, owner).transactionSuccess() && !(true && owner.hasPermission("emeraldbank.admin")))
             throw createCommandException(getMessages().errorBankingNotOwner, tagResolver("player", owner.name()), tagResolver("bank", Component.text(account)));
         isBankOwner result = new isBankOwner(account, owner);
         return result;
