@@ -154,7 +154,7 @@ public class EmeraldEconomy implements Economy {
         for (ItemStack item : player.getInventory().getContents()) {
             if (item != null && item.getType() == Material.EMERALD_BLOCK) {
                 int itemAmount = item.getAmount();
-                if (emeraldBlocks >= itemAmount) {
+                if (emeraldBlocks <= itemAmount) {
                     item.setAmount(itemAmount - emeraldBlocks);
                     if (amount > 0) player.getInventory().addItem(new ItemStack(Material.EMERALD, amount));
                     player.updateInventory();
