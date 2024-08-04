@@ -1,13 +1,18 @@
 package net.sabafly.emeraldbank.commands;
 
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
 import net.sabafly.emeraldbank.EmeraldBank;
+import net.sabafly.emeraldbank.util.EmeraldUtils;
 import org.bukkit.entity.Player;
+
+import static net.sabafly.emeraldbank.economy.EmeraldEconomy.formatCurrency;
+import static net.sabafly.emeraldbank.util.EmeraldUtils.*;
 
 public class PayCommand {
     public static LiteralCommandNode<CommandSourceStack> command() {
@@ -24,7 +29,7 @@ public class PayCommand {
                                                             if (!(context.getSource().getExecutor() instanceof Player player))
                                                                 throw net.minecraft.commands.CommandSourceStack.ERROR_NOT_PLAYER.create();
                                                             final int amount = context.getArgument("amount", Integer.class);
-                                                            return EmeraldCommands.pay(context, amount, player, target);
+                                                            return pay(context, amount, player, target);
                                                         })
                                                         .build()
                                         )
@@ -36,11 +41,25 @@ public class PayCommand {
                                                             if (!(context.getSource().getExecutor() instanceof Player player))
                                                                 throw net.minecraft.commands.CommandSourceStack.ERROR_NOT_PLAYER.create();
                                                             final int amount = (int) EmeraldBank.getInstance().getEconomy().getBalance(player);
-                                                            return EmeraldCommands.pay(context, amount, player, target);
+                                                            return pay(context, amount, player, target);
                                                         })
                                         )
                                         .build()
                         )
                         .build();
+    }
+
+    static int pay(CommandContext<CommandSourceStack> context, int amount, Player from, Player to) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+        if (to.getUniqueId().equals(from.getUniqueId()))
+            throw createCommandException(getMessages().errorPaySelf);
+        int cost = EmeraldBank.getInstance().getGlobalConfiguration().payCost.or(0);
+        if (context.getSource().getSender().hasPermission("emeraldbank.admin"))
+            cost = 0;
+        if (amount <= cost)
+            throw createCommandException(getMessages().errorPayCost, tagResolver("value", formatCurrency(amount)), tagResolver("player", to.name()), tagResolver("cost", formatCurrency(cost)));
+        if (!EmeraldUtils.payPlayer(from, to, amount, cost))
+            throw createCommandException(getMessages().errorPay, tagResolver("value", formatCurrency(amount)), tagResolver("player", to.name()));
+        context.getSource().getSender().sendMessage(deserializeMiniMessage(getMessages().paySuccess, tagResolver("value", formatCurrency(amount)), tagResolver("player", to.name())));
+        return amount;
     }
 }

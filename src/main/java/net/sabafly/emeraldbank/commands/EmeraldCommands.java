@@ -61,22 +61,4 @@ public class EmeraldCommands implements LifecycleEventHandler<ReloadableRegistra
         );
     }
 
-    static int pay(CommandContext<CommandSourceStack> context, int amount, Player from, Player to) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
-        if (to.getUniqueId().equals( from.getUniqueId()))
-            throw createCommandException(getMessages().errorPaySelf);
-        final int cost = EmeraldBank.getInstance().getGlobalConfiguration().payCost.or(0);
-        if (amount<=cost)
-            throw createCommandException(getMessages().errorPayCost, tagResolver("value", formatCurrency(amount)), tagResolver("player", to.name()), tagResolver("cost", formatCurrency(cost)));
-        if (!EmeraldUtils.payPlayer(from, to, amount, cost))
-            throw createCommandException(getMessages().errorPay, tagResolver("value", formatCurrency(amount)), tagResolver("player", to.name()));
-        context.getSource().getSender().sendMessage(deserializeMiniMessage(getMessages().paySuccess, tagResolver("value", formatCurrency(amount)), tagResolver("player", to.name())));
-        return amount;
-    }
-
-    static int printBalance(CommandContext<CommandSourceStack> context, Player player) {
-        final double balance = EmeraldBank.getInstance().getEconomy().getBalance(player);
-        context.getSource().getSender().sendMessage(deserializeMiniMessage(getMessages().balance, tagResolver("player", player.name()), tagResolver("value", formatCurrency(balance))));
-        return (int) balance;
-    }
-
 }

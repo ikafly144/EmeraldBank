@@ -7,6 +7,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.PaperCommandSourceStack;
 import io.papermc.paper.command.brigadier.argument.CustomArgumentType;
 import net.sabafly.emeraldbank.EmeraldBank;
@@ -30,9 +31,9 @@ public class BankAccountArgumentType implements CustomArgumentType<String, Strin
     public <S> @NotNull CompletableFuture<Suggestions> listSuggestions(final @NotNull CommandContext<S> context, final @NotNull SuggestionsBuilder builder) {
         if (!getEconomy().hasBankSupport())
             return builder.buildFuture();
-        if (!(context.getSource() instanceof PaperCommandSourceStack source))
+        if (!(context.getSource() instanceof CommandSourceStack source))
             return builder.buildFuture();
-        if (!(source.getBukkitSender() instanceof Player player)) {
+        if (!(source.getSender() instanceof Player player)) {
             getEconomy().getBanks().stream()
                     .filter(bank -> bank.startsWith(builder.getRemaining()))
                     .toList()
