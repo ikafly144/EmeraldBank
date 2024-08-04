@@ -1,22 +1,15 @@
 package net.sabafly.emeraldbank.commands;
 
 import com.mojang.brigadier.Command;
-import com.mojang.brigadier.context.CommandContext;
-import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.plugin.lifecycle.event.handler.LifecycleEventHandler;
 import io.papermc.paper.plugin.lifecycle.event.registrar.ReloadableRegistrarEvent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.sabafly.emeraldbank.EmeraldBank;
-import net.sabafly.emeraldbank.util.EmeraldUtils;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.List;
-
-import static net.sabafly.emeraldbank.economy.EmeraldEconomy.formatCurrency;
-import static net.sabafly.emeraldbank.util.EmeraldUtils.*;
 
 public class EmeraldCommands implements LifecycleEventHandler<ReloadableRegistrarEvent<Commands>> {
     @Override
