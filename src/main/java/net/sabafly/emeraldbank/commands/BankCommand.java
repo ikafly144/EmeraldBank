@@ -16,6 +16,7 @@ import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.milkbowl.vault.economy.EconomyResponse;
 import net.sabafly.emeraldbank.EmeraldBank;
+import org.bukkit.craftbukkit.command.ServerCommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -46,17 +47,18 @@ public class BankCommand {
                                                                                 throw createCommandException(getMessages().errorBankingDisabled);
                                                                             if (EmeraldBank.getInstance().getEconomy().getBanks().contains(account))
                                                                                 throw createCommandException(getMessages().errorBankingExists, tagResolver("bank", Component.text(account)));
-                                                                            if (EmeraldBank.getInstance().getGlobalConfiguration().banking.tax.createCost.or(0) > 0) {
-                                                                                final EconomyResponse response = getEconomy().withdrawPlayer(player, EmeraldBank.getInstance().getGlobalConfiguration().banking.tax.createCost.or(0));
+                                                                            final int cost = EmeraldBank.getInstance().getGlobalConfiguration().banking.tax.createCost.or(0);
+                                                                            if (cost > 0) {
+                                                                                final EconomyResponse response = getEconomy().withdrawPlayer(player, cost);
                                                                                 if (!response.transactionSuccess()) {
-                                                                                    throw createCommandException(getMessages().errorBankingCreateCost, tagResolver("bank", Component.text(account)), tagResolver("value", formatCurrency(EmeraldBank.getInstance().getGlobalConfiguration().banking.tax.createCost.or(0))));
+                                                                                    throw createCommandException(getMessages().errorBankingCreateCost, tagResolver("bank", Component.text(account)), tagResolver("value", formatCurrency(cost)));
                                                                                 }
                                                                             }
                                                                             final EconomyResponse response = getEconomy().createBank(account, player);
                                                                             if (!response.transactionSuccess()) {
                                                                                 throw createCommandException(getMessages().errorBankingCreate, tagResolver("bank", Component.text(account)));
                                                                             }
-                                                                            player.sendMessage(deserializeMiniMessage(getMessages().bankingCreate, tagResolver("bank", Component.text(account))));
+                                                                            player.sendMessage(deserializeMiniMessage(getMessages().bankingCreate, tagResolver("bank", Component.text(account)), tagResolver("cost", formatCurrency(cost))));
                                                                             return Command.SINGLE_SUCCESS;
                                                                         })
                                                                         .build()
@@ -105,7 +107,7 @@ public class BankCommand {
                                                                                             if (cost > 0 && context.getSource().getExecutor() instanceof Player player) {
                                                                                                 final EconomyResponse response = getEconomy().withdrawPlayer(player, cost);
                                                                                                 if (!response.transactionSuccess()) {
-                                                                                                    throw createCommandException(getMessages().errorBankingAddMemberCost, tagResolver("player", target.name()), tagResolver("bank", Component.text(result.account())), tagResolver("value", formatCurrency(cost)));
+                                                                                                    throw createCommandException(getMessages().errorBankingAddMemberCost, tagResolver("player", target.name()), tagResolver("bank", Component.text(result.account())), tagResolver("cost", formatCurrency(cost)));
                                                                                                 }
                                                                                             }
                                                                                             if (!(context.getSource().getExecutor() instanceof Player) && context.getSource().getSender().hasPermission("emeraldbank.admin"))
@@ -113,7 +115,7 @@ public class BankCommand {
                                                                                             if (EmeraldBank.getInstance().getEconomy().bankAddMember(result.account(), target)) {
                                                                                                 throw createCommandException(getMessages().errorBankingAddMember, tagResolver("player", target.name()), tagResolver("bank", Component.text(result.account())));
                                                                                             }
-                                                                                            context.getSource().getSender().sendMessage(deserializeMiniMessage(getMessages().bankingAddMember, tagResolver("player", target.name()), tagResolver("bank", Component.text(result.account()))));
+                                                                                            context.getSource().getSender().sendMessage(deserializeMiniMessage(getMessages().bankingAddMember, tagResolver("player", target.name()), tagResolver("bank", Component.text(result.account())), tagResolver("cost", formatCurrency(cost))));
                                                                                             return Command.SINGLE_SUCCESS;
                                                                                         })
                                                                                         .build()
@@ -180,31 +182,29 @@ public class BankCommand {
                                         )
                                         .then(
                                                 Commands.literal("transfer")
-                                                        .requires(context -> context.getSender().hasPermission("emeraldbank.banking.transfer"))
+                                                        .requires(context -> context.getSender().hasPermission("emeraldbank.banking.account.transfer"))
                                                         .then(
                                                                 Commands.argument("account", new BankAccountArgumentType())
-                                                                        .requires(context -> context.getSender().hasPermission("emeraldbank.banking.transfer"))
+                                                                        .requires(context -> context.getSender().hasPermission("emeraldbank.banking.account.transfer"))
                                                                         .then(
                                                                                 Commands.argument("target", ArgumentTypes.player())
-                                                                                        .requires(context -> context.getSender().hasPermission("emeraldbank.banking.transfer"))
+                                                                                        .requires(context -> context.getSender().hasPermission("emeraldbank.banking.account.transfer"))
                                                                                         .executes(context -> {
                                                                                             final isBankOwner result = getIsBankOwner(context);
                                                                                             final Player target = context.getArgument("target", PlayerSelectorArgumentResolver.class).resolve(context.getSource()).getFirst();
                                                                                             int cost = EmeraldBank.getInstance().getGlobalConfiguration().banking.tax.transferBankCost.or(0);
-                                                                                            if (context.getSource().getSender().hasPermission("emeraldbank.admin"))
+                                                                                            if (context.getSource().getSender().hasPermission("emeraldbank.bypass.cost"))
                                                                                                 cost = 0;
                                                                                             if (cost > 0 && context.getSource().getExecutor() instanceof Player player) {
                                                                                                 final EconomyResponse response = getEconomy().withdrawPlayer(player, cost);
                                                                                                 if (!response.transactionSuccess()) {
-                                                                                                    throw createCommandException(getMessages().errorBankingTransferCost, tagResolver("player", target.name()), tagResolver("bank", Component.text(result.account)), tagResolver("value", formatCurrency(cost)));
+                                                                                                    throw createCommandException(getMessages().errorBankingTransferCost, tagResolver("player", target.name()), tagResolver("bank", Component.text(result.account)), tagResolver("cost", formatCurrency(cost)));
                                                                                                 }
                                                                                             }
-                                                                                            if (!(context.getSource().getExecutor() instanceof Player) && context.getSource().getSender().hasPermission("emeraldbank.admin"))
-                                                                                                throw net.minecraft.commands.CommandSourceStack.ERROR_NOT_PLAYER.create();
                                                                                             if (!getEconomy().bankTransfer(result.account, target)) {
                                                                                                 throw createCommandException(getMessages().errorBankingTransfer, tagResolver("player", target.name()), tagResolver("bank", Component.text(result.account)));
                                                                                             }
-                                                                                            context.getSource().getSender().sendMessage(deserializeMiniMessage(getMessages().bankingTransfer, tagResolver("player", target.name()), tagResolver("bank", Component.text(result.account))));
+                                                                                            context.getSource().getSender().sendMessage(deserializeMiniMessage(getMessages().bankingTransfer, tagResolver("player", target.name()), tagResolver("bank", Component.text(result.account)), tagResolver("cost", formatCurrency(cost))));
                                                                                             return Command.SINGLE_SUCCESS;
                                                                                         })
                                                                                         .build()
@@ -275,7 +275,7 @@ public class BankCommand {
                                                                             final isBankMember result = getIsBankMember(context);
                                                                             final int amount = context.getArgument("amount", Integer.class);
                                                                             int cost = EmeraldBank.getInstance().getGlobalConfiguration().banking.tax.withdrawCost.or(0);
-                                                                            if (context.getSource().getSender().hasPermission("emeraldbank.admin"))
+                                                                            if (context.getSource().getSender().hasPermission("emeraldbank.bypass.cost"))
                                                                                 cost = 0;
                                                                             if (amount <= cost)
                                                                                 throw createCommandException(getMessages().errorBankingWithdrawCost, tagResolver("value", formatCurrency(amount)), tagResolver("bank", Component.text(result.account)), tagResolver("cost", formatCurrency(cost)));
@@ -283,8 +283,6 @@ public class BankCommand {
                                                                             if (!response.transactionSuccess()) {
                                                                                 throw createCommandException(getMessages().errorBankingWithdraw, tagResolver("value", formatCurrency(amount)), tagResolver("bank", Component.text(result.account)));
                                                                             }
-                                                                            if (!(context.getSource().getExecutor() instanceof Player) && context.getSource().getSender().hasPermission("emeraldbank.admin"))
-                                                                                throw net.minecraft.commands.CommandSourceStack.ERROR_NOT_PLAYER.create();
                                                                             if ((context.getSource().getExecutor() instanceof Player player) && !getEconomy().depositPlayer(player, response.amount - cost).transactionSuccess()) {
                                                                                 throw createCommandException(getMessages().errorBankingWithdraw, tagResolver("value", formatCurrency(amount)), tagResolver("bank", Component.text(result.account)));
                                                                             }
@@ -323,7 +321,8 @@ public class BankCommand {
                                                                                         .executes(context -> {
                                                                                             final isBankMember result = getIsBankMember(context);
                                                                                             final int amount = (int) getEconomy().bankBalance(result.account).balance;
-                                                                                            return bankSend(context, result, amount, result.account);
+                                                                                            final String target = context.getArgument("target", String.class);
+                                                                                            return bankSend(context, result, amount, target);
                                                                                         })
                                                                                         .build()
                                                                         )
@@ -390,26 +389,24 @@ public class BankCommand {
 
     private static int bankDeposit(CommandContext<CommandSourceStack> context, isBankMember result, int amount) throws CommandSyntaxException {
         int cost = EmeraldBank.getInstance().getGlobalConfiguration().banking.tax.depositCost.or(0);
-        if (context.getSource().getSender().hasPermission("emeraldbank.admin"))
+        if (context.getSource().getSender().hasPermission("emeraldbank.bypass.cost"))
             cost = 0;
         if (amount <= cost) {
             throw createCommandException(getMessages().errorBankingDepositCost, tagResolver("value", formatCurrency(amount)), tagResolver("bank", Component.text(result.account)), tagResolver("cost", formatCurrency(cost)));
         }
-        if ((context.getSource().getExecutor() instanceof Player player) && !getEconomy().withdrawPlayer(player, amount).transactionSuccess()) {
+        if (!context.getSource().getSender().hasPermission("emeraldbank.bypass.deposit") && (context.getSource().getExecutor() instanceof Player player) && !getEconomy().withdrawPlayer(player, amount).transactionSuccess()) {
             throw createCommandException(getMessages().errorBankingDeposit, tagResolver("value", formatCurrency(amount)), tagResolver("bank", Component.text(result.account)));
         }
-        if (!(context.getSource().getExecutor() instanceof Player) && context.getSource().getSender().hasPermission("emeraldbank.admin"))
-            throw net.minecraft.commands.CommandSourceStack.ERROR_NOT_PLAYER.create();
         if (!getEconomy().bankDeposit(result.account(), amount - cost).transactionSuccess()) {
             throw createCommandException(getMessages().errorBankingDeposit, tagResolver("value", formatCurrency(amount)), tagResolver("bank", Component.text(result.account)));
         }
-        context.getSource().getSender().sendMessage(deserializeMiniMessage(getMessages().bankingDeposit, tagResolver("value", formatCurrency(amount)), tagResolver("bank", Component.text(result.account))));
+        context.getSource().getSender().sendMessage(deserializeMiniMessage(getMessages().bankingDeposit, tagResolver("value", formatCurrency(amount)), tagResolver("bank", Component.text(result.account)), tagResolver("cost", formatCurrency(cost))));
         return amount;
     }
 
     static int payBank(CommandContext<CommandSourceStack> context, int amount, String bankFrom, Player to) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
         int cost = EmeraldBank.getInstance().getGlobalConfiguration().banking.tax.payCost.or(EmeraldBank.getInstance().getGlobalConfiguration().banking.tax.withdrawCost.or(0));
-        if (context.getSource().getSender().hasPermission("emeraldbank.admin"))
+        if (context.getSource().getSender().hasPermission("emeraldbank.bypass.cost"))
             cost = 0;
         if (amount <= cost)
             throw createCommandException(getMessages().errorBankingPayCost, tagResolver("player", to.name()), tagResolver("value", formatCurrency(amount)), tagResolver("bank", Component.text(bankFrom)), tagResolver("cost", formatCurrency(cost)));
@@ -421,7 +418,7 @@ public class BankCommand {
         response = EmeraldBank.getInstance().getEconomy().depositPlayer(to, response.amount - cost);
         if (!response.transactionSuccess())
             throw createCommandException(getMessages().errorBankingPay, tagResolver("value", formatCurrency(amount)), tagResolver("bank", Component.text(bankFrom)), tagResolver("player", to.name()));
-        context.getSource().getSender().sendMessage(deserializeMiniMessage(getMessages().bankingPay, tagResolver("value", formatCurrency(amount)), tagResolver("bank", Component.text(bankFrom)), tagResolver("player", to.name())));
+        context.getSource().getSender().sendMessage(deserializeMiniMessage(getMessages().bankingPay, tagResolver("value", formatCurrency(amount)), tagResolver("bank", Component.text(bankFrom)), tagResolver("player", to.name()), tagResolver("cost", formatCurrency(cost))));
         return amount;
     }
 
@@ -431,12 +428,10 @@ public class BankCommand {
             throw createCommandException(getMessages().errorBankingDisabled);
         if (!EmeraldBank.getInstance().getEconomy().getBanks().contains(account))
             throw createCommandException(getMessages().errorBankingNoBank, tagResolver("bank", Component.text(account)));
-        if (context.getSource().getSender() instanceof Player player && !(context.getSource().getSender().hasPermission("emeraldbank.admin")) && !EmeraldBank.getInstance().getEconomy().isBankOwner(account, player).transactionSuccess()) {
+        if (context.getSource().getSender() instanceof Player player && !(context.getSource().getSender().hasPermission("emeraldbank.bypass.owner")) && !EmeraldBank.getInstance().getEconomy().isBankOwner(account, player).transactionSuccess()) {
             throw createCommandException(getMessages().errorBankingNotOwner, tagResolver("bank", Component.text(account)), tagResolver("player", player.name()));
-        } else if (!(context.getSource().getSender().hasPermission("emeraldbank.admin")))
-            throw net.minecraft.commands.CommandSourceStack.ERROR_NOT_PLAYER.create();
-        isBankOwner result = new isBankOwner(account);
-        return result;
+        }
+        return new isBankOwner(account);
     }
 
     private record isBankOwner(String account) {
@@ -446,10 +441,9 @@ public class BankCommand {
         final String account = context.getArgument("account", String.class);
         if (!EmeraldBank.getInstance().getEconomy().hasBankSupport())
             throw createCommandException(getMessages().errorBankingDisabled);
-        if (context.getSource().getSender() instanceof Player player && !(context.getSource().getSender().hasPermission("emeraldbank.admin")) && !EmeraldBank.getInstance().getEconomy().isBankMember(account, player).transactionSuccess()) {
+        if (context.getSource().getSender() instanceof Player player && !(context.getSource().getSender().hasPermission("emeraldbank.bypass.member")) && !EmeraldBank.getInstance().getEconomy().isBankMember(account, player).transactionSuccess()) {
             throw createCommandException(getMessages().errorBankingNotMember, tagResolver("bank", Component.text(account)), tagResolver("player", player.name()));
-        } else if (!(context.getSource().getSender().hasPermission("emeraldbank.admin")))
-            throw net.minecraft.commands.CommandSourceStack.ERROR_NOT_PLAYER.create();
+        }
         return new isBankMember(account);
     }
 

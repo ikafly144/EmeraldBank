@@ -9,7 +9,7 @@ load: STARTUP
 dependencies:
   server:
     Vault:
-      load: BEFORE
+      load: AFTER
       required: true
     OpenInv:
       load: BEFORE
@@ -21,6 +21,14 @@ permissions:
     children:
       emeraldbank.balance.all: true
       emeraldbank.reload: true
+      emeraldbank.bypass:
+        default: op
+        description: Allows the player to bypass the EmeraldBank command
+        children:
+          emeraldbank.bypass.cost: true
+          emeraldbank.bypass.deposit: true
+          emeraldbank.bypass.member: true
+          emeraldbank.bypass.owner: true
       emeraldbank.default:
         default: true
         description: Allows the player to use the EmeraldBank command

@@ -57,9 +57,9 @@ public class Messages extends ConfigurationPart {
     public String errorBankingSend = "<red>Failed to send <value> from bank <bank_from> to bank <bank_to>!";
     public String errorBankingPay = "<red>Failed to pay <value> from bank <bank> to <player>!";
     public String errorBankingRemoveOwner = "<red><player> is the owner of bank <bank>!";
-    public String errorBankingCreateCost = "<red>Failed to create bank due to insufficient funds <value>!";
-    public String errorBankingAddMemberCost = "<red>Failed to add member <player> to bank <bank> due to insufficient funds <value>!";
-    public String errorBankingTransferCost = "<red>Failed to transfer bank <bank> to <player> due to insufficient funds <value>!";
+    public String errorBankingCreateCost = "<red>Failed to create bank due to insufficient funds <cost>!";
+    public String errorBankingAddMemberCost = "<red>Failed to add member <player> to bank <bank> due to insufficient funds <cost>!";
+    public String errorBankingTransferCost = "<red>Failed to transfer bank <bank> to <player> due to insufficient funds <cost>!";
     public String errorBankingDepositCost = "<red>Failed to deposit <value> to bank <bank> due to insufficient funds <cost>!";
     public String errorBankingWithdrawCost = "<red>Failed to withdraw <value> from bank <bank> due to insufficient funds <cost>!";
     public String errorBankingPayCost = "<red>Failed to pay <value> from bank <bank> to <player> due to insufficient funds <cost>!";
