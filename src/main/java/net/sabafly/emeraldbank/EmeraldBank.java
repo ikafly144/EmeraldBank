@@ -5,7 +5,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.Tag;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
-import net.milkbowl.vault.economy.Economy;
 import net.sabafly.emeraldbank.configuration.EmeraldConfigurations;
 import net.sabafly.emeraldbank.configuration.GlobalConfiguration;
 import net.sabafly.emeraldbank.configuration.Messages;
@@ -67,7 +66,7 @@ public final class EmeraldBank extends JavaPlugin {
         if (getServer().getPluginManager().getPlugin("Vault") == null) {
             return false;
         }
-        getServer().getServicesManager().register(Economy.class, economy, this, ServicePriority.High);
+        getServer().getServicesManager().register(net.milkbowl.vault.economy.Economy.class, economy, this, ServicePriority.High);
         return true;
     }
 

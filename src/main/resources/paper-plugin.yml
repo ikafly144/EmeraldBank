@@ -7,11 +7,10 @@ bootstrapper: net.sabafly.emeraldbank.EmeraldBootstrapper
 api-version: '1.21'
 load: STARTUP
 dependencies:
-  bootstrap:
+  server:
     Vault:
       load: BEFORE
       required: true
-  server:
     OpenInv:
       load: BEFORE
       required: true
