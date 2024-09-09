@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'net.sabafly'
-version = '0.3.0'
+version = '0.4.0'
 
 repositories {
     mavenCentral()
@@ -25,11 +25,11 @@ repositories {
 
 dependencies {
     implementation "com.github.MilkBowl:VaultAPI:1.7.1"
-    compileOnly 'com.lishid:openinvplugin:5.1.0-SNAPSHOT'
+    compileOnly 'com.lishid:openinvplugin:5.1.2-SNAPSHOT'
     compileOnly 'org.spongepowered:configurate-yaml:4.2.0-SNAPSHOT'
     compileOnly 'org.projectlombok:lombok:1.18.32'
     annotationProcessor 'org.projectlombok:lombok:1.18.32'
-    paperweight.paperDevBundle("1.21-R0.1-SNAPSHOT")
+    paperweight.paperDevBundle("1.21.1-R0.1-SNAPSHOT")
 }
 
 def targetJavaVersion = 21
@@ -62,9 +62,10 @@ processResources {
 tasks {
     runServer {
         downloadPlugins {
-            github("Jikoo", "OpenInv", "5.0.0", "OpenInv.jar")
+            github("Jikoo", "OpenInv", "5.1.1", "OpenInv.jar")
             github("MilkBowl", "Vault", "1.7.3", "Vault.jar")
+            url("https://download.luckperms.net/1556/bukkit/loader/LuckPerms-Bukkit-5.4.141.jar")
         }
-        minecraftVersion("1.21")
+        minecraftVersion("1.21.1")
     }
 }

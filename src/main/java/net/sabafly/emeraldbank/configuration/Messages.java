@@ -6,6 +6,7 @@ import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
 
 @ConfigSerializable
+@SuppressWarnings("unused")
 public class Messages extends ConfigurationPart {
     private static final Logger LOGGER = LogUtils.getClassLogger();
     static final int CURRENT_VERSION = 1;
@@ -23,6 +24,8 @@ public class Messages extends ConfigurationPart {
 
     public String balance = "<green><player>'s Balance: <value>";
     public String balanceBank = "<green><bank>'s Balance: <value>";
+
+    public String leaderboard = "<player>: <balance>";
 
     public String paySuccess = "<green>Successfully paid <value> to <player>";
     public String errorPay = "<red>Failed to pay <value> to <player>";

@@ -16,7 +16,6 @@ import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.milkbowl.vault.economy.EconomyResponse;
 import net.sabafly.emeraldbank.EmeraldBank;
-import org.bukkit.craftbukkit.command.ServerCommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -394,7 +393,9 @@ public class BankCommand {
         if (amount <= cost) {
             throw createCommandException(getMessages().errorBankingDepositCost, tagResolver("value", formatCurrency(amount)), tagResolver("bank", Component.text(result.account)), tagResolver("cost", formatCurrency(cost)));
         }
-        if (!context.getSource().getSender().hasPermission("emeraldbank.bypass.deposit") && (context.getSource().getExecutor() instanceof Player player) && !getEconomy().withdrawPlayer(player, amount).transactionSuccess()) {
+        if (!context.getSource().getSender().hasPermission("emeraldbank.bypass.deposit")
+            && (context.getSource().getExecutor() instanceof Player player)
+            && !getEconomy().withdrawPlayer(player, amount).transactionSuccess()) {
             throw createCommandException(getMessages().errorBankingDeposit, tagResolver("value", formatCurrency(amount)), tagResolver("bank", Component.text(result.account)));
         }
         if (!getEconomy().bankDeposit(result.account(), amount - cost).transactionSuccess()) {

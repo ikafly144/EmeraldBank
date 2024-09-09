@@ -11,8 +11,8 @@ import net.kyori.adventure.text.minimessage.tag.Tag;
 import net.kyori.adventure.text.minimessage.tag.TagPattern;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.sabafly.emeraldbank.EmeraldBank;
-import net.sabafly.emeraldbank.economy.EmeraldEconomy;
 import net.sabafly.emeraldbank.configuration.Messages;
+import net.sabafly.emeraldbank.economy.EmeraldEconomy;
 import org.bukkit.NamespacedKey;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -27,6 +27,10 @@ public class EmeraldUtils {
 
     public static EmeraldEconomy getEconomy() {
         return EmeraldBank.getInstance().getEconomy();
+    }
+
+    public static Component formatCurrency(double amount) {
+        return deserializeMiniMessage(getMessages().economyFormat, tagResolver("value", Component.text((int) amount)), tagResolver("currency", deserializeMiniMessage((int) amount == 1 ? getMessages().currencyName : getMessages().currencyNamePlural)));
     }
 
     public static boolean depositPlayer(Player account, double amount) {
