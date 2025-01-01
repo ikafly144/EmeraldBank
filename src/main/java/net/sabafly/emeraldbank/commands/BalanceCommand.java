@@ -36,7 +36,7 @@ public class BalanceCommand {
 
     static int printBalance(CommandContext<CommandSourceStack> context, Player player) {
         final double balance = EmeraldBank.getInstance().getEconomy().getBalance(player);
-        context.getSource().getSender().sendMessage(deserializeMiniMessage(getMessages().balance, tagResolver("player", player.name()), tagResolver("value", formatCurrency(balance))));
+        context.getSource().getSender().sendMessage(deserializeMiniMessage(getMessages().balance, tagResolver("player", player.name()), tagResolver("value", formatCurrency(balance)), tagResolver("wallet", formatCurrency(EmeraldBank.getInstance().getEconomy().getWallet(player)))));
         return (int) balance;
     }
 }

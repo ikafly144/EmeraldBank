@@ -28,6 +28,7 @@ permissions:
     description: Allows the player to use all EmeraldBank command
     children:
       emeraldbank.balance.all: true
+      emeraldbank.wallet.balance.all: true
       emeraldbank.reload: true
       emeraldbank.default:
         default: true
@@ -36,6 +37,13 @@ permissions:
           emeraldbank.balance: true
           emeraldbank.pay: true
           emeraldbank.leaderboard: true
+          emeraldbank.wallet:
+            default: true
+            description: Allows the player to use the EmeraldBank command
+            children:
+              emeraldbank.wallet.balance: true
+              emeraldbank.wallet.add: true
+              emeraldbank.wallet.withdraw: true
           emeraldbank.banking:
             default: true
             description: Allows the player to use the EmeraldBank command

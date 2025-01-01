@@ -25,7 +25,7 @@ repositories {
 
 dependencies {
     implementation "com.github.MilkBowl:VaultAPI:1.7.1"
-    compileOnly 'com.lishid:openinvplugin:5.1.2-SNAPSHOT'
+    compileOnly 'com.github.Jikoo.OpenInv:openinvapi:5.1.4'
     compileOnly 'org.spongepowered:configurate-yaml:4.2.0-SNAPSHOT'
     compileOnly 'org.projectlombok:lombok:1.18.32'
     annotationProcessor 'org.projectlombok:lombok:1.18.32'
@@ -64,8 +64,8 @@ tasks {
         downloadPlugins {
             github("Jikoo", "OpenInv", "5.1.1", "OpenInv.jar")
             github("MilkBowl", "Vault", "1.7.3", "Vault.jar")
-            url("https://download.luckperms.net/1556/bukkit/loader/LuckPerms-Bukkit-5.4.141.jar")
+            url("https://download.luckperms.net/1568/bukkit/loader/LuckPerms-Bukkit-5.4.151.jar")
         }
-        minecraftVersion("1.21.1")
+        minecraftVersion("1.21.4")
     }
 }

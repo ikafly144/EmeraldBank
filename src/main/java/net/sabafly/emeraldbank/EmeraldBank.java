@@ -66,7 +66,12 @@ public final class EmeraldBank extends JavaPlugin {
         if (getServer().getPluginManager().getPlugin("Vault") == null) {
             return false;
         }
-        getServer().getServicesManager().register(net.milkbowl.vault.economy.Economy.class, economy, this, ServicePriority.High);
+        try {
+            getServer().getServicesManager().register(net.milkbowl.vault.economy.Economy.class, economy, this, ServicePriority.High);
+        } catch (Exception e) {
+            getSLF4JLogger().error("Failed to register economy service", e);
+            return false;
+        }
         return true;
     }
 

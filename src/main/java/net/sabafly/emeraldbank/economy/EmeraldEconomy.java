@@ -1,6 +1,6 @@
 package net.sabafly.emeraldbank.economy;
 
-import com.lishid.openinv.OpenInv;
+import com.lishid.openinv.IOpenInv;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -11,6 +11,7 @@ import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
 import net.sabafly.emeraldbank.EmeraldBank;
 import net.sabafly.emeraldbank.util.EmeraldUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
@@ -20,7 +21,10 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
 
 public class EmeraldEconomy implements Economy {
     @Override
@@ -85,9 +89,13 @@ public class EmeraldEconomy implements Economy {
 
     @Override
     public double getBalance(OfflinePlayer offlinePlayer) {
-        Player player = OpenInv.getPlugin(OpenInv.class).loadPlayer(offlinePlayer);
+        return getBalance(offlinePlayer, true);
+    }
+
+    public double getBalance(OfflinePlayer offlinePlayer, boolean wallet) {
+        Player player = getOpenInv().loadPlayer(offlinePlayer);
         return player == null ? 0 :
-                Arrays.stream(player.getInventory().getContents()).filter(item -> item != null && item.getType() == Material.EMERALD).mapToDouble(ItemStack::getAmount).sum()
+                (wallet ? getWallet(player) : 0) + Arrays.stream(player.getInventory().getContents()).filter(item -> item != null && item.getType() == Material.EMERALD).mapToDouble(ItemStack::getAmount).sum()
                         + Arrays.stream(player.getInventory().getContents()).filter(item -> item != null && item.getType() == Material.EMERALD_BLOCK).mapToDouble(item -> item.getAmount() * 9).sum();
     }
 
@@ -101,6 +109,37 @@ public class EmeraldEconomy implements Economy {
         return getBalance(offlinePlayer);
     }
 
+    private static final NamespacedKey WALLET_KEY = new NamespacedKey(EmeraldBank.getInstance(), "wallet");
+
+    public double getWallet(OfflinePlayer offlinePlayer) {
+        Player player = getOpenInv().loadPlayer(offlinePlayer);
+        if (player == null) return 0;
+        return player.getPersistentDataContainer().getOrDefault(WALLET_KEY, PersistentDataType.DOUBLE, 0.0);
+    }
+
+    @SuppressWarnings("unused")
+    public EconomyResponse hasWallet(OfflinePlayer offlinePlayer, double amount) {
+        return new EconomyResponse(amount, getWallet(offlinePlayer), getWallet(offlinePlayer) >= amount ? EconomyResponse.ResponseType.SUCCESS : EconomyResponse.ResponseType.FAILURE, null);
+    }
+
+    public EconomyResponse addWallet(OfflinePlayer offlinePlayer, double amount) {
+        Player player = getOpenInv().loadPlayer(offlinePlayer);
+        if (player == null) return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, "Player not found");
+        double balance = player.getPersistentDataContainer().getOrDefault(WALLET_KEY, PersistentDataType.DOUBLE, 0.0);
+        player.getPersistentDataContainer().set(WALLET_KEY, PersistentDataType.DOUBLE, balance + amount);
+        return new EconomyResponse(amount, balance + amount, EconomyResponse.ResponseType.SUCCESS, null);
+    }
+
+    public EconomyResponse removeWallet(OfflinePlayer offlinePlayer, double amount) {
+        Player player = getOpenInv().loadPlayer(offlinePlayer);
+        if (player == null) return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, "Player not found");
+        double balance = player.getPersistentDataContainer().getOrDefault(WALLET_KEY, PersistentDataType.DOUBLE, 0.0);
+        if (balance < amount)
+            return new EconomyResponse(0, balance, EconomyResponse.ResponseType.FAILURE, "Insufficient funds");
+        player.getPersistentDataContainer().set(WALLET_KEY, PersistentDataType.DOUBLE, balance - amount);
+        return new EconomyResponse(amount, balance - amount, EconomyResponse.ResponseType.SUCCESS, null);
+    }
+
     @Override
     public boolean has(String s, double v) {
         return has(EmeraldBank.getInstance().getServer().getOfflinePlayer(s), v);
@@ -108,7 +147,7 @@ public class EmeraldEconomy implements Economy {
 
     @Override
     public boolean has(OfflinePlayer offlinePlayer, double v) {
-        return getBalance(offlinePlayer) >= v;
+        return has(offlinePlayer, v, true);
     }
 
     @Override
@@ -121,6 +160,10 @@ public class EmeraldEconomy implements Economy {
         return has(offlinePlayer, v);
     }
 
+    public boolean has(OfflinePlayer offlinePlayer, double v, boolean wallet) {
+        return getBalance(offlinePlayer, wallet) >= v;
+    }
+
     @Override
     public EconomyResponse withdrawPlayer(String s, double v) {
         return withdrawPlayer(EmeraldBank.getInstance().getServer().getOfflinePlayer(s), v);
@@ -128,10 +171,22 @@ public class EmeraldEconomy implements Economy {
 
     @Override
     public EconomyResponse withdrawPlayer(OfflinePlayer offlinePlayer, double v) {
-        if (!has(offlinePlayer, v)) {
+        return withdrawPlayer(offlinePlayer, v, true);
+    }
+
+    public EconomyResponse withdrawPlayer(OfflinePlayer offlinePlayer, double v, boolean wallet) {
+        if (!has(offlinePlayer, v, wallet)) {
             return new EconomyResponse(0, getBalance(offlinePlayer), EconomyResponse.ResponseType.FAILURE, "Insufficient funds");
         }
-        Player player = OpenInv.getPlugin(OpenInv.class).loadPlayer(offlinePlayer);
+        if (wallet && getWallet(offlinePlayer) >= v) {
+            return removeWallet(offlinePlayer, v);
+        }
+        if (wallet && getWallet(offlinePlayer) > 0) {
+            EconomyResponse response = removeWallet(offlinePlayer, getWallet(offlinePlayer));
+            if (!response.transactionSuccess()) return response;
+            v -= response.amount;
+        }
+        Player player = getOpenInv().loadPlayer(offlinePlayer);
         if (player == null) {
             return new EconomyResponse(0, getBalance(offlinePlayer), EconomyResponse.ResponseType.FAILURE, "Player not found");
         }
@@ -156,7 +211,13 @@ public class EmeraldEconomy implements Economy {
                 int itemAmount = item.getAmount();
                 if (emeraldBlocks <= itemAmount) {
                     item.setAmount(itemAmount - emeraldBlocks);
-                    if (amount > 0) player.getInventory().addItem(new ItemStack(Material.EMERALD, amount));
+                    if (amount > 0) {
+                        HashMap<Integer, ItemStack> remainingItems = player.getInventory().addItem(new ItemStack(Material.EMERALD, amount));
+                        if (!remainingItems.isEmpty()) {
+                            if (!addWallet(player, remainingItems.values().stream().mapToInt(ItemStack::getAmount).sum()).transactionSuccess())
+                                return new EconomyResponse(0, getBalance(offlinePlayer), EconomyResponse.ResponseType.FAILURE, "Insufficient funds");
+                        }
+                    }
                     player.updateInventory();
                     return new EconomyResponse(v, getBalance(offlinePlayer), EconomyResponse.ResponseType.SUCCESS, null);
                 } else {
@@ -185,12 +246,24 @@ public class EmeraldEconomy implements Economy {
 
     @Override
     public EconomyResponse depositPlayer(OfflinePlayer offlinePlayer, double v) {
-        Player player = OpenInv.getPlugin(OpenInv.class).loadPlayer(offlinePlayer);
+        Player player = getOpenInv().loadPlayer(offlinePlayer);
         if (player == null) {
             return new EconomyResponse(0, getBalance(offlinePlayer), EconomyResponse.ResponseType.FAILURE, "Player not found");
         }
-        if (((int) v) % 9 > 0) player.getInventory().addItem(new ItemStack(Material.EMERALD, (int) v % 9));
-        if (((int) v) / 9 > 0) player.getInventory().addItem(new ItemStack(Material.EMERALD_BLOCK, ((int) v) / 9));
+        if (((int) v) % 9 > 0) {
+            var remaining = player.getInventory().addItem(new ItemStack(Material.EMERALD, (int) v % 9));
+            if (!remaining.isEmpty()) {
+                if (!addWallet(offlinePlayer, remaining.values().stream().mapToInt(ItemStack::getAmount).sum()).transactionSuccess())
+                    return new EconomyResponse(0, getBalance(offlinePlayer), EconomyResponse.ResponseType.FAILURE, "Insufficient funds");
+            }
+        }
+        if (((int) v) / 9 > 0) {
+            var remaining = player.getInventory().addItem(new ItemStack(Material.EMERALD_BLOCK, ((int) v) / 9));
+            if (!remaining.isEmpty()) {
+                if (!addWallet(offlinePlayer, remaining.values().stream().mapToInt(ItemStack::getAmount).sum() * 9).transactionSuccess())
+                    return new EconomyResponse(0, getBalance(offlinePlayer), EconomyResponse.ResponseType.FAILURE, "Insufficient funds");
+            }
+        }
         player.updateInventory();
         return new EconomyResponse(v, getBalance(offlinePlayer), EconomyResponse.ResponseType.SUCCESS, null);
     }
@@ -292,7 +365,7 @@ public class EmeraldEconomy implements Economy {
 
     @Override
     public boolean createPlayerAccount(OfflinePlayer offlinePlayer) {
-        return OpenInv.getPlugin(OpenInv.class).loadPlayer(offlinePlayer) != null;
+        return getOpenInv().loadPlayer(offlinePlayer) != null;
     }
 
     @Override
@@ -403,5 +476,9 @@ public class EmeraldEconomy implements Economy {
 
     public static NamespacedKey ACCOUNTS_KEY = new NamespacedKey(EmeraldBank.getInstance(), "accounts");
 
+    @NotNull
+    private static IOpenInv getOpenInv() {
+        return ((IOpenInv) Objects.requireNonNull(Bukkit.getServer().getPluginManager().getPlugin("OpenInv")));
+    }
 
 }

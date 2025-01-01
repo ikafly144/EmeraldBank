@@ -22,8 +22,8 @@ public class Messages extends ConfigurationPart {
     public String currencyName = "Emerald";
     public String currencyNamePlural = "Emeralds";
 
-    public String balance = "<green><player>'s Balance: <value>";
-    public String balanceBank = "<green><bank>'s Balance: <value>";
+    public String balance = "<green><player>'s Balance: <value> (Wallet: <wallet>)";
+    public String balanceBank = "<green><bank>'s Balance: <value> (Wallet: <wallet>)";
 
     public String leaderboard = "<player>: <balance>";
 
@@ -42,6 +42,10 @@ public class Messages extends ConfigurationPart {
     public String bankingTransfer = "<green>Transferred <bank> to <player>";
     public String bankingSend = "<green>Sent <value> from <bank_from> to <bank_to>";
     public String bankingPay = "<green>Paid <value> from bank <bank> to <player>";
+
+    public String wallet = "<green><player>'s Wallet: <value>";
+    public String addWallet = "<green>Added <value> to <player>'s wallet!";
+    public String withdrawWallet = "<green>Withdrew <value> from <player>'s wallet!";
 
     public String errorBankingDisabled = "<red>Banking is disabled!";
     public String errorBankingCreate = "<red>Failed to create bank <bank>!";
@@ -67,4 +71,6 @@ public class Messages extends ConfigurationPart {
     public String errorBankingWithdrawCost = "<red>Failed to withdraw <value> from bank <bank> due to insufficient funds <cost>!";
     public String errorBankingPayCost = "<red>Failed to pay <value> from bank <bank> to <player> due to insufficient funds <cost>!";
     public String errorPayCost = "<red>Failed to pay <value> to <player> due to insufficient funds <cost>!";
+    public String errorAddWallet = "<red>Failed to add <value> to <player>'s wallet!";
+    public String errorWithdrawWallet = "<red>Failed to withdraw <value> from <player>'s wallet!";
 }

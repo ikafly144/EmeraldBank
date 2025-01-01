@@ -55,6 +55,9 @@ public class EmeraldCommands implements LifecycleEventHandler<ReloadableRegistra
                         .then(
                                 BankCommand.command()
                         )
+                        .then(
+                                WalletCommand.command()
+                        )
                         .build(),
                 List.of("em", "embank", "emeraldbank")
         );
@@ -66,6 +69,9 @@ public class EmeraldCommands implements LifecycleEventHandler<ReloadableRegistra
         );
         commands.register(
                 BankCommand.command()
+        );
+        commands.register(
+                WalletCommand.command()
         );
     }
 
