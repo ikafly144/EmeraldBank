@@ -7,6 +7,7 @@ import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
+import net.kyori.adventure.text.Component;
 import net.sabafly.emeraldbank.EmeraldBank;
 import net.sabafly.emeraldbank.util.EmeraldUtils;
 import org.bukkit.entity.Player;
@@ -60,6 +61,12 @@ public class PayCommand {
         if (!EmeraldUtils.payPlayer(from, to, amount, cost))
             throw createCommandException(getMessages().errorPay, tagResolver("value", formatCurrency(amount)), tagResolver("player", to.name()));
         context.getSource().getSender().sendMessage(deserializeMiniMessage(getMessages().paySuccess, tagResolver("value", formatCurrency(amount)), tagResolver("player", to.name()), tagResolver("cost", formatCurrency(cost))));
+        sendReceivedMessage(to, amount, from.name());
         return amount;
     }
+
+    static void sendReceivedMessage(Player player, int amount, Component from) {
+        player.sendMessage(deserializeMiniMessage(getMessages().received, tagResolver("value", formatCurrency(amount)), tagResolver("source", from)));
+    }
+
 }

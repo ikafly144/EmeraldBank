@@ -16,10 +16,13 @@ import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.milkbowl.vault.economy.EconomyResponse;
 import net.sabafly.emeraldbank.EmeraldBank;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Optional;
 
 import static net.sabafly.emeraldbank.economy.EmeraldEconomy.formatCurrency;
 import static net.sabafly.emeraldbank.util.EmeraldUtils.*;
@@ -383,6 +386,7 @@ public class BankCommand {
             throw createCommandException(getMessages().errorBankingSend, tagResolver("value", formatCurrency(amount)), tagResolver("bank_from", Component.text(result.account)), tagResolver("bank_to", Component.text(target)));
         }
         context.getSource().getSender().sendMessage(deserializeMiniMessage(getMessages().bankingSend, tagResolver("value", formatCurrency(amount)), tagResolver("bank_from", Component.text(result.account)), tagResolver("bank_to", Component.text(target))));
+        getEconomy().getBankMembers(target).forEach(member -> Optional.ofNullable(Bukkit.getServer().getPlayer(member.getUniqueId())).ifPresent(p -> sendReceivedMessage(p, amount, target, result.account)));
         return amount;
     }
 
@@ -420,6 +424,8 @@ public class BankCommand {
         if (!response.transactionSuccess())
             throw createCommandException(getMessages().errorBankingPay, tagResolver("value", formatCurrency(amount)), tagResolver("bank", Component.text(bankFrom)), tagResolver("player", to.name()));
         context.getSource().getSender().sendMessage(deserializeMiniMessage(getMessages().bankingPay, tagResolver("value", formatCurrency(amount)), tagResolver("bank", Component.text(bankFrom)), tagResolver("player", to.name()), tagResolver("cost", formatCurrency(cost))));
+        var src = context.getSource();
+        PayCommand.sendReceivedMessage(to, amount, src != null ? src.getExecutor() != null ? src.getExecutor().name() : Component.text("SERVER") : Component.text("SERVER"));
         return amount;
     }
 
@@ -449,6 +455,10 @@ public class BankCommand {
     }
 
     private record isBankMember(String account) {
+    }
+
+    static void sendReceivedMessage(Player player, int amount,String destBank , String srcBank) {
+        player.sendMessage(deserializeMiniMessage(getMessages().receiveBank, tagResolver("value", formatCurrency(amount)), tagResolver("source", Component.text(srcBank)), tagResolver("destination", Component.text(destBank))));
     }
 
 }

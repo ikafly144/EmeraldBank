@@ -47,6 +47,9 @@ public class Messages extends ConfigurationPart {
     public String addWallet = "<green>Added <value> to <player>'s wallet!";
     public String withdrawWallet = "<green>Withdrew <value> from <player>'s wallet!";
 
+    public String received = "<green>Received <value> from <source>";
+    public String receiveBank = "<green>Received <value> to bank <destination> from <source>";
+
     public String errorBankingDisabled = "<red>Banking is disabled!";
     public String errorBankingCreate = "<red>Failed to create bank <bank>!";
     public String errorBankingDelete = "<red>Failed to delete bank <bank>!";
