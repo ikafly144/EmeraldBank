@@ -14,12 +14,17 @@ All messages can be customized in `messages.yml`.
 - `/bank` Alias of `/emeraldbank bank`
 - `/balance` Alias of `/emeraldbank balance`
 - `/pay` Alias of `/emeraldbank pay`
+- `/wallet` Alias of `/emeraldbank wallet`
 - `/emeraldbank` There are aliases `/em` and `/embank`.
     - `balance` Show your balance that count of emeralds you have.
     - `balance <player>` Show other player's balance.
     - `leaderboard` Show all player's balance in leaderboard.
     - `pay` Pay emeralds to other online player.
     - `reload` Reload config and messages
+    - `wallet`
+        - `add <count>`
+        - `withdraw <count>`
+        - `balance`
     - `bank`
         - `account`
             - `create <name>` Create a new bank account.
