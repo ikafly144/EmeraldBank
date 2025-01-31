@@ -15,6 +15,7 @@ import org.bukkit.entity.Player;
 import static net.sabafly.emeraldbank.economy.EmeraldEconomy.formatCurrency;
 import static net.sabafly.emeraldbank.util.EmeraldUtils.*;
 
+@SuppressWarnings("UnstableApiUsage")
 public class PayCommand {
     public static LiteralCommandNode<CommandSourceStack> command() {
         return Commands.literal("pay")

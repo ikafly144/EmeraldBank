@@ -20,6 +20,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
+@SuppressWarnings("UnstableApiUsage")
 public class EmeraldUtils {
     public static Messages getMessages() {
         return EmeraldBank.getInstance().getMessages();

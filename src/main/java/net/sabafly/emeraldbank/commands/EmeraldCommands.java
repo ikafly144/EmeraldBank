@@ -20,9 +20,10 @@ import java.util.List;
 import static net.sabafly.emeraldbank.util.EmeraldUtils.*;
 import static net.sabafly.emeraldbank.util.EmeraldUtils.tagResolver;
 
-public class EmeraldCommands implements LifecycleEventHandler<ReloadableRegistrarEvent<Commands>> {
+@SuppressWarnings("UnstableApiUsage")
+public class EmeraldCommands implements LifecycleEventHandler<@NotNull ReloadableRegistrarEvent<@NotNull Commands>> {
     @Override
-    public void run(@NotNull ReloadableRegistrarEvent<Commands> event) {
+    public void run(@NotNull ReloadableRegistrarEvent<@NotNull Commands> event) {
         final Commands commands = event.registrar();
         commands.register(
                 Commands.literal("emeraldbank")

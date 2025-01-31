@@ -14,6 +14,9 @@ dependencies:
     OpenInv:
       load: BEFORE
       required: true
+    PlaceholderAPI:
+      load: BEFORE
+      required: false
 permissions:
   emeraldbank.bypass:
     default: false

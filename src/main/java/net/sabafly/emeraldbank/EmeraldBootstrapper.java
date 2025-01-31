@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.function.UnaryOperator;
 
+@SuppressWarnings("UnstableApiUsage")
 public class EmeraldBootstrapper implements PluginBootstrap {
 
     @Override

@@ -12,6 +12,7 @@ import org.bukkit.entity.Player;
 
 import static net.sabafly.emeraldbank.util.EmeraldUtils.*;
 
+@SuppressWarnings("UnstableApiUsage")
 public class WalletCommand {
     public static LiteralCommandNode<CommandSourceStack> command() {
         return Commands.literal("wallet")

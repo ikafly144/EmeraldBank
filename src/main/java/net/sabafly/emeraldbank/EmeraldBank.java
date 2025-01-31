@@ -9,6 +9,7 @@ import net.sabafly.emeraldbank.configuration.EmeraldConfigurations;
 import net.sabafly.emeraldbank.configuration.GlobalConfiguration;
 import net.sabafly.emeraldbank.configuration.Messages;
 import net.sabafly.emeraldbank.economy.EmeraldEconomy;
+import net.sabafly.emeraldbank.placeholder.EmeraldBankPlaceholderExpansion;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
@@ -17,6 +18,7 @@ import org.spongepowered.configurate.ConfigurateException;
 import java.io.IOException;
 import java.nio.file.Path;
 
+@SuppressWarnings("UnstableApiUsage")
 public final class EmeraldBank extends JavaPlugin {
 
     @Getter
@@ -58,6 +60,9 @@ public final class EmeraldBank extends JavaPlugin {
             getComponentLogger().warn(MiniMessage.miniMessage().deserialize("<red>Disabled due to no Vault dependency found!", TagResolver.empty()));
             getServer().getPluginManager().disablePlugin(this);
             return;
+        }
+        if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            new EmeraldBankPlaceholderExpansion(this).register();
         }
         getComponentLogger().info(MiniMessage.miniMessage().deserialize("Enabled <version>", TagResolver.builder().tag("version", Tag.inserting(Component.text(getPluginMeta().getVersion()))).build()));
     }

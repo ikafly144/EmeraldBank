@@ -13,6 +13,7 @@ import static net.sabafly.emeraldbank.economy.EmeraldEconomy.formatCurrency;
 import static net.sabafly.emeraldbank.util.EmeraldUtils.*;
 import static net.sabafly.emeraldbank.util.EmeraldUtils.tagResolver;
 
+@SuppressWarnings("UnstableApiUsage")
 public class BalanceCommand {
     public static LiteralCommandNode<CommandSourceStack> command() {
         return Commands.literal("balance")

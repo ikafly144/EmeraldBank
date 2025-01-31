@@ -17,7 +17,6 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.milkbowl.vault.economy.EconomyResponse;
 import net.sabafly.emeraldbank.EmeraldBank;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -27,6 +26,7 @@ import java.util.Optional;
 import static net.sabafly.emeraldbank.economy.EmeraldEconomy.formatCurrency;
 import static net.sabafly.emeraldbank.util.EmeraldUtils.*;
 
+@SuppressWarnings("UnstableApiUsage")
 public class BankCommand {
     static LiteralCommandNode<CommandSourceStack> command() {
         return
