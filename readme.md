@@ -22,9 +22,9 @@ All messages can be customized in `messages.yml`.
     - `pay` Pay emeralds to other online player.
     - `reload` Reload config and messages
     - `wallet`
-        - `add <count>`
-        - `withdraw <count>`
-        - `balance`
+        - `add <count>` Add emeralds to your wallet.
+        - `withdraw <count>` Withdraw emeralds from your wallet.
+        - `balance` Show your wallet balance.
     - `bank`
         - `account`
             - `create <name>` Create a new bank account.
