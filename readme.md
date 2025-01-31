@@ -65,3 +65,14 @@ All messages can be customized in `messages.yml`.
     - `emeraldbank.banking.account.remove`
     - `emeraldbank.banking.account.list`
     - `emeraldbank.banking.account.transfer`
+
+## Placeholders
+
+- `%emeraldbank_balance%`
+- `%emeraldbank_balance_<player>%`
+- `%emeraldbank_wallet%`
+- `%emeraldbank_wallet_<player>%`
+- `%emeraldbank_bank_balance_<bank>%`
+- `%emeraldbank_bank_owner_<bank>%`
+- `%emeraldbank_bank_members_<bank>%`
+- `%emeraldbank_bank_list%`
