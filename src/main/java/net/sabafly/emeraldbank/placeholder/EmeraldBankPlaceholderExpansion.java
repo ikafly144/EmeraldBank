@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 @SuppressWarnings("UnstableApiUsage")
 public class EmeraldBankPlaceholderExpansion extends PlaceholderExpansion {
@@ -25,7 +26,7 @@ public class EmeraldBankPlaceholderExpansion extends PlaceholderExpansion {
 
     @Override
     public @NotNull String getAuthor() {
-        return "SabaFly";
+        return "ikafly144";
     }
 
     @Override
@@ -39,10 +40,30 @@ public class EmeraldBankPlaceholderExpansion extends PlaceholderExpansion {
     }
 
     @Override
+    public @NotNull List<String> getPlaceholders() {
+        return Stream.of(
+                "balance",
+                "balance_<player>",
+                "wallet",
+                "wallet_<player>",
+                "bank_balance_<bank>",
+                "bank_owner_<bank>",
+                "bank_members_<bank>",
+                "bank_list"
+        ).map(s -> "%" + getIdentifier() + "_" + s + "%").toList();
+    }
+
+
+
+    @Override
     public @Nullable String onRequest(OfflinePlayer player, @NotNull String params) {
         if (params.startsWith("balance_")) {
             OfflinePlayer offlinePlayer = plugin.getServer().getOfflinePlayer(params.substring(8));
             return plugin.getEconomy().format(plugin.getEconomy().getBalance(offlinePlayer));
+        }
+        if (params.startsWith("wallet_")) {
+            OfflinePlayer offlinePlayer = plugin.getServer().getOfflinePlayer(params.substring(7));
+            return plugin.getEconomy().format(plugin.getEconomy().getWallet(offlinePlayer));
         }
         if (params.startsWith("bank_balance_")) {
             String bankName = params.substring(13);
@@ -67,6 +88,9 @@ public class EmeraldBankPlaceholderExpansion extends PlaceholderExpansion {
         }
         if (params.equals("balance")) {
             return plugin.getEconomy().format(plugin.getEconomy().getBalance(player));
+        }
+        if (params.equals("wallet")) {
+            return plugin.getEconomy().format(plugin.getEconomy().getWallet(player));
         }
         return null;
     }
