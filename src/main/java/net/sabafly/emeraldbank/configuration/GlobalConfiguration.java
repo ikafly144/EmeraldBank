@@ -1,15 +1,12 @@
 package net.sabafly.emeraldbank.configuration;
 
-import com.mojang.logging.LogUtils;
 import net.sabafly.emeraldbank.configuration.type.IntOr;
-import org.slf4j.Logger;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
 
 @SuppressWarnings({"FieldCanBeLocal", "FieldMayBeFinal", "InnerClassMayBeStatic"})
 @ConfigSerializable
 public class GlobalConfiguration extends ConfigurationPart {
-    private static final Logger LOGGER = LogUtils.getClassLogger();
     static final int CURRENT_VERSION = 1;
     private static GlobalConfiguration instance;
     public static boolean isFirstStart = false;
@@ -50,6 +47,13 @@ public class GlobalConfiguration extends ConfigurationPart {
             public IntOr.Disabled withdrawCost = IntOr.Disabled.DISABLED;
             public IntOr.Disabled payCost = IntOr.Disabled.DISABLED;
         }
+    }
+
+    public DefaultDestination defaultDestination = DefaultDestination.INVENTORY;
+
+    public enum DefaultDestination {
+        INVENTORY,
+        WALLET
     }
 
 }

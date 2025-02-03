@@ -10,6 +10,7 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
 import net.sabafly.emeraldbank.EmeraldBank;
+import net.sabafly.emeraldbank.configuration.GlobalConfiguration;
 import net.sabafly.emeraldbank.util.EmeraldUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -21,10 +22,7 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class EmeraldEconomy implements Economy {
     @Override
@@ -186,9 +184,9 @@ public class EmeraldEconomy implements Economy {
             if (!response.transactionSuccess()) return response;
             v -= response.amount;
         }
-        Player player = getOpenInv().loadPlayer(offlinePlayer);
+        Player player = Optional.ofNullable(Bukkit.getPlayer(offlinePlayer.getUniqueId())).orElseGet(() -> getOpenInv().loadPlayer(offlinePlayer));
         if (player == null) {
-            return new EconomyResponse(0, getBalance(offlinePlayer), EconomyResponse.ResponseType.FAILURE, "Player not found");
+            throw new IllegalArgumentException("Player not found (maybe OpenInv is old or disabled)");
         }
         int amount = (int) Math.ceil(v);
         for (ItemStack item : player.getInventory().getContents()) {
@@ -247,6 +245,9 @@ public class EmeraldEconomy implements Economy {
     @Override
     public EconomyResponse depositPlayer(OfflinePlayer offlinePlayer, double v) {
         Player player = getOpenInv().loadPlayer(offlinePlayer);
+        if (GlobalConfiguration.get().defaultDestination == GlobalConfiguration.DefaultDestination.WALLET) {
+            return addWallet(offlinePlayer, v);
+        }
         if (player == null) {
             return new EconomyResponse(0, getBalance(offlinePlayer), EconomyResponse.ResponseType.FAILURE, "Player not found");
         }
