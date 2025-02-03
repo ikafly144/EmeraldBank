@@ -61,7 +61,7 @@ public class WalletCommand {
                                     var response = EmeraldBank.getInstance().getEconomy().removeWallet(player, amount);
                                     if (!response.transactionSuccess())
                                         throw createCommandException(getMessages().errorWithdrawWallet, tagResolver("value", formatCurrency(amount)), tagResolver("player", player.name()));
-                                    var deposit = EmeraldBank.getInstance().getEconomy().depositPlayer(player, amount);
+                                    var deposit = EmeraldBank.getInstance().getEconomy().depositPlayer(player, amount, false);
                                     if (!deposit.transactionSuccess())
                                         throw createCommandException(getMessages().errorWithdrawWallet, tagResolver("value", formatCurrency(amount)), tagResolver("player", player.name()));
                                     context.getSource().getSender().sendMessage(deserializeMiniMessage(getMessages().withdrawWallet, tagResolver("value", formatCurrency(amount)), tagResolver("player", player.name())));

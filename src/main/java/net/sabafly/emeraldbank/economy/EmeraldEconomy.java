@@ -110,9 +110,7 @@ public class EmeraldEconomy implements Economy {
     private static final NamespacedKey WALLET_KEY = new NamespacedKey(EmeraldBank.getInstance(), "wallet");
 
     public double getWallet(OfflinePlayer offlinePlayer) {
-        Player player = getOpenInv().loadPlayer(offlinePlayer);
-        if (player == null) return 0;
-        return player.getPersistentDataContainer().getOrDefault(WALLET_KEY, PersistentDataType.DOUBLE, 0.0);
+        return offlinePlayer.getPersistentDataContainer().getOrDefault(WALLET_KEY, PersistentDataType.DOUBLE, 0.0);
     }
 
     @SuppressWarnings("unused")
@@ -120,17 +118,19 @@ public class EmeraldEconomy implements Economy {
         return new EconomyResponse(amount, getWallet(offlinePlayer), getWallet(offlinePlayer) >= amount ? EconomyResponse.ResponseType.SUCCESS : EconomyResponse.ResponseType.FAILURE, null);
     }
 
+    // TODO: OpenInv Player PDC is not correctly load and save
     public EconomyResponse addWallet(OfflinePlayer offlinePlayer, double amount) {
-        Player player = getOpenInv().loadPlayer(offlinePlayer);
+        Player player = offlinePlayer.getPlayer();
         if (player == null) return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, "Player not found");
         double balance = player.getPersistentDataContainer().getOrDefault(WALLET_KEY, PersistentDataType.DOUBLE, 0.0);
         player.getPersistentDataContainer().set(WALLET_KEY, PersistentDataType.DOUBLE, balance + amount);
         return new EconomyResponse(amount, balance + amount, EconomyResponse.ResponseType.SUCCESS, null);
     }
 
+    // TODO: OpenInv Player PDC is not correctly load and save
     public EconomyResponse removeWallet(OfflinePlayer offlinePlayer, double amount) {
-        Player player = getOpenInv().loadPlayer(offlinePlayer);
-        if (player == null) return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, "Player not found");
+        Player player = offlinePlayer.getPlayer();
+        if (player == null) return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, "Player not online");
         double balance = player.getPersistentDataContainer().getOrDefault(WALLET_KEY, PersistentDataType.DOUBLE, 0.0);
         if (balance < amount)
             return new EconomyResponse(0, balance, EconomyResponse.ResponseType.FAILURE, "Insufficient funds");
@@ -244,8 +244,12 @@ public class EmeraldEconomy implements Economy {
 
     @Override
     public EconomyResponse depositPlayer(OfflinePlayer offlinePlayer, double v) {
+        return depositPlayer(offlinePlayer, v, true);
+    }
+
+    public EconomyResponse depositPlayer(OfflinePlayer offlinePlayer, double v, boolean isWallet) {
         Player player = getOpenInv().loadPlayer(offlinePlayer);
-        if (GlobalConfiguration.get().defaultDestination == GlobalConfiguration.DefaultDestination.WALLET) {
+        if (isWallet && GlobalConfiguration.get().defaultDestination == GlobalConfiguration.DefaultDestination.WALLET) {
             return addWallet(offlinePlayer, v);
         }
         if (player == null) {
