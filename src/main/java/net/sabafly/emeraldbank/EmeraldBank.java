@@ -1,5 +1,7 @@
 package net.sabafly.emeraldbank;
 
+import com.google.gson.Gson;
+import io.papermc.paper.ServerBuildInfo;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -10,13 +12,21 @@ import net.sabafly.emeraldbank.configuration.GlobalConfiguration;
 import net.sabafly.emeraldbank.configuration.Messages;
 import net.sabafly.emeraldbank.economy.EmeraldEconomy;
 import net.sabafly.emeraldbank.placeholder.EmeraldBankPlaceholderExpansion;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.configurate.ConfigurateException;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URLEncoder;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.time.Duration;
 
 @SuppressWarnings("UnstableApiUsage")
 public final class EmeraldBank extends JavaPlugin {
@@ -65,6 +75,7 @@ public final class EmeraldBank extends JavaPlugin {
             new EmeraldBankPlaceholderExpansion(this).register();
         }
         getComponentLogger().info(MiniMessage.miniMessage().deserialize("Enabled <version>", TagResolver.builder().tag("version", Tag.inserting(Component.text(getPluginMeta().getVersion()))).build()));
+        Bukkit.getScheduler().runTaskTimerAsynchronously(this, task -> updateCheck(), 1, 60 * 60 * 20);
     }
 
     private boolean setupEconomy() {
@@ -88,4 +99,31 @@ public final class EmeraldBank extends JavaPlugin {
         messages = EmeraldBootstrapper.loadMessages(this.dataDir.resolve("messages.yml"));
         this.globalConfiguration = configurations.initializeGlobalConfiguration();
     }
+
+    private void updateCheck() {
+        getSLF4JLogger().info("Checking for updates");
+        try (var client = HttpClient.newHttpClient()) {
+            var param = URLEncoder.encode("loaders=[\"paper\"]&game_versions=[\"" + ServerBuildInfo.buildInfo().minecraftVersionId() + "\"]", StandardCharsets.UTF_8);
+            var uri = URI.create("https://api.modrinth.com/v2/project/fPQBnIe2/version?" + param);
+            var request = HttpRequest.newBuilder()
+                    .uri(uri)
+                    .timeout(Duration.ofSeconds(10))
+                    .build();
+            client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                    .thenApplyAsync(HttpResponse::body).thenAcceptAsync(buf -> {
+                        var raw = new Gson().fromJson(buf, Object.class);
+                        // .[0].version_number
+                        var version = ((java.util.List<?>) raw).getFirst();
+                        var versionNumber = ((java.util.Map<?, ?>) version).get("version_number");
+                        if (getPluginMeta().getVersion().equals(versionNumber)) {
+                            getSLF4JLogger().info("You are running the latest version");
+                        } else {
+                            getSLF4JLogger().info("A new version is available");
+                        }
+                        getSLF4JLogger().info("Latest version: {}", versionNumber);
+                        getSLF4JLogger().info("Current version: {}", getPluginMeta().getVersion());
+                    }).join();
+        }
+    }
+
 }
