@@ -69,7 +69,7 @@ public abstract class Configurations<G, M> {
         return this.createLoaderBuilder();
     }
 
-    static <T> CheckedFunction<ConfigurationNode, T, SerializationException> creator(final Class<? extends T> type, final boolean refreshNode) {
+    static <T> CheckedFunction<CommentedConfigurationNode, T, @org.jetbrains.annotations.NotNull SerializationException> creator(final Class<? extends T> type, final boolean refreshNode) {
         return node -> {
             final T instance = node.require(type);
             if (refreshNode) {
@@ -79,7 +79,7 @@ public abstract class Configurations<G, M> {
         };
     }
 
-    static <T> CheckedFunction<ConfigurationNode, T, SerializationException> reloader(Class<T> type, T instance) {
+    static <T> CheckedFunction<CommentedConfigurationNode, T, @org.jetbrains.annotations.NotNull SerializationException> reloader(Class<T> type, T instance) {
         return node -> {
             ObjectMapper.Factory factory = (ObjectMapper.Factory) Objects.requireNonNull(node.options().serializers().get(type));
             ObjectMapper.Mutable<T> mutable = (ObjectMapper.Mutable<T>) factory.get(type);
@@ -92,7 +92,7 @@ public abstract class Configurations<G, M> {
         return this.initializeGlobalConfiguration(creator(this.globalConfigClass, true));
     }
 
-    private void trySaveFileNode(YamlConfigurationLoader loader, ConfigurationNode node, String filename) throws ConfigurateException {
+    private void trySaveFileNode(YamlConfigurationLoader loader, CommentedConfigurationNode node, String filename) throws ConfigurateException {
         try {
             loader.save(node);
         } catch (ConfigurateException ex) {
@@ -102,13 +102,13 @@ public abstract class Configurations<G, M> {
         }
     }
 
-    protected G initializeGlobalConfiguration(final CheckedFunction<ConfigurationNode, G, SerializationException> creator) throws ConfigurateException {
+    protected G initializeGlobalConfiguration(final CheckedFunction<CommentedConfigurationNode, G, @org.jetbrains.annotations.NotNull SerializationException> creator) throws ConfigurateException {
         final Path configFile = this.globalFolder.resolve(this.globalConfigFileName);
         final YamlConfigurationLoader loader = this.createGlobalLoaderBuilder()
                 .defaultOptions(this.applyObjectMapperFactory(this.createGlobalObjectMapperFactoryBuilder().build()))
                 .path(configFile)
                 .build();
-        final ConfigurationNode node;
+        final CommentedConfigurationNode node;
         if (Files.notExists(configFile)) {
             node = CommentedConfigurationNode.root(loader.defaultOptions());
             node.node(Configuration.VERSION_FIELD).raw(this.globalConfigVersion());
@@ -123,7 +123,7 @@ public abstract class Configurations<G, M> {
         return instance;
     }
 
-    protected void verifyGlobalConfigVersion(final ConfigurationNode globalNode) {
+    protected void verifyGlobalConfigVersion(final CommentedConfigurationNode globalNode) {
         final ConfigurationNode version = globalNode.node(Configuration.VERSION_FIELD);
         if (version.virtual()) {
             LOGGER.warn("The global config file didn't have a version set, assuming latest");
@@ -133,7 +133,7 @@ public abstract class Configurations<G, M> {
         }
     }
 
-    protected void applyGlobalConfigTransformations(final ConfigurationNode node) throws ConfigurateException {
+    protected void applyGlobalConfigTransformations(final CommentedConfigurationNode node) throws ConfigurateException {
     }
 
     private UnaryOperator<ConfigurationOptions> applyObjectMapperFactory(final ObjectMapper.Factory factory) {

@@ -12,6 +12,9 @@ public class GlobalConfiguration extends ConfigurationPart {
     private static GlobalConfiguration instance;
     public static boolean isFirstStart = false;
 
+    public GlobalConfiguration() {
+    }
+
     public static GlobalConfiguration get() {
         return instance;
     }

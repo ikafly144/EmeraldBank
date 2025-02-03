@@ -17,7 +17,6 @@ import static io.leangen.geantyref.GenericTypeReflector.erase;
 
 public class EmeraldConfigurations extends Configurations<GlobalConfiguration, Messages> {
 
-    private static final Logger LOGGER = LogUtils.getClassLogger();
     static final String GLOBAL_CONFIG_FILE_NAME = "config.yml";
     static final String MESSAGES_FILE_NAME = "messages.yml";
 
@@ -74,6 +73,7 @@ public class EmeraldConfigurations extends Configurations<GlobalConfiguration, M
     private static ConfigurationOptions defaultGlobalOptions(ConfigurationOptions options) {
         return options
                 .header(GLOBAL_HEADER)
+                .shouldCopyDefaults(true)
                 .serializers(builder -> builder
                         .register(IntOr.Default.SERIALIZER)
                         .register(IntOr.Disabled.SERIALIZER)
