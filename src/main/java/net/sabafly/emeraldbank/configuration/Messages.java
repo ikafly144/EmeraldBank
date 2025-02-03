@@ -23,7 +23,7 @@ public class Messages extends ConfigurationPart {
     public String currencyNamePlural = "Emeralds";
 
     public String balance = "<green><player>'s Balance: <value> (Wallet: <wallet>)";
-    public String balanceBank = "<green><bank>'s Balance: <value> (Wallet: <wallet>)";
+    public String balanceBank = "<green><bank>'s Balance: <value>";
 
     public String leaderboard = "<player>: <balance>";
 

@@ -22,10 +22,14 @@ permissions:
     default: false
     description: Allows the player to bypass the EmeraldBank command
     children:
-      emeraldbank.bypass.cost: true
-      emeraldbank.bypass.deposit: true
-      emeraldbank.bypass.member: true
-      emeraldbank.bypass.owner: true
+      emeraldbank.bypass.cost:
+        default: false
+      emeraldbank.bypass.deposit:
+        default: false
+      emeraldbank.bypass.member:
+        default: false
+      emeraldbank.bypass.owner:
+        default: false
   emeraldbank.admin:
     default: op
     description: Allows the player to use all EmeraldBank command
