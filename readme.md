@@ -15,30 +15,26 @@ All messages can be customized in `messages.yml`.
 - `/balance` Alias of `/emeraldbank balance`
 - `/pay` Alias of `/emeraldbank pay`
 - `/wallet` Alias of `/emeraldbank wallet`
-- `/emeraldbank` There are aliases `/em` and `/embank`.
-    - `balance` Show your balance that count of emeralds you have.
-    - `balance <player>` Show other player's balance.
-    - `leaderboard` Show all player's balance in leaderboard.
-    - `pay` Pay emeralds to other online player.
-    - `reload` Reload config and messages
-    - `wallet`
-        - `add <count>` Add emeralds to your wallet.
-        - `withdraw <count>` Withdraw emeralds from your wallet.
-        - `balance` Show your wallet balance.
-    - `bank`
-        - `account`
-            - `create <name>` Create a new bank account.
-            - `delete <bank>` Close the specified bank account.
-            - `add <bank> <player>` Add a member that can access the bank account.
-            - `remove <bank> <player>` Remove a member from the bank account.
-            - `transfer <bank> <player>` Change the bank owner to other player.
-            - `list` Show all bank accounts.
-            - `list <bank>` Show all members of bank.
-        - `balance <bank>` Show bank balance.
-        - `deposit <bank> <count>` Deposit to the bank account.
-        - `withdraw <bank> <count>` Withdraw to the bank account.
-        - `send <bank> <target> <count>` Transfer emeralds to other bank account.
-        - `pay <bank> <player> <count>` Pay emeralds to specified player.
+- `/emeraldbank balance` Show your balance that count of emeralds you have.
+- `/emeraldbank balance <player>` Show other player's balance.
+- `/emeraldbank leaderboard` Show all player's balance in leaderboard.
+- `/emeraldbank pay <player> <count>` Pay emeralds to other online player.
+- `/emeraldbank reload` Reload config and messages
+- `/emeraldbank wallet add <count>` Add emeralds to your wallet.
+- `/emeraldbank wallet withdraw <count>` Withdraw emeralds from your wallet.
+- `/emeraldbank wallet balance` Show your wallet balance.
+- `/emeraldbank bank account create <name>` Create a new bank account.
+- `/emeraldbank bank account delete <bank>` Close the specified bank account.
+- `/emeraldbank bank account add <bank> <player>` Add a member that can access the bank account.
+- `/emeraldbank bank account remove <bank> <player>` Remove a member from the bank account.
+- `/emeraldbank bank account transfer <bank> <player>` Change the bank owner to other player.
+- `/emeraldbank bank account list` Show all bank accounts.
+- `/emeraldbank bank account list <bank>` Show all members of bank.
+- `/emeraldbank bank balance <bank>` Show bank balance.
+- `/emeraldbank bank deposit <bank> <count>` Deposit to the bank account.
+- `/emeraldbank bank withdraw <bank> <count>` Withdraw to the bank account.
+- `/emeraldbank bank send <bank> <target> <count>` Transfer emeralds to other bank account.
+- `/emeraldbank bank pay <bank> <player> <count>` Pay emeralds to specified player.
 
 ## Permissions
 
