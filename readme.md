@@ -15,6 +15,8 @@ All messages can be customized in `messages.yml`.
 - `/balance` Alias of `/emeraldbank balance`
 - `/pay` Alias of `/emeraldbank pay`
 - `/wallet` Alias of `/emeraldbank wallet`
+- `/em` Alias of `/emeraldbank`
+- `/embank` Alias of `/emeraldbank`
 - `/emeraldbank balance` Show your balance that count of emeralds you have.
 - `/emeraldbank balance <player>` Show other player's balance.
 - `/emeraldbank leaderboard` Show all player's balance in leaderboard.
