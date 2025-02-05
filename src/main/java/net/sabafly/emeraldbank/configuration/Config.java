@@ -152,6 +152,7 @@ public class Config extends BaseConfig {
         public String errorPayCost = "<red>Failed to pay <value> to <player> due to insufficient funds <cost>!";
         public String errorAddWallet = "<red>Failed to add <value> to <player>'s wallet!";
         public String errorWithdrawWallet = "<red>Failed to withdraw <value> from <player>'s wallet!";
+        public String errorReload = "<red>Failed to reload configuration and messages!";
     }
 
 }

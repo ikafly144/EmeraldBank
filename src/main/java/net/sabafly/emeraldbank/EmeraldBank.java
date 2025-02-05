@@ -91,15 +91,17 @@ public final class EmeraldBank extends JavaPlugin {
         return getPlugin(EmeraldBank.class);
     }
 
-    public void loadConfiguration() {
+    public boolean loadConfiguration() {
         try {
             this.configuration = ConfigurationLoader.loadConfig(dataDir.resolve("config.yml"));
+            return true;
         } catch (ConfigurateException e) {
             getSLF4JLogger().error("Failed to load configuration", e);
             if (configuration == null) {
                 this.configuration = new Config();
                 getSLF4JLogger().warn("Using default configuration");
             }
+            return false;
         }
     }
 

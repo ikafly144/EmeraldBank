@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static net.sabafly.emeraldbank.util.EmeraldUtils.*;
-import static net.sabafly.emeraldbank.util.EmeraldUtils.tagResolver;
 
 @SuppressWarnings("UnstableApiUsage")
 public class EmeraldCommands implements LifecycleEventHandler<@NotNull ReloadableRegistrarEvent<@NotNull Commands>> {
@@ -30,8 +29,10 @@ public class EmeraldCommands implements LifecycleEventHandler<@NotNull Reloadabl
                                 Commands.literal("reload")
                                         .requires(context -> context.getSender().hasPermission("emeraldbank.reload"))
                                         .executes(context -> {
-                                            EmeraldBank.getInstance().loadConfiguration();
-                                            context.getSource().getSender().sendMessage(MiniMessage.miniMessage().deserialize(EmeraldBank.getInstance().getConfiguration().messages.reload));
+                                            if (EmeraldBank.getInstance().loadConfiguration())
+                                                context.getSource().getSender().sendMessage(MiniMessage.miniMessage().deserialize(EmeraldBank.getInstance().getConfiguration().messages.reload));
+                                            else
+                                                context.getSource().getSender().sendMessage(MiniMessage.miniMessage().deserialize(EmeraldBank.getInstance().getConfiguration().messages.errorReload));
                                             return Command.SINGLE_SUCCESS;
                                         })
                                         .build()
