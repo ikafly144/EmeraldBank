@@ -2,6 +2,7 @@ package net.sabafly.emeraldbank.configuration.type;
 
 import com.google.common.base.Preconditions;
 import com.mojang.logging.LogUtils;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.spongepowered.configurate.serialize.ScalarSerializer;
 
@@ -10,6 +11,7 @@ import java.util.function.Function;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 
+@SuppressWarnings("unused")
 public interface IntOr {
 
     Logger LOGGER = LogUtils.getClassLogger();
@@ -20,6 +22,10 @@ public interface IntOr {
 
     OptionalInt value();
 
+    default boolean isDefined() {
+        return this.value().isPresent();
+    }
+
     default int intValue() {
         return this.value().orElseThrow();
     }
@@ -27,13 +33,13 @@ public interface IntOr {
     record Default(OptionalInt value) implements IntOr {
         private static final String DEFAULT_VALUE = "default";
         public static final Default USE_DEFAULT = new Default(OptionalInt.empty());
-        public static final ScalarSerializer<Default> SERIALIZER = new IntOr.Serializer<>(Default.class, Default::new, DEFAULT_VALUE, USE_DEFAULT);
+        public static final ScalarSerializer<Default> SERIALIZER = new Serializer<>(Default.class, Default::new, DEFAULT_VALUE, USE_DEFAULT);
     }
 
     record Disabled(OptionalInt value) implements IntOr {
         private static final String DISABLED_VALUE = "disabled";
         public static final Disabled DISABLED = new Disabled(OptionalInt.empty());
-        public static final ScalarSerializer<Disabled> SERIALIZER = new IntOr.Serializer<>(Disabled.class, Disabled::new, DISABLED_VALUE, DISABLED);
+        public static final ScalarSerializer<Disabled> SERIALIZER = new Serializer<>(Disabled.class, Disabled::new, DISABLED_VALUE, DISABLED);
 
         public boolean test(IntPredicate predicate) {
             return this.value.isPresent() && predicate.test(this.value.getAsInt());
@@ -70,7 +76,7 @@ public interface IntOr {
         }
 
         @Override
-        protected Object serialize(final T item, final Predicate<Class<?>> typeSupported) {
+        protected @NotNull Object serialize(final T item, final @NotNull Predicate<Class<?>> typeSupported) {
             final OptionalInt value = item.value();
             if (value.isPresent()) {
                 return value.getAsInt();

@@ -2,14 +2,15 @@ package net.sabafly.emeraldbank;
 
 import com.google.gson.Gson;
 import io.papermc.paper.ServerBuildInfo;
+import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.Tag;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
-import net.sabafly.emeraldbank.configuration.EmeraldConfigurations;
-import net.sabafly.emeraldbank.configuration.GlobalConfiguration;
-import net.sabafly.emeraldbank.configuration.Messages;
+import net.sabafly.emeraldbank.commands.EmeraldCommands;
+import net.sabafly.emeraldbank.configuration.Config;
+import net.sabafly.emeraldbank.configuration.ConfigurationLoader;
 import net.sabafly.emeraldbank.economy.EmeraldEconomy;
 import net.sabafly.emeraldbank.placeholder.EmeraldBankPlaceholderExpansion;
 import org.bukkit.Bukkit;
@@ -18,7 +19,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.configurate.ConfigurateException;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
@@ -32,24 +32,15 @@ import java.time.Duration;
 public final class EmeraldBank extends JavaPlugin {
 
     @Getter
-    private Messages messages;
-    @Getter
-    @NotNull
-    private GlobalConfiguration globalConfiguration;
-    private final EmeraldConfigurations configurations;
-    private final Path dataDir;
+    private static Path dataDir;
     @Getter
     private final EmeraldEconomy economy = new EmeraldEconomy();
 
-    public EmeraldBank(Path dataDir, Messages messages, EmeraldConfigurations configurations) {
-        this.dataDir = dataDir;
-        this.messages = messages;
-        this.configurations = configurations;
-        try {
-            this.globalConfiguration = this.configurations.initializeGlobalConfiguration();
-        } catch (ConfigurateException e) {
-            throw new RuntimeException(e);
-        }
+    @Getter
+    private Config configuration;
+
+    public EmeraldBank(@NotNull Path dataDir) {
+        EmeraldBank.dataDir = dataDir;
     }
 
     @Override
@@ -60,7 +51,8 @@ public final class EmeraldBank extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        // Plugin startup logic
+        loadConfiguration();
+
         if (getServer().getPluginManager().getPlugin("OpenInv") == null) {
             getComponentLogger().warn(MiniMessage.miniMessage().deserialize( "<red>Disabled due to no OpenInv dependency found!", TagResolver.empty()));
             getServer().getPluginManager().disablePlugin(this);
@@ -74,6 +66,10 @@ public final class EmeraldBank extends JavaPlugin {
         if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new EmeraldBankPlaceholderExpansion(this).register();
         }
+
+        getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, new EmeraldCommands());
+        getSLF4JLogger().info("Commands registered");
+
         getComponentLogger().info(MiniMessage.miniMessage().deserialize("Enabled <version>", TagResolver.builder().tag("version", Tag.inserting(Component.text(getPluginMeta().getVersion()))).build()));
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, task -> updateCheck(), 1, 60 * 60 * 20);
     }
@@ -95,9 +91,16 @@ public final class EmeraldBank extends JavaPlugin {
         return getPlugin(EmeraldBank.class);
     }
 
-    public void reloadConfiguration() throws IOException {
-        messages = EmeraldBootstrapper.loadMessages(this.dataDir.resolve("messages.yml"));
-        this.globalConfiguration = configurations.initializeGlobalConfiguration();
+    public void loadConfiguration() {
+        try {
+            this.configuration = ConfigurationLoader.loadConfig(dataDir.resolve("config.yml"));
+        } catch (ConfigurateException e) {
+            getSLF4JLogger().error("Failed to load configuration", e);
+            if (configuration == null) {
+                this.configuration = new Config();
+                getSLF4JLogger().warn("Using default configuration");
+            }
+        }
     }
 
     private void updateCheck() {
@@ -123,6 +126,8 @@ public final class EmeraldBank extends JavaPlugin {
                         getSLF4JLogger().info("Latest version: {}", versionNumber);
                         getSLF4JLogger().info("Current version: {}", getPluginMeta().getVersion());
                     }).join();
+        } catch (Exception e) {
+            getSLF4JLogger().error("Failed to check for updates: {}", e.getLocalizedMessage());
         }
     }
 

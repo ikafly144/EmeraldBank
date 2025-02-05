@@ -54,8 +54,8 @@ public class PayCommand {
     static int pay(CommandContext<CommandSourceStack> context, int amount, Player from, Player to) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
         if (to.getUniqueId().equals(from.getUniqueId()))
             throw createCommandException(getMessages().errorPaySelf);
-        int cost = EmeraldBank.getInstance().getGlobalConfiguration().payCost.or(0);
-        if (context.getSource().getSender().hasPermission("emeraldbank.admin"))
+        int cost = EmeraldBank.getInstance().getConfiguration().payCost.or(0);
+        if (context.getSource().getSender().hasPermission("emeraldbank.bypass.cost"))
             cost = 0;
         if (amount <= cost)
             throw createCommandException(getMessages().errorPayCost, tagResolver("value", formatCurrency(amount)), tagResolver("player", to.name()), tagResolver("cost", formatCurrency(cost)));

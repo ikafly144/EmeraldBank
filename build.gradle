@@ -1,11 +1,13 @@
 plugins {
     id 'java'
-    id("io.papermc.paperweight.userdev") version "1.7.1" // Check for new versions at https://plugins.gradle.org/plugin/io.papermc.paperweight.userdev
-    id("xyz.jpenilla.run-paper") version "2.3.0"
+    // Check for new versions at https://plugins.gradle.org/plugin/io.papermc.paperweight.userdev
+    id("io.papermc.paperweight.userdev") version "2.0.0-beta.14"
+    id("xyz.jpenilla.run-paper") version "2.3.1"
+    id 'com.gradleup.shadow' version '9.0.0-beta7'
 }
 
 group = 'net.sabafly'
-version = '0.5.2'
+version = '0.5.3'
 
 repositories {
     mavenCentral()
@@ -27,10 +29,10 @@ repositories {
 }
 
 dependencies {
+    implementation 'org.spongepowered:configurate-yaml:4.2.0-SNAPSHOT'
     compileOnly "com.github.MilkBowl:VaultAPI:1.7.1"
     compileOnly 'me.clip:placeholderapi:2.11.6'
     compileOnly 'com.github.Jikoo.OpenInv:openinvapi:5.1.4'
-    compileOnly 'org.spongepowered:configurate-yaml:4.2.0-SNAPSHOT'
     compileOnly 'org.projectlombok:lombok:1.18.32'
     annotationProcessor 'org.projectlombok:lombok:1.18.32'
     paperweight.paperDevBundle("1.21.1-R0.1-SNAPSHOT")
@@ -57,14 +59,31 @@ tasks.withType(JavaCompile).configureEach {
 processResources {
     def props = [version: version]
     inputs.properties props
-    filteringCharset 'UTF-8'
+    filteringCharset = 'UTF-8'
     filesMatching('paper-plugin.yml') {
         expand props
     }
 }
 
+//noinspection UnnecessaryQualifiedReference
+tasks.named('shadowJar', com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
+    relocate('org.spongepowered.configurate', 'net.sabafly.configurate')
+
+    archiveBaseName = 'EmeraldBank'
+    archiveClassifier = ''
+    archiveVersion = "${version}"
+    archiveFileName = "${rootProject.name}-${version}.jar"
+
+    minimize()
+}
+
+tasks.build {
+    dependsOn shadowJar
+}
+
 tasks {
     runServer {
+        //noinspection GroovyMissingReturnStatement
         downloadPlugins {
             github("Jikoo", "OpenInv", "5.1.6", "OpenInv.jar")
             github("MilkBowl", "Vault", "1.7.3", "Vault.jar")

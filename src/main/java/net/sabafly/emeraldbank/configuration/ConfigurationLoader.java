@@ -1,0 +1,97 @@
+package net.sabafly.emeraldbank.configuration;
+
+import com.google.common.base.Preconditions;
+import net.sabafly.emeraldbank.EmeraldBank;
+import net.sabafly.emeraldbank.configuration.type.IntOr;
+import net.sabafly.emeraldbank.util.LogUtils;
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.ConfigurateException;
+import org.spongepowered.configurate.NodePath;
+import org.spongepowered.configurate.loader.HeaderMode;
+import org.spongepowered.configurate.transformation.ConfigurationTransformation;
+import org.spongepowered.configurate.transformation.MoveStrategy;
+import org.spongepowered.configurate.util.MapFactories;
+import org.spongepowered.configurate.yaml.NodeStyle;
+import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+public class ConfigurationLoader {
+
+    private static final Logger LOGGER = LogUtils.getLogger();
+
+    public static @NotNull Config loadConfig(Path path) throws ConfigurateException {
+        YamlConfigurationLoader loader = YamlConfigurationLoader.builder()
+                .defaultOptions(options -> options
+                        .mapFactory(MapFactories.insertionOrdered())
+                        .shouldCopyDefaults(true)
+                        .header(Config.HEADER)
+                        .serializers(
+                                builder -> builder
+                                        .register(IntOr.Default.SERIALIZER)
+                                        .register(IntOr.Disabled.SERIALIZER)
+                                        .build()
+                        )
+                )
+                .indent(2)
+                .nodeStyle(NodeStyle.BLOCK)
+                .headerMode(HeaderMode.PRESET)
+                .path(path)
+                .build();
+        CommentedConfigurationNode node;
+
+        if (Files.notExists(path)) {
+            node = loader.createNode(config -> config.set(Config.class, new Config()));
+        } else {
+            node = loader.load();
+        }
+
+        var trans = transformer();
+
+        var start = trans.version(node);
+        if (start != CURRENT_VERSION) {
+            trans.apply(node);
+            LOGGER.info("Updated configuration from {} to version {}", start, CURRENT_VERSION);
+        }
+
+        Config config = node.get(Config.class, new Config());
+
+        loader.save(loader.createNode(c -> c.set(Config.class, config)));
+        return config;
+    }
+
+    static final int CURRENT_VERSION = 0;
+
+    static ConfigurationTransformation.Versioned transformer() {
+        var builder = ConfigurationTransformation.versionedBuilder()
+                .versionKey(Config.VERSION_FIELD)
+                .addVersion(0, initialTransform())
+                .build();
+        Preconditions.checkState(builder.latestVersion() == CURRENT_VERSION, "Latest version is not current");
+        return builder;
+    }
+
+    private static ConfigurationTransformation initialTransform() {
+        return ConfigurationTransformation.builder()
+                .moveStrategy(MoveStrategy.OVERWRITE)
+                .addAction(NodePath.path(), (inputPath, valueAtPath) -> {
+                    var path = EmeraldBank.getDataDir().resolve("messages.yml");
+                    if (Files.exists(path)) {
+                        CommentedConfigurationNode node = YamlConfigurationLoader.builder().path(path).build().load();
+                        valueAtPath.node("messages").set(node);
+                        try {
+                            Files.delete(path);
+                            Files.createFile(EmeraldBank.getDataDir().resolve("messages.yml_has_been_moved_to_config.yml"));
+                        } catch (IOException ignored) {
+                        }
+                    }
+                    return null;
+                })
+                .build();
+    }
+
+}

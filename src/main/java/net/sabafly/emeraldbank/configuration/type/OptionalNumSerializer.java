@@ -1,6 +1,7 @@
 package net.sabafly.emeraldbank.configuration.type;
 
 import org.apache.commons.lang3.math.NumberUtils;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.configurate.serialize.ScalarSerializer;
 import org.spongepowered.configurate.serialize.SerializationException;
 
@@ -29,7 +30,7 @@ public abstract class OptionalNumSerializer<T, O> extends ScalarSerializer.Annot
     }
 
     @Override
-    public final T deserialize(final AnnotatedType type, final Object obj) throws SerializationException {
+    public final T deserialize(final @NotNull AnnotatedType type, final @NotNull Object obj) throws SerializationException {
         final O value;
         if (obj instanceof String string) {
             if (this.emptySerializedValue.equalsIgnoreCase(string)) {

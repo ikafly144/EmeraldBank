@@ -1,4 +1,4 @@
 package net.sabafly.emeraldbank.configuration;
 
-public abstract class ConfigurationPart {
+public abstract class BaseConfig {
 }

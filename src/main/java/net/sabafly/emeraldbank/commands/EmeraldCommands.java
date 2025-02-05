@@ -13,7 +13,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,12 +30,8 @@ public class EmeraldCommands implements LifecycleEventHandler<@NotNull Reloadabl
                                 Commands.literal("reload")
                                         .requires(context -> context.getSender().hasPermission("emeraldbank.reload"))
                                         .executes(context -> {
-                                            try {
-                                                EmeraldBank.getInstance().reloadConfiguration();
-                                            } catch (IOException e) {
-                                                throw new RuntimeException(e);
-                                            }
-                                            context.getSource().getSender().sendMessage(MiniMessage.miniMessage().deserialize(EmeraldBank.getInstance().getMessages().reload));
+                                            EmeraldBank.getInstance().loadConfiguration();
+                                            context.getSource().getSender().sendMessage(MiniMessage.miniMessage().deserialize(EmeraldBank.getInstance().getConfiguration().messages.reload));
                                             return Command.SINGLE_SUCCESS;
                                         })
                                         .build()

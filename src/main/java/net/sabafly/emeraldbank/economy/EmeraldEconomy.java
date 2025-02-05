@@ -10,7 +10,7 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
 import net.sabafly.emeraldbank.EmeraldBank;
-import net.sabafly.emeraldbank.configuration.GlobalConfiguration;
+import net.sabafly.emeraldbank.configuration.Config;
 import net.sabafly.emeraldbank.util.EmeraldUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -32,12 +32,12 @@ public class EmeraldEconomy implements Economy {
 
     @Override
     public String getName() {
-        return EmeraldBank.getInstance().getMessages().name;
+        return EmeraldBank.getInstance().getConfiguration().messages.name;
     }
 
     @Override
     public boolean hasBankSupport() {
-        return EmeraldBank.getInstance().getGlobalConfiguration().banking.enabled && isEnabled();
+        return EmeraldBank.getInstance().getConfiguration().banking.enabled && isEnabled();
     }
 
     @Override
@@ -47,17 +47,17 @@ public class EmeraldEconomy implements Economy {
 
     @Override
     public String format(double v) {
-        return PlainTextComponentSerializer.plainText().serialize(MiniMessage.miniMessage().deserialize(EmeraldBank.getInstance().getMessages().economyFormat, TagResolver.resolver("currency", Tag.inserting(MiniMessage.miniMessage().deserialize(v == 1 ? EmeraldBank.getInstance().getMessages().currencyName : EmeraldBank.getInstance().getMessages().currencyNamePlural))), TagResolver.resolver("value", Tag.inserting(Component.text((int) v)))));
+        return PlainTextComponentSerializer.plainText().serialize(MiniMessage.miniMessage().deserialize(EmeraldBank.getInstance().getConfiguration().messages.economyFormat, TagResolver.resolver("currency", Tag.inserting(MiniMessage.miniMessage().deserialize(v == 1 ? EmeraldBank.getInstance().getConfiguration().messages.currencyName : EmeraldBank.getInstance().getConfiguration().messages.currencyNamePlural))), TagResolver.resolver("value", Tag.inserting(Component.text((int) v)))));
     }
 
     @Override
     public String currencyNamePlural() {
-        return PlainTextComponentSerializer.plainText().serialize(MiniMessage.miniMessage().deserialize(EmeraldBank.getInstance().getMessages().currencyNamePlural));
+        return PlainTextComponentSerializer.plainText().serialize(MiniMessage.miniMessage().deserialize(EmeraldBank.getInstance().getConfiguration().messages.currencyNamePlural));
     }
 
     @Override
     public String currencyNameSingular() {
-        return PlainTextComponentSerializer.plainText().serialize(MiniMessage.miniMessage().deserialize(EmeraldBank.getInstance().getMessages().currencyName));
+        return PlainTextComponentSerializer.plainText().serialize(MiniMessage.miniMessage().deserialize(EmeraldBank.getInstance().getConfiguration().messages.currencyName));
     }
 
     @Override
@@ -249,7 +249,7 @@ public class EmeraldEconomy implements Economy {
 
     public EconomyResponse depositPlayer(OfflinePlayer offlinePlayer, double v, boolean isWallet) {
         Player player = getOpenInv().loadPlayer(offlinePlayer);
-        if (isWallet && GlobalConfiguration.get().defaultDestination == GlobalConfiguration.DefaultDestination.WALLET) {
+        if (isWallet && EmeraldBank.getInstance().getConfiguration().defaultDestination == Config.DefaultDestination.WALLET) {
             return addWallet(offlinePlayer, v);
         }
         if (player == null) {

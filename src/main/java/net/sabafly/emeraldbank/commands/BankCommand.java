@@ -49,7 +49,7 @@ public class BankCommand {
                                                                                 throw createCommandException(getMessages().errorBankingDisabled);
                                                                             if (EmeraldBank.getInstance().getEconomy().getBanks().contains(account))
                                                                                 throw createCommandException(getMessages().errorBankingExists, tagResolver("bank", Component.text(account)));
-                                                                            final int cost = EmeraldBank.getInstance().getGlobalConfiguration().banking.tax.createCost.or(0);
+                                                                            final int cost = EmeraldBank.getInstance().getConfiguration().banking.tax.createCost.or(0);
                                                                             if (cost > 0) {
                                                                                 final EconomyResponse response = getEconomy().withdrawPlayer(player, cost);
                                                                                 if (!response.transactionSuccess()) {
@@ -103,7 +103,7 @@ public class BankCommand {
                                                                                             final Player target = context.getArgument("target", PlayerSelectorArgumentResolver.class).resolve(context.getSource()).getFirst();
                                                                                             if (EmeraldBank.getInstance().getEconomy().isBankMember(result.account(), target).transactionSuccess())
                                                                                                 throw createCommandException(getMessages().errorBankingMemberExists, tagResolver("player", target.name()), tagResolver("bank", Component.text(result.account())));
-                                                                                            int cost = EmeraldBank.getInstance().getGlobalConfiguration().banking.tax.addMemberCost.or(0);
+                                                                                            int cost = EmeraldBank.getInstance().getConfiguration().banking.tax.addMemberCost.or(0);
                                                                                             if (context.getSource().getSender().hasPermission("emeraldbank.admin"))
                                                                                                 cost = 0;
                                                                                             if (cost > 0 && context.getSource().getExecutor() instanceof Player player) {
@@ -194,7 +194,7 @@ public class BankCommand {
                                                                                         .executes(context -> {
                                                                                             final isBankOwner result = getIsBankOwner(context);
                                                                                             final Player target = context.getArgument("target", PlayerSelectorArgumentResolver.class).resolve(context.getSource()).getFirst();
-                                                                                            int cost = EmeraldBank.getInstance().getGlobalConfiguration().banking.tax.transferBankCost.or(0);
+                                                                                            int cost = EmeraldBank.getInstance().getConfiguration().banking.tax.transferBankCost.or(0);
                                                                                             if (context.getSource().getSender().hasPermission("emeraldbank.bypass.cost"))
                                                                                                 cost = 0;
                                                                                             if (cost > 0 && context.getSource().getExecutor() instanceof Player player) {
@@ -276,7 +276,7 @@ public class BankCommand {
                                                                         .executes(context -> {
                                                                             final isBankMember result = getIsBankMember(context);
                                                                             final int amount = context.getArgument("amount", Integer.class);
-                                                                            int cost = EmeraldBank.getInstance().getGlobalConfiguration().banking.tax.withdrawCost.or(0);
+                                                                            int cost = EmeraldBank.getInstance().getConfiguration().banking.tax.withdrawCost.or(0);
                                                                             if (context.getSource().getSender().hasPermission("emeraldbank.bypass.cost"))
                                                                                 cost = 0;
                                                                             if (amount <= cost)
@@ -391,7 +391,7 @@ public class BankCommand {
     }
 
     private static int bankDeposit(CommandContext<CommandSourceStack> context, isBankMember result, int amount) throws CommandSyntaxException {
-        int cost = EmeraldBank.getInstance().getGlobalConfiguration().banking.tax.depositCost.or(0);
+        int cost = EmeraldBank.getInstance().getConfiguration().banking.tax.depositCost.or(0);
         if (context.getSource().getSender().hasPermission("emeraldbank.bypass.cost"))
             cost = 0;
         if (amount <= cost) {
@@ -410,7 +410,7 @@ public class BankCommand {
     }
 
     static int payBank(CommandContext<CommandSourceStack> context, int amount, String bankFrom, Player to) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
-        int cost = EmeraldBank.getInstance().getGlobalConfiguration().banking.tax.payCost.or(EmeraldBank.getInstance().getGlobalConfiguration().banking.tax.withdrawCost.or(0));
+        int cost = EmeraldBank.getInstance().getConfiguration().banking.tax.payCost.or(EmeraldBank.getInstance().getConfiguration().banking.tax.withdrawCost.or(0));
         if (context.getSource().getSender().hasPermission("emeraldbank.bypass.cost"))
             cost = 0;
         if (amount <= cost)

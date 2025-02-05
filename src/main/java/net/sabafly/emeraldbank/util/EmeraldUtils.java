@@ -11,7 +11,7 @@ import net.kyori.adventure.text.minimessage.tag.Tag;
 import net.kyori.adventure.text.minimessage.tag.TagPattern;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.sabafly.emeraldbank.EmeraldBank;
-import net.sabafly.emeraldbank.configuration.Messages;
+import net.sabafly.emeraldbank.configuration.Config;
 import net.sabafly.emeraldbank.economy.EmeraldEconomy;
 import org.bukkit.NamespacedKey;
 import org.bukkit.World;
@@ -22,8 +22,8 @@ import java.util.Objects;
 
 @SuppressWarnings("UnstableApiUsage")
 public class EmeraldUtils {
-    public static Messages getMessages() {
-        return EmeraldBank.getInstance().getMessages();
+    public static Config.Messages getMessages() {
+        return EmeraldBank.getInstance().getConfiguration().messages;
     }
 
     public static EmeraldEconomy getEconomy() {
