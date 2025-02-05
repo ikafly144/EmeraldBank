@@ -189,4 +189,6 @@ messages:
   error-pay-cost: <red>Failed to pay <value> to <player> due to insufficient funds <cost>!
   error-add-wallet: <red>Failed to add <value> to <player>'s wallet!
   error-withdraw-wallet: <red>Failed to withdraw <value> from <player>'s wallet!
+  error-reload: <red>Failed to reload configuration and messages!
+
 ```
