@@ -7,7 +7,7 @@ plugins {
 }
 
 group = 'net.sabafly'
-version = '0.5.3'
+version = '0.6.0'
 
 repositories {
     mavenCentral()
@@ -68,11 +68,11 @@ processResources {
 //noinspection UnnecessaryQualifiedReference
 tasks.named('shadowJar', com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
     relocate('org.spongepowered.configurate', 'net.sabafly.configurate')
+    relocate('io.leangen.geantyref', 'net.sabafly.geantyref')
 
     archiveBaseName = 'EmeraldBank'
     archiveClassifier = ''
     archiveVersion = "${version}"
-    archiveFileName = "${rootProject.name}-${version}.jar"
 
     minimize()
 }

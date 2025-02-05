@@ -79,3 +79,114 @@ All messages can be customized in `messages.yml`.
 - `%emeraldbank_bank_owner_<bank>%`
 - `%emeraldbank_bank_members_<bank>%`
 - `%emeraldbank_bank_list%`
+
+## Configuration
+
+```yaml
+#  ______                          _     _ ____              _    
+# |  ____|                        | |   | |  _ \            | |   
+# | |__   _ __ ___   ___ _ __ __ _| | __| | |_) | __ _ _ __ | | __
+# |  __| | '_ ` _ \ / _ | '__/ _` | |/ _` |  _ < / _` | '_ \| |/ /
+# | |____| | | | | |  __| | | (_| | | (_| | |_) | (_| | | | |   < 
+# |______|_| |_| |_|\___|_|  \__,_|_|\__,_|____/ \__,_|_| |_|_|\_\
+#                                                                 
+#                                                                 
+
+# DO NOT CHANGE THIS VALUE!
+config_version: 0
+
+# The cost for creating a bank.
+pay-cost: disabled
+
+#################################################################
+##                                                              #
+##  Banking                                                     #
+##                                                              #
+#################################################################
+banking:
+  # Enable or disable banking.
+  enabled: true
+  tax:
+    # The cost for creating a bank.
+    create-cost: disabled
+
+    # The cost for creating a bank.
+    add-member-cost: disabled
+
+    # The cost for removing a member from a bank.
+    transfer-bank-cost: disabled
+
+    # The cost for sending from a bank to another bank.
+    deposit-cost: disabled
+
+    # The cost for withdrawing from a bank.
+    withdraw-cost: disabled
+
+    # The cost for paying from a bank to a player.
+    pay-cost: disabled
+
+# The default destination for payments.
+# INVENTORY: The player's inventory.
+# WALLET: The player's wallet.
+default-destination: INVENTORY
+
+#################################################################
+##                                                              #
+##  Messages                                                    #
+##                                                              #
+#################################################################
+messages:
+  name: EmeraldBank
+  reload: <green>Reloaded configuration and messages
+  economy-format: <value> <green><currency></green>
+  currency-name: Emerald
+  currency-name-plural: Emeralds
+  balance: '<green><player>''s Balance: <value> (Wallet: <wallet>)'
+  balance-bank: '<green><bank>''s Balance: <value>'
+  leaderboard: '<player>: <balance>'
+  pay-success: <green>Successfully paid <value> to <player>
+  error-pay: <red>Failed to pay <value> to <player>
+  error-pay-self: <red>You cannot pay yourself!
+  banking-create: <green>Created bank <bank>
+  banking-delete: <green>Deleted bank <bank>
+  banking-deposit: <green>Deposited <value> to <bank>
+  banking-withdraw: <green>Withdrew <value> from <bank>
+  banking-add-member: <green>Added <player> to bank <bank>
+  banking-remove-member: <green>Removed <player> from bank <bank>
+  banking-list: '<green>Banks: <banks>'
+  banking-members: '<green>Members of <bank>: <members>'
+  banking-transfer: <green>Transferred <bank> to <player>
+  banking-send: <green>Sent <value> from <bank_from> to <bank_to>
+  banking-pay: <green>Paid <value> from bank <bank> to <player>
+  wallet: '<green><player>''s Wallet: <value>'
+  add-wallet: <green>Added <value> to <player>'s wallet!
+  withdraw-wallet: <green>Withdrew <value> from <player>'s wallet!
+  received: <green>Received <value> from <source>
+  receive-bank: <green>Received <value> to bank <destination> from <source>
+  error-banking-disabled: <red>Banking is disabled!
+  error-banking-create: <red>Failed to create bank <bank>!
+  error-banking-delete: <red>Failed to delete bank <bank>!
+  error-banking-exists: <red>Bank <bank> already exists!
+  error-banking-no-bank: <red>Bank <bank> does not exist!
+  error-banking-deposit: <red>Failed to deposit <value> to <bank>
+  error-banking-withdraw: <red>Failed to withdraw <value> from <bank>
+  error-banking-not-owner: <red><player> is not the owner of bank <bank>!
+  error-banking-not-member: <red><player> is not a member of bank <bank>!
+  error-banking-member-exists: <red><player> is already a member of bank <bank>!
+  error-banking-add-member: <red>Failed to add <player> to bank <bank>!
+  error-banking-remove-member: <red>Failed to remove <player> from bank <bank>!
+  error-banking-delete-remaining: <red>Bank <bank> has a remaining balance of <value>!
+  error-banking-transfer: <red>Failed to transfer <bank> to <player>!
+  error-banking-send: <red>Failed to send <value> from bank <bank_from> to bank <bank_to>!
+  error-banking-pay: <red>Failed to pay <value> from bank <bank> to <player>!
+  error-banking-remove-owner: <red><player> is the owner of bank <bank>!
+  error-banking-create-cost: <red>Failed to create bank due to insufficient funds <cost>!
+  error-banking-add-member-cost: <red>Failed to add member <player> to bank <bank> due to insufficient funds <cost>!
+  error-banking-transfer-cost: <red>Failed to transfer bank <bank> to <player> due to insufficient funds <cost>!
+  error-banking-deposit-cost: <red>Failed to deposit <value> to bank <bank> due to insufficient funds <cost>!
+  error-banking-withdraw-cost: <red>Failed to withdraw <value> from bank <bank> due to insufficient funds <cost>!
+  error-banking-pay-cost: <red>Failed to pay <value> from bank <bank> to <player> due to insufficient funds <cost>!
+  error-pay-cost: <red>Failed to pay <value> to <player> due to insufficient funds <cost>!
+  error-add-wallet: <red>Failed to add <value> to <player>'s wallet!
+  error-withdraw-wallet: <red>Failed to withdraw <value> from <player>'s wallet!
+```
