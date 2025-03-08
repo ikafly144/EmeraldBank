@@ -20,9 +20,10 @@ All messages can be customized in `messages.yml`.
 - `/emeraldbank balance` Show your balance that count of emeralds you have.
 - `/emeraldbank balance <player>` Show other player's balance.
 - `/emeraldbank leaderboard` Show all player's balance in leaderboard.
-- `/emeraldbank pay <player> <count>` Pay emeralds to other online player.
+- `/emeraldbank pay <player> <count>` Pay emeralds to other player.
 - `/emeraldbank reload` Reload config and messages
 - `/emeraldbank wallet add <count>` Add emeralds to your wallet.
+- `/emeraldbank wallet add all` Add all emeralds to your wallet.
 - `/emeraldbank wallet withdraw <count>` Withdraw emeralds from your wallet.
 - `/emeraldbank wallet balance` Show your wallet balance.
 - `/emeraldbank bank account create <name>` Create a new bank account.
@@ -132,6 +133,33 @@ default-destination: INVENTORY
 
 #################################################################
 ##                                                              #
+##  Database                                                     #
+##                                                              #
+#################################################################
+database:
+  # The type of database to use.
+  # Change of database type will require a restart of the server.
+  # H2: H2 Database
+  # MYSQL: MySQL Database
+  type: H2
+
+  # The host of the database.
+  host: localhost
+
+  # The port of the database.
+  port: 3306
+
+  # The name of the database.
+  database: emeraldbank
+
+  # The username of the database.
+  username: root
+
+  # The password of the database.
+  password: password
+
+#################################################################
+##                                                              #
 ##  Messages                                                    #
 ##                                                              #
 #################################################################
@@ -155,9 +183,11 @@ messages:
   banking-remove-member: <green>Removed <player> from bank <bank>
   banking-list: '<green>Banks: <banks>'
   banking-members: '<green>Members of <bank>: <members>'
-  banking-transfer: <green>Transferred <bank> to <player>
+  banking-add-owner: <green>Added <player> as owner of bank <bank>!
+  banking-remove-owner: <green>Removed <player> as owner of bank <bank>!
   banking-send: <green>Sent <value> from <bank_from> to <bank_to>
   banking-pay: <green>Paid <value> from bank <bank> to <player>
+  offline-transaction: <green><value> has been moved to your balance while you were offline!
   wallet: '<green><player>''s Wallet: <value>'
   add-wallet: <green>Added <value> to <player>'s wallet!
   withdraw-wallet: <green>Withdrew <value> from <player>'s wallet!
@@ -176,7 +206,6 @@ messages:
   error-banking-add-member: <red>Failed to add <player> to bank <bank>!
   error-banking-remove-member: <red>Failed to remove <player> from bank <bank>!
   error-banking-delete-remaining: <red>Bank <bank> has a remaining balance of <value>!
-  error-banking-transfer: <red>Failed to transfer <bank> to <player>!
   error-banking-send: <red>Failed to send <value> from bank <bank_from> to bank <bank_to>!
   error-banking-pay: <red>Failed to pay <value> from bank <bank> to <player>!
   error-banking-remove-owner: <red><player> is the owner of bank <bank>!
@@ -190,5 +219,8 @@ messages:
   error-add-wallet: <red>Failed to add <value> to <player>'s wallet!
   error-withdraw-wallet: <red>Failed to withdraw <value> from <player>'s wallet!
   error-reload: <red>Failed to reload configuration and messages!
+  error-banking-remove-last-owner: <red>Failed to remove <player> as owner of bank <bank>!
+  error-banking-remove-last-member: <red>Failed to remove <player> as member of bank <bank>!
+  error-player-not-found: <red>Player <player> not found!
 
 ```

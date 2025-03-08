@@ -1,12 +1,14 @@
 package net.sabafly.emeraldbank.configuration;
 
 import net.sabafly.emeraldbank.configuration.type.IntOr;
+import net.sabafly.emeraldbank.database.Database;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
 
 @ConfigSerializable
-public class Config extends BaseConfig {
+public class Settings extends BaseConfig {
     public static final String HEADER = """
               ______                          _     _ ____              _   \s
              |  ____|                        | |   | |  _ \\            | |  \s
@@ -82,6 +84,58 @@ public class Config extends BaseConfig {
     @Comment("""
             ################################################################
             #                                                              #
+            #  Database                                                     #
+            #                                                              #
+            ################################################################
+            """)
+    public DatabaseSettings database = new DatabaseSettings();
+
+    @ConfigSerializable
+    public static class DatabaseSettings extends BaseConfig {
+
+        public DatabaseSettings() {
+        }
+
+        @Comment("""
+                The type of database to use.
+                Change of database type will require a restart of the server.
+                H2: H2 Database
+                MYSQL: MySQL Database
+                """)
+        public DatabaseType type = DatabaseType.H2;
+
+        public enum DatabaseType {
+            H2,
+            MYSQL
+        }
+
+        @Comment("The host of the database.")
+        public String host = "localhost";
+
+        @Comment("The port of the database.")
+        public int port = 3306;
+
+        @Comment("The name of the database.")
+        public String database = "emeraldbank";
+
+        @Comment("The username of the database.")
+        public String username = "root";
+
+        @Comment("The password of the database.")
+        public String password = "password";
+
+        public @NotNull Database createDatabase() {
+            return switch (type) {
+                case H2 -> new net.sabafly.emeraldbank.database.impl.H2();
+                case MYSQL -> new net.sabafly.emeraldbank.database.impl.MySQL();
+            };
+        }
+
+    }
+
+    @Comment("""
+            ################################################################
+            #                                                              #
             #  Messages                                                    #
             #                                                              #
             ################################################################
@@ -115,9 +169,12 @@ public class Config extends BaseConfig {
         public String bankingRemoveMember = "<green>Removed <player> from bank <bank>";
         public String bankingList = "<green>Banks: <banks>";
         public String bankingMembers = "<green>Members of <bank>: <members>";
-        public String bankingTransfer = "<green>Transferred <bank> to <player>";
+        public String bankingAddOwner = "<green>Added <player> as owner of bank <bank>!";
+        public String bankingRemoveOwner = "<green>Removed <player> as owner of bank <bank>!";
         public String bankingSend = "<green>Sent <value> from <bank_from> to <bank_to>";
         public String bankingPay = "<green>Paid <value> from bank <bank> to <player>";
+
+        public String offlineTransaction = "<green><value> has been moved to your balance while you were offline!";
 
         public String wallet = "<green><player>'s Wallet: <value>";
         public String addWallet = "<green>Added <value> to <player>'s wallet!";
@@ -139,7 +196,6 @@ public class Config extends BaseConfig {
         public String errorBankingAddMember = "<red>Failed to add <player> to bank <bank>!";
         public String errorBankingRemoveMember = "<red>Failed to remove <player> from bank <bank>!";
         public String errorBankingDeleteRemaining = "<red>Bank <bank> has a remaining balance of <value>!";
-        public String errorBankingTransfer = "<red>Failed to transfer <bank> to <player>!";
         public String errorBankingSend = "<red>Failed to send <value> from bank <bank_from> to bank <bank_to>!";
         public String errorBankingPay = "<red>Failed to pay <value> from bank <bank> to <player>!";
         public String errorBankingRemoveOwner = "<red><player> is the owner of bank <bank>!";
@@ -153,6 +209,9 @@ public class Config extends BaseConfig {
         public String errorAddWallet = "<red>Failed to add <value> to <player>'s wallet!";
         public String errorWithdrawWallet = "<red>Failed to withdraw <value> from <player>'s wallet!";
         public String errorReload = "<red>Failed to reload configuration and messages!";
+        public String errorBankingRemoveLastOwner = "<red>Failed to remove <player> as owner of bank <bank>!";
+        public String errorBankingRemoveLastMember = "<red>Failed to remove <player> as member of bank <bank>!";
+        public String errorPlayerNotFound = "<red>Player <player> not found!";
     }
 
 }

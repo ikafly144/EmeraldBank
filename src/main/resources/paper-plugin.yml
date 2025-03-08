@@ -4,9 +4,14 @@ authors:
 version: '${version}'
 main: net.sabafly.emeraldbank.EmeraldBank
 bootstrapper: net.sabafly.emeraldbank.EmeraldBootstrapper
+loader: net.sabafly.emeraldbank.EmeraldLoader
 api-version: '1.21'
 load: STARTUP
 dependencies:
+  bootstrap:
+    Essentials:
+      load: BEFORE
+      required: false
   server:
     Vault:
       load: BEFORE
@@ -15,6 +20,9 @@ dependencies:
       load: BEFORE
       required: true
     PlaceholderAPI:
+      load: BEFORE
+      required: false
+    Essentials:
       load: BEFORE
       required: false
 permissions:

@@ -2,7 +2,6 @@ package net.sabafly.emeraldbank.economy;
 
 import com.lishid.openinv.IOpenInv;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.Tag;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
@@ -10,7 +9,8 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
 import net.sabafly.emeraldbank.EmeraldBank;
-import net.sabafly.emeraldbank.configuration.Config;
+import net.sabafly.emeraldbank.bank.Bank;
+import net.sabafly.emeraldbank.configuration.Settings;
 import net.sabafly.emeraldbank.util.EmeraldUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -24,6 +24,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
+import static net.sabafly.emeraldbank.EmeraldBank.database;
+
+@Deprecated(forRemoval = true, since = "1.0.0")
 public class EmeraldEconomy implements Economy {
     @Override
     public boolean isEnabled() {
@@ -32,12 +35,12 @@ public class EmeraldEconomy implements Economy {
 
     @Override
     public String getName() {
-        return EmeraldBank.getInstance().getConfiguration().messages.name;
+        return EmeraldBank.getInstance().getSettings().messages.name;
     }
 
     @Override
     public boolean hasBankSupport() {
-        return EmeraldBank.getInstance().getConfiguration().banking.enabled && isEnabled();
+        return EmeraldBank.getInstance().getSettings().banking.enabled && isEnabled();
     }
 
     @Override
@@ -47,17 +50,17 @@ public class EmeraldEconomy implements Economy {
 
     @Override
     public String format(double v) {
-        return PlainTextComponentSerializer.plainText().serialize(MiniMessage.miniMessage().deserialize(EmeraldBank.getInstance().getConfiguration().messages.economyFormat, TagResolver.resolver("currency", Tag.inserting(MiniMessage.miniMessage().deserialize(v == 1 ? EmeraldBank.getInstance().getConfiguration().messages.currencyName : EmeraldBank.getInstance().getConfiguration().messages.currencyNamePlural))), TagResolver.resolver("value", Tag.inserting(Component.text((int) v)))));
+        return PlainTextComponentSerializer.plainText().serialize(MiniMessage.miniMessage().deserialize(EmeraldBank.getInstance().getSettings().messages.economyFormat, TagResolver.resolver("currency", Tag.inserting(MiniMessage.miniMessage().deserialize(v == 1 ? EmeraldBank.getInstance().getSettings().messages.currencyName : EmeraldBank.getInstance().getSettings().messages.currencyNamePlural))), TagResolver.resolver("value", Tag.inserting(Component.text((int) v)))));
     }
 
     @Override
     public String currencyNamePlural() {
-        return PlainTextComponentSerializer.plainText().serialize(MiniMessage.miniMessage().deserialize(EmeraldBank.getInstance().getConfiguration().messages.currencyNamePlural));
+        return PlainTextComponentSerializer.plainText().serialize(MiniMessage.miniMessage().deserialize(EmeraldBank.getInstance().getSettings().messages.currencyNamePlural));
     }
 
     @Override
     public String currencyNameSingular() {
-        return PlainTextComponentSerializer.plainText().serialize(MiniMessage.miniMessage().deserialize(EmeraldBank.getInstance().getConfiguration().messages.currencyName));
+        return PlainTextComponentSerializer.plainText().serialize(MiniMessage.miniMessage().deserialize(EmeraldBank.getInstance().getSettings().messages.currencyName));
     }
 
     @Override
@@ -186,7 +189,7 @@ public class EmeraldEconomy implements Economy {
         }
         Player player = Optional.ofNullable(Bukkit.getPlayer(offlinePlayer.getUniqueId())).orElseGet(() -> getOpenInv().loadPlayer(offlinePlayer));
         if (player == null) {
-            throw new IllegalArgumentException("Player not found (maybe OpenInv is old or disabled)");
+            return new EconomyResponse(0, getBalance(offlinePlayer), EconomyResponse.ResponseType.FAILURE, "Player not found");
         }
         int amount = (int) Math.ceil(v);
         for (ItemStack item : player.getInventory().getContents()) {
@@ -249,7 +252,7 @@ public class EmeraldEconomy implements Economy {
 
     public EconomyResponse depositPlayer(OfflinePlayer offlinePlayer, double v, boolean isWallet) {
         Player player = getOpenInv().loadPlayer(offlinePlayer);
-        if (isWallet && EmeraldBank.getInstance().getConfiguration().defaultDestination == Config.DefaultDestination.WALLET) {
+        if (isWallet && EmeraldBank.getInstance().getSettings().defaultDestination == Settings.DefaultDestination.WALLET) {
             return addWallet(offlinePlayer, v);
         }
         if (player == null) {
@@ -416,10 +419,6 @@ public class EmeraldEconomy implements Economy {
     }
 
 
-    public static @NotNull TextComponent formatCurrency(double balance) {
-        return Component.text(EmeraldBank.getInstance().getEconomy().format(balance));
-    }
-
     private static @NotNull BankAccount getAccountData(String account) {
         if (!isAccountValid(account)) {
             throw new IllegalArgumentException("Account does not exist");
@@ -457,6 +456,7 @@ public class EmeraldEconomy implements Economy {
                 .toList();
     }
 
+    @Deprecated(forRemoval = true)
     static @NotNull PersistentDataContainer getPDC() {
         final PersistentDataContainer container = EmeraldUtils.getWorld().getPersistentDataContainer();
         var pdc = container.get(ACCOUNTS_KEY, PersistentDataType.TAG_CONTAINER);
@@ -486,4 +486,32 @@ public class EmeraldEconomy implements Economy {
         return ((IOpenInv) Objects.requireNonNull(Bukkit.getServer().getPluginManager().getPlugin("OpenInv")));
     }
 
+    @Deprecated(forRemoval = true, since = "1.0.0")
+    public void migrate() {
+        getAccounts().forEach(account -> {
+            var oldBank = getAccountData(account);
+            double balance = oldBank.balance();
+            var bank = database().getBank(account).map(b -> {
+                b.deposit(balance);
+                return b;
+            }).orElse(new Bank(account, balance));
+            database().saveBank(bank);
+            database().addOwner(account, oldBank.owner().getUniqueId());
+            oldBank.members().forEach(uuid -> database().addMember(account, uuid));
+        });
+        EmeraldUtils.getWorld().getPersistentDataContainer().remove(ACCOUNTS_KEY);
+    }
+
+    @Deprecated(forRemoval = true, since = "1.0.0")
+    public void archive(Player player) {
+        player.getPersistentDataContainer().set(new NamespacedKey("emeraldbank", "archive_wallet"), PersistentDataType.DOUBLE, getWallet(player));
+        player.getPersistentDataContainer().remove(WALLET_KEY);
+    }
+
+    @Deprecated(forRemoval = true, since = "1.0.0")
+    public int migratePlayer(Player player) {
+        Double wallet = player.getPersistentDataContainer().get(WALLET_KEY, PersistentDataType.DOUBLE);
+        if (wallet == null) return 0;
+        return (int) (double) wallet;
+    }
 }

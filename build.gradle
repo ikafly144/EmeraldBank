@@ -7,11 +7,11 @@ plugins {
 }
 
 group = 'net.sabafly'
-version = '0.6.0'
+version = '1.0.0-alpha.1'
 
 repositories {
-    mavenCentral()
     mavenLocal()
+    mavenCentral()
     maven {
         url = 'https://jitpack.io'
     }
@@ -26,16 +26,35 @@ repositories {
     maven {
         url = 'https://repo.extendedclip.com/releases/'
     }
+    maven {
+        url = "https://repo.essentialsx.net/snapshots/"
+    }
 }
 
 dependencies {
+    compileOnly("com.h2database:h2:2.3.232")
+    compileOnly("com.mysql:mysql-connector-j:9.2.0")
+    implementation("com.zaxxer:HikariCP:6.2.1")
+    implementation("commons-dbutils:commons-dbutils:1.8.1")
     implementation 'org.spongepowered:configurate-yaml:4.2.0-SNAPSHOT'
-    compileOnly "com.github.MilkBowl:VaultAPI:1.7.1"
-    compileOnly 'me.clip:placeholderapi:2.11.6'
-    compileOnly 'com.github.Jikoo.OpenInv:openinvapi:5.1.4'
+
+    compileOnly("com.github.MilkBowl:VaultAPI:1.7.1") {
+        transitive = false
+    }
+    compileOnly('me.clip:placeholderapi:2.11.6') {
+        transitive = false
+    }
+    compileOnly('com.github.Jikoo.OpenInv:openinvapi:5.1.4') {
+        transitive = false
+    }
+    compileOnly("net.essentialsx:EssentialsX:2.21.0-SNAPSHOT") {
+        exclude(group: 'org.spigotmc', module: 'spigot-api')
+        transitive = false
+    }
+
     compileOnly 'org.projectlombok:lombok:1.18.32'
     annotationProcessor 'org.projectlombok:lombok:1.18.32'
-    paperweight.paperDevBundle("1.21.1-R0.1-SNAPSHOT")
+    paperweight.paperDevBundle("1.21.4-R0.1-SNAPSHOT")
 }
 
 def targetJavaVersion = 21
@@ -67,14 +86,23 @@ processResources {
 
 //noinspection UnnecessaryQualifiedReference
 tasks.named('shadowJar', com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
-    relocate('org.spongepowered.configurate', 'net.sabafly.configurate')
-    relocate('io.leangen.geantyref', 'net.sabafly.geantyref')
 
     archiveBaseName = 'EmeraldBank'
     archiveClassifier = ''
     archiveVersion = "${version}"
 
+    dependencies {
+        exclude(dependency("org.slf4j:slf4j-api"))
+        exclude(dependency("net.kyori:option"))
+    }
+
     minimize()
+
+    relocate('org.spongepowered.configurate', 'net.sabafly.configurate')
+    relocate('io.leangen.geantyref', 'net.sabafly.geantyref')
+
+    relocate("com.zaxxer.hikari", "net.sabafly.libs.com.zaxxer.hikari")
+    relocate("org.apache.commons.dbutils", "net.sabafly.libs.org.apache.commons.dbutils")
 }
 
 tasks.build {
@@ -87,6 +115,7 @@ tasks {
         downloadPlugins {
             github("Jikoo", "OpenInv", "5.1.6", "OpenInv.jar")
             github("MilkBowl", "Vault", "1.7.3", "Vault.jar")
+            url("https://ci.ender.zone/job/EssentialsX/lastSuccessfulBuild/artifact/jars/EssentialsX-2.21.0-dev+185-5bf158c.jar")
             url("https://download.luckperms.net/1570/bukkit/loader/LuckPerms-Bukkit-5.4.153.jar")
             url("https://ci.extendedclip.com/job/PlaceholderAPI/lastSuccessfulBuild/artifact/build/libs/PlaceholderAPI-2.11.7-DEV-200.jar")
         }

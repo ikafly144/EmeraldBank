@@ -24,12 +24,12 @@ public class ConfigurationLoader {
 
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    public static @NotNull Config loadConfig(Path path) throws ConfigurateException {
+    public static @NotNull Settings loadConfig(Path path) throws ConfigurateException {
         YamlConfigurationLoader loader = YamlConfigurationLoader.builder()
                 .defaultOptions(options -> options
                         .mapFactory(MapFactories.insertionOrdered())
                         .shouldCopyDefaults(true)
-                        .header(Config.HEADER)
+                        .header(Settings.HEADER)
                         .serializers(
                                 builder -> builder
                                         .register(IntOr.Default.SERIALIZER)
@@ -45,7 +45,7 @@ public class ConfigurationLoader {
         CommentedConfigurationNode node;
 
         if (Files.notExists(path)) {
-            node = loader.createNode(config -> config.set(Config.class, new Config()));
+            node = loader.createNode(config -> config.set(Settings.class, new Settings()));
         } else {
             node = loader.load();
         }
@@ -58,17 +58,17 @@ public class ConfigurationLoader {
             LOGGER.info("Updated configuration from {} to version {}", start, CURRENT_VERSION);
         }
 
-        Config config = node.get(Config.class, new Config());
+        Settings settings = node.get(Settings.class, new Settings());
 
-        loader.save(loader.createNode(c -> c.set(Config.class, config)));
-        return config;
+        loader.save(loader.createNode(c -> c.set(Settings.class, settings)));
+        return settings;
     }
 
     static final int CURRENT_VERSION = 0;
 
     static ConfigurationTransformation.Versioned transformer() {
         var builder = ConfigurationTransformation.versionedBuilder()
-                .versionKey(Config.VERSION_FIELD)
+                .versionKey(Settings.VERSION_FIELD)
                 .addVersion(0, initialTransform())
                 .build();
         Preconditions.checkState(builder.latestVersion() == CURRENT_VERSION, "Latest version is not current");

@@ -10,7 +10,7 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.argument.CustomArgumentType;
 import net.sabafly.emeraldbank.EmeraldBank;
-import net.sabafly.emeraldbank.economy.EmeraldEconomy;
+import net.sabafly.emeraldbank.bank.Economy;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -48,7 +48,7 @@ public class BankAccountArgumentType implements CustomArgumentType<String, Strin
         return builder.buildFuture();
     }
 
-    private static EmeraldEconomy getEconomy() {
+    private static Economy getEconomy() {
         return EmeraldBank.getInstance().getEconomy();
     }
 

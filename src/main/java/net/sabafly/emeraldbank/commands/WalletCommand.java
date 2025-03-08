@@ -7,9 +7,11 @@ import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
-import net.sabafly.emeraldbank.EmeraldBank;
+import net.sabafly.emeraldbank.bank.User;
+import net.sabafly.emeraldbank.util.PlayerInventoryUtils;
 import org.bukkit.entity.Player;
 
+import static net.sabafly.emeraldbank.EmeraldBank.database;
 import static net.sabafly.emeraldbank.util.EmeraldUtils.*;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -39,16 +41,30 @@ public class WalletCommand {
                                     if (!(context.getSource().getExecutor() instanceof Player player))
                                         throw net.minecraft.commands.CommandSourceStack.ERROR_NOT_PLAYER.create();
                                     final int amount = context.getArgument("amount", Integer.class);
-                                    var withdraw = EmeraldBank.getInstance().getEconomy().withdrawPlayer(player, amount, false);
-                                    if (!withdraw.transactionSuccess())
+                                    if (PlayerInventoryUtils.getEmeraldsAmount(player) < amount)
                                         throw createCommandException(getMessages().errorAddWallet, tagResolver("value", formatCurrency(amount)), tagResolver("player", player.name()));
-                                    var response = EmeraldBank.getInstance().getEconomy().addWallet(player, amount);
-                                    if (!response.transactionSuccess())
-                                        throw createCommandException(getMessages().errorAddWallet, tagResolver("value", formatCurrency(amount)), tagResolver("player", player.name()));
+                                    PlayerInventoryUtils.removeEmeralds(player, amount);
+                                    User user = database().getUser(player.getUniqueId());
+                                    user.addWallet(amount);
+                                    database().saveUser(user);
                                     context.getSource().getSender().sendMessage(deserializeMiniMessage(getMessages().addWallet, tagResolver("value", formatCurrency(amount)), tagResolver("player", player.name())));
-                                    return (int) response.amount;
+                                    return amount;
                                 })
                         )
+                        .then(Commands.literal("all")
+                                .requires(context -> context.getSender().hasPermission("emeraldbank.wallet.add"))
+                                .executes(context -> {
+                                    if (!(context.getSource().getExecutor() instanceof Player player))
+                                        throw net.minecraft.commands.CommandSourceStack.ERROR_NOT_PLAYER.create();
+                                    final int amount = PlayerInventoryUtils.getEmeraldsAmount(player);
+                                    PlayerInventoryUtils.removeEmeralds(player, amount);
+                                    User user = database().getUser(player.getUniqueId());
+                                    user.addWallet(amount);
+                                    database().saveUser(user);
+                                    context.getSource().getSender().sendMessage(deserializeMiniMessage(getMessages().addWallet, tagResolver("value", formatCurrency(amount)), tagResolver("player", player.name())));
+                                    return amount;
+                                })
+                                .build())
                         .build())
                 .then(Commands.literal("withdraw")
                         .requires(context -> context.getSender().hasPermission("emeraldbank.wallet.withdraw"))
@@ -57,15 +73,18 @@ public class WalletCommand {
                                 .executes(context -> {
                                     if (!(context.getSource().getExecutor() instanceof Player player))
                                         throw net.minecraft.commands.CommandSourceStack.ERROR_NOT_PLAYER.create();
-                                    final int amount = context.getArgument("amount", Integer.class);
-                                    var response = EmeraldBank.getInstance().getEconomy().removeWallet(player, amount);
-                                    if (!response.transactionSuccess())
+                                    int amount = context.getArgument("amount", Integer.class);
+                                    User user = database().getUser(player.getUniqueId());
+                                    if (user.getWallet() < amount)
                                         throw createCommandException(getMessages().errorWithdrawWallet, tagResolver("value", formatCurrency(amount)), tagResolver("player", player.name()));
-                                    var deposit = EmeraldBank.getInstance().getEconomy().depositPlayer(player, amount, false);
-                                    if (!deposit.transactionSuccess())
-                                        throw createCommandException(getMessages().errorWithdrawWallet, tagResolver("value", formatCurrency(amount)), tagResolver("player", player.name()));
+                                    user.removeWallet(amount);
+                                    // 余り
+                                    int remaining = PlayerInventoryUtils.addEmeralds(player, amount);
+                                    user.addWallet(remaining);
+                                    amount -= remaining;
+                                    database().saveUser(user);
                                     context.getSource().getSender().sendMessage(deserializeMiniMessage(getMessages().withdrawWallet, tagResolver("value", formatCurrency(amount)), tagResolver("player", player.name())));
-                                    return (int) response.amount;
+                                    return amount;
                                 })
                         )
                         .build())
@@ -73,7 +92,7 @@ public class WalletCommand {
     }
 
     static int printWallet(CommandContext<CommandSourceStack> context, Player player) {
-        final double balance = EmeraldBank.getInstance().getEconomy().getWallet(player);
+        final double balance = database().getUser(player.getUniqueId()).getWallet();
         context.getSource().getSender().sendMessage(deserializeMiniMessage(getMessages().wallet, tagResolver("player", player.name()), tagResolver("value", formatCurrency(balance))));
         return (int) balance;
     }

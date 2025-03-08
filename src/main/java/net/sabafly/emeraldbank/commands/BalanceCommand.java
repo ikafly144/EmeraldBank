@@ -9,7 +9,8 @@ import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSele
 import net.sabafly.emeraldbank.EmeraldBank;
 import org.bukkit.entity.Player;
 
-import static net.sabafly.emeraldbank.economy.EmeraldEconomy.formatCurrency;
+import static net.sabafly.emeraldbank.EmeraldBank.database;
+import static net.sabafly.emeraldbank.util.EmeraldUtils.formatCurrency;
 import static net.sabafly.emeraldbank.util.EmeraldUtils.*;
 import static net.sabafly.emeraldbank.util.EmeraldUtils.tagResolver;
 
@@ -37,7 +38,7 @@ public class BalanceCommand {
 
     static int printBalance(CommandContext<CommandSourceStack> context, Player player) {
         final double balance = EmeraldBank.getInstance().getEconomy().getBalance(player);
-        context.getSource().getSender().sendMessage(deserializeMiniMessage(getMessages().balance, tagResolver("player", player.name()), tagResolver("value", formatCurrency(balance)), tagResolver("wallet", formatCurrency(EmeraldBank.getInstance().getEconomy().getWallet(player)))));
+        context.getSource().getSender().sendMessage(deserializeMiniMessage(getMessages().balance, tagResolver("player", player.name()), tagResolver("value", formatCurrency(balance)), tagResolver("wallet", formatCurrency(database().getUser(player.getUniqueId()).getWallet()))));
         return (int) balance;
     }
 }

@@ -8,15 +8,23 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.Tag;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
+import net.sabafly.emeraldbank.bank.Economy;
+import net.sabafly.emeraldbank.bank.User;
 import net.sabafly.emeraldbank.commands.EmeraldCommands;
-import net.sabafly.emeraldbank.configuration.Config;
 import net.sabafly.emeraldbank.configuration.ConfigurationLoader;
+import net.sabafly.emeraldbank.configuration.Settings;
+import net.sabafly.emeraldbank.database.Database;
 import net.sabafly.emeraldbank.economy.EmeraldEconomy;
+import net.sabafly.emeraldbank.essentials.EssentialsAccess;
 import net.sabafly.emeraldbank.placeholder.EmeraldBankPlaceholderExpansion;
 import org.bukkit.Bukkit;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.configurate.ConfigurateException;
 
 import java.net.URI;
@@ -29,35 +37,84 @@ import java.nio.file.Path;
 import java.time.Duration;
 
 @SuppressWarnings("UnstableApiUsage")
-public final class EmeraldBank extends JavaPlugin {
+public final class EmeraldBank extends JavaPlugin implements Listener {
 
     @Getter
     private static Path dataDir;
     @Getter
-    private final EmeraldEconomy economy = new EmeraldEconomy();
+    private final Economy economy = new Economy();
+    private Database database;
+    @Nullable
+    private EssentialsAccess essentialsAccess = null;
 
     @Getter
-    private Config configuration;
+    private Settings settings;
 
     public EmeraldBank(@NotNull Path dataDir) {
         EmeraldBank.dataDir = dataDir;
     }
 
+    public static Settings config() {
+        return getInstance().getSettings();
+    }
+
+    public static Database database() {
+        return getInstance().database;
+    }
+
+    public static Economy economy() {
+        return getInstance().economy;
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        var player = event.getPlayer();
+        database().getUser(player.getUniqueId());
+
+        Bukkit.getScheduler().runTaskLater(this, () -> {
+            User user = database().getUser(player.getUniqueId());
+            user.notifyOfflineTransaction();
+            if (user.player().isPresent())
+                database().saveUser(user);
+        }, 20 * 10);
+    }
+
+    @Deprecated(forRemoval = true, since = "1.0.0")
+    private void migrate() {
+        Bukkit.getScheduler().runTask(this, () -> new EmeraldEconomy().migrate());
+    }
+
     @Override
     public void onDisable() {
         // Plugin shutdown logic
+        database.close();
         getComponentLogger().info(MiniMessage.miniMessage().deserialize("Disabled <version>", TagResolver.builder().tag("version", Tag.inserting(Component.text(getPluginMeta().getVersion()))).build()));
+    }
+
+    @Override
+    public void onLoad() {
+        if (getServer().getPluginManager().getPlugin("Essentials") != null) {
+            this.essentialsAccess = new EssentialsAccess();
+            essentialsAccess.load();
+            getSLF4JLogger().info("Detected Essentials plugin, enabling support for Essentials");
+        }
     }
 
     @Override
     public void onEnable() {
         loadConfiguration();
 
+        this.database = config().database.createDatabase();
+        this.database.setup();
+
+        migrate();
+
         if (getServer().getPluginManager().getPlugin("OpenInv") == null) {
             getComponentLogger().warn(MiniMessage.miniMessage().deserialize( "<red>Disabled due to no OpenInv dependency found!", TagResolver.empty()));
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
+
         if (!setupEconomy()) {
             getComponentLogger().warn(MiniMessage.miniMessage().deserialize("<red>Disabled due to no Vault dependency found!", TagResolver.empty()));
             getServer().getPluginManager().disablePlugin(this);
@@ -65,6 +122,10 @@ public final class EmeraldBank extends JavaPlugin {
         }
         if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new EmeraldBankPlaceholderExpansion(this).register();
+        }
+
+        if (essentialsAccess != null) {
+            essentialsAccess.enable(this);
         }
 
         getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, new EmeraldCommands());
@@ -93,12 +154,12 @@ public final class EmeraldBank extends JavaPlugin {
 
     public boolean loadConfiguration() {
         try {
-            this.configuration = ConfigurationLoader.loadConfig(dataDir.resolve("config.yml"));
+            this.settings = ConfigurationLoader.loadConfig(dataDir.resolve("config.yml"));
             return true;
         } catch (ConfigurateException e) {
             getSLF4JLogger().error("Failed to load configuration", e);
-            if (configuration == null) {
-                this.configuration = new Config();
+            if (settings == null) {
+                this.settings = new Settings();
                 getSLF4JLogger().warn("Using default configuration");
             }
             return false;

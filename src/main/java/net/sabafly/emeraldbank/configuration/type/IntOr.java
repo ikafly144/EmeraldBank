@@ -75,6 +75,11 @@ public interface IntOr {
             return value.getAsInt() < 0;
         }
 
+//        @Override
+//        protected @NotNull Object serialize(@NotNull AnnotatedType type, T item, @NotNull Predicate<Class<?>> typeSupported) {
+//            return serialize(item, typeSupported);
+//        }
+
         @Override
         protected @NotNull Object serialize(final T item, final @NotNull Predicate<Class<?>> typeSupported) {
             final OptionalInt value = item.value();

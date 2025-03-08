@@ -2,6 +2,7 @@ package net.sabafly.emeraldbank.placeholder;
 
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import net.sabafly.emeraldbank.EmeraldBank;
+import net.sabafly.emeraldbank.bank.User;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -9,6 +10,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.stream.Stream;
+
+import static net.sabafly.emeraldbank.EmeraldBank.database;
 
 @SuppressWarnings("UnstableApiUsage")
 public class EmeraldBankPlaceholderExpansion extends PlaceholderExpansion {
@@ -64,7 +67,7 @@ public class EmeraldBankPlaceholderExpansion extends PlaceholderExpansion {
             }
             if (params.startsWith("wallet_")) {
                 OfflinePlayer offlinePlayer = plugin.getServer().getOfflinePlayer(params.substring(7));
-                return plugin.getEconomy().format(plugin.getEconomy().getWallet(offlinePlayer));
+                return plugin.getEconomy().format(database().getUser(offlinePlayer.getUniqueId()).getWallet());
             }
             try {
                 if (params.startsWith("bank_balance_")) {
@@ -73,13 +76,13 @@ public class EmeraldBankPlaceholderExpansion extends PlaceholderExpansion {
                 }
                 if (params.startsWith("bank_owner_")) {
                     String bankName = params.substring(11);
-                    List<OfflinePlayer> members = plugin.getEconomy().getBankMembers(bankName);
-                    return members.isEmpty() ? "" : members.stream().filter(p -> plugin.getEconomy().isBankOwner(bankName, p).transactionSuccess()).findFirst().map(OfflinePlayer::getName).orElse("");
+                    List<User> members = database().getOwners(bankName);
+                    return members.isEmpty() ? "" : String.join(", ", members.stream().map(User::getName).toList());
                 }
                 if (params.startsWith("bank_members_")) {
                     String bankName = params.substring(13);
-                    List<OfflinePlayer> members = plugin.getEconomy().getBankMembers(bankName);
-                    return members.isEmpty() ? "" : members.stream().map(OfflinePlayer::getName).reduce((a, b) -> a + ", " + b).orElse(null);
+                    List<User> members = database().getMembers(bankName);
+                    return members.isEmpty() ? "" : String.join(", ", members.stream().map(User::getName).toList());
                 }
                 if (params.startsWith("bank_list")) {
                     List<String> banks = plugin.getEconomy().getBanks();
@@ -95,7 +98,7 @@ public class EmeraldBankPlaceholderExpansion extends PlaceholderExpansion {
                 return plugin.getEconomy().format(plugin.getEconomy().getBalance(player));
             }
             if (params.equals("wallet")) {
-                return plugin.getEconomy().format(plugin.getEconomy().getWallet(player));
+                return plugin.getEconomy().format(database().getUser(player.getUniqueId()).getWallet());
             }
             return null;
         } catch (Exception e) {

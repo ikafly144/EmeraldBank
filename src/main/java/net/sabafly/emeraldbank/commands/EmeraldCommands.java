@@ -30,9 +30,9 @@ public class EmeraldCommands implements LifecycleEventHandler<@NotNull Reloadabl
                                         .requires(context -> context.getSender().hasPermission("emeraldbank.reload"))
                                         .executes(context -> {
                                             if (EmeraldBank.getInstance().loadConfiguration())
-                                                context.getSource().getSender().sendMessage(MiniMessage.miniMessage().deserialize(EmeraldBank.getInstance().getConfiguration().messages.reload));
+                                                context.getSource().getSender().sendMessage(MiniMessage.miniMessage().deserialize(EmeraldBank.getInstance().getSettings().messages.reload));
                                             else
-                                                context.getSource().getSender().sendMessage(MiniMessage.miniMessage().deserialize(EmeraldBank.getInstance().getConfiguration().messages.errorReload));
+                                                context.getSource().getSender().sendMessage(MiniMessage.miniMessage().deserialize(EmeraldBank.getInstance().getSettings().messages.errorReload));
                                             return Command.SINGLE_SUCCESS;
                                         })
                                         .build()
@@ -56,7 +56,7 @@ public class EmeraldCommands implements LifecycleEventHandler<@NotNull Reloadabl
                                 WalletCommand.command()
                         )
                         .build(),
-                List.of("em", "embank", "emeraldbank")
+                List.of("em", "embank", "emeraldbank", "emerald")
         );
         commands.register(
                 BalanceCommand.command()
