@@ -7,7 +7,6 @@ import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.plugin.lifecycle.event.handler.LifecycleEventHandler;
 import io.papermc.paper.plugin.lifecycle.event.registrar.ReloadableRegistrarEvent;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.sabafly.emeraldbank.EmeraldBank;
 import net.sabafly.emeraldbank.bank.User;
 import org.jetbrains.annotations.NotNull;
@@ -16,6 +15,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import static net.kyori.adventure.text.minimessage.MiniMessage.miniMessage;
+import static net.sabafly.emeraldbank.EmeraldBank.config;
 import static net.sabafly.emeraldbank.EmeraldBank.database;
 import static net.sabafly.emeraldbank.util.EmeraldUtils.*;
 
@@ -31,9 +32,9 @@ public class EmeraldCommands implements LifecycleEventHandler<@NotNull Reloadabl
                                         .requires(context -> context.getSender().hasPermission("emeraldbank.reload"))
                                         .executes(context -> {
                                             if (EmeraldBank.getInstance().loadConfiguration())
-                                                context.getSource().getSender().sendMessage(MiniMessage.miniMessage().deserialize(EmeraldBank.getInstance().getSettings().messages.reload));
+                                                context.getSource().getSender().sendMessage(miniMessage().deserialize(config().messages.reload));
                                             else
-                                                context.getSource().getSender().sendMessage(MiniMessage.miniMessage().deserialize(EmeraldBank.getInstance().getSettings().messages.errorReload));
+                                                context.getSource().getSender().sendMessage(miniMessage().deserialize(config().messages.errorReload));
                                             return Command.SINGLE_SUCCESS;
                                         })
                                         .build()
@@ -81,7 +82,7 @@ public class EmeraldCommands implements LifecycleEventHandler<@NotNull Reloadabl
         for (@NotNull User user : offlinePlayers) {
             i++;
             var name = user.getName();
-            result.append(deserializeMiniMessage(getMessages().leaderboard, tagResolver("player", Component.text(name)), tagResolver("balance", formatCurrency(user.balance()))));
+            result.append(miniMessage().deserialize(getMessages().leaderboard, tagResolver("player", Component.text(name)), tagResolver("balance", formatCurrency(user.balance()))));
             if (i == offlinePlayers.size()) {
                 break;
             }

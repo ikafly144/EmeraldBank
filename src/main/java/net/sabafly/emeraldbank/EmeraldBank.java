@@ -42,13 +42,11 @@ public final class EmeraldBank extends JavaPlugin implements Listener {
 
     @Getter
     private static Path dataDir;
-    @Getter
     private final Economy economy = new Economy();
     private Database database;
     @Nullable
     private EssentialsAccess essentialsAccess = null;
 
-    @Getter
     private Settings settings;
 
     public EmeraldBank(@NotNull Path dataDir) {
@@ -56,7 +54,7 @@ public final class EmeraldBank extends JavaPlugin implements Listener {
     }
 
     public static Settings config() {
-        return getInstance().getSettings();
+        return getInstance().settings;
     }
 
     public static Database database() {

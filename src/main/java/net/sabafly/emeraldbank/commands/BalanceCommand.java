@@ -6,10 +6,11 @@ import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
-import net.sabafly.emeraldbank.EmeraldBank;
 import org.bukkit.entity.Player;
 
+import static net.kyori.adventure.text.minimessage.MiniMessage.miniMessage;
 import static net.sabafly.emeraldbank.EmeraldBank.database;
+import static net.sabafly.emeraldbank.EmeraldBank.economy;
 import static net.sabafly.emeraldbank.util.EmeraldUtils.formatCurrency;
 import static net.sabafly.emeraldbank.util.EmeraldUtils.*;
 import static net.sabafly.emeraldbank.util.EmeraldUtils.tagResolver;
@@ -37,8 +38,8 @@ public class BalanceCommand {
     }
 
     static int printBalance(CommandContext<CommandSourceStack> context, Player player) {
-        final double balance = EmeraldBank.getInstance().getEconomy().getBalance(player);
-        context.getSource().getSender().sendMessage(deserializeMiniMessage(getMessages().balance, tagResolver("player", player.name()), tagResolver("value", formatCurrency(balance)), tagResolver("wallet", formatCurrency(database().getUser(player.getUniqueId()).getWallet()))));
+        final double balance = economy().getBalance(player);
+        context.getSource().getSender().sendMessage(miniMessage().deserialize(getMessages().balance, tagResolver("player", player.name()), tagResolver("value", formatCurrency(balance)), tagResolver("wallet", formatCurrency(database().getUser(player.getUniqueId()).getWallet()))));
         return (int) balance;
     }
 }

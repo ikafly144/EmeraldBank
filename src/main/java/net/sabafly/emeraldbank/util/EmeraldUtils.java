@@ -7,12 +7,10 @@ import io.papermc.paper.command.brigadier.MessageComponentSerializer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.Tag;
 import net.kyori.adventure.text.minimessage.tag.TagPattern;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.sabafly.emeraldbank.EmeraldBank;
-import net.sabafly.emeraldbank.bank.Economy;
 import net.sabafly.emeraldbank.configuration.Settings;
 import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
@@ -22,34 +20,30 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
+import static net.kyori.adventure.text.minimessage.MiniMessage.miniMessage;
+import static net.sabafly.emeraldbank.EmeraldBank.config;
+import static net.sabafly.emeraldbank.EmeraldBank.economy;
+
 @SuppressWarnings("UnstableApiUsage")
 public class EmeraldUtils {
     public static Settings.Messages getMessages() {
-        return EmeraldBank.getInstance().getSettings().messages;
-    }
-
-    public static Economy getEconomy() {
-        return EmeraldBank.getInstance().getEconomy();
+        return config().messages;
     }
 
     public static boolean depositPlayer(OfflinePlayer account, double amount) {
-        return getEconomy().depositPlayer(account, amount).transactionSuccess();
+        return economy().depositPlayer(account, amount).transactionSuccess();
     }
 
     public static boolean withdrawPlayer(Player account, double amount) {
-        return getEconomy().withdrawPlayer(account, amount).transactionSuccess();
+        return economy().withdrawPlayer(account, amount).transactionSuccess();
     }
 
     public static boolean payPlayer(Player from, OfflinePlayer to, double amount, int cost) {
         return withdrawPlayer(from, amount) && depositPlayer(to, amount - cost);
     }
 
-    public static Component deserializeMiniMessage(String message, TagResolver... resolvers) {
-        return MiniMessage.miniMessage().deserialize(message, resolvers);
-    }
-
     public static Message serializeBrigadierMessage(String message, TagResolver... resolvers) {
-        return MessageComponentSerializer.message().serialize(deserializeMiniMessage(message, resolvers));
+        return MessageComponentSerializer.message().serialize(miniMessage().deserialize(message, resolvers));
     }
 
     public static CommandSyntaxException createCommandException(String message, TagResolver... resolvers) {
@@ -70,6 +64,6 @@ public class EmeraldUtils {
     }
 
     public static @NotNull TextComponent formatCurrency(double balance) {
-        return Component.text(EmeraldBank.getInstance().getEconomy().format(balance));
+        return Component.text(economy().format(balance));
     }
 }

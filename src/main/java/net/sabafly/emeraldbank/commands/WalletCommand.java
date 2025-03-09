@@ -11,6 +11,7 @@ import net.sabafly.emeraldbank.bank.User;
 import net.sabafly.emeraldbank.util.PlayerInventoryUtils;
 import org.bukkit.entity.Player;
 
+import static net.kyori.adventure.text.minimessage.MiniMessage.miniMessage;
 import static net.sabafly.emeraldbank.EmeraldBank.database;
 import static net.sabafly.emeraldbank.util.EmeraldUtils.*;
 
@@ -47,7 +48,7 @@ public class WalletCommand {
                                     User user = database().getUser(player.getUniqueId());
                                     user.addWallet(amount);
                                     database().saveUser(user);
-                                    context.getSource().getSender().sendMessage(deserializeMiniMessage(getMessages().addWallet, tagResolver("value", formatCurrency(amount)), tagResolver("player", player.name())));
+                                    context.getSource().getSender().sendMessage(miniMessage().deserialize(getMessages().addWallet, tagResolver("value", formatCurrency(amount)), tagResolver("player", player.name())));
                                     return amount;
                                 })
                         )
@@ -61,7 +62,7 @@ public class WalletCommand {
                                     User user = database().getUser(player.getUniqueId());
                                     user.addWallet(amount);
                                     database().saveUser(user);
-                                    context.getSource().getSender().sendMessage(deserializeMiniMessage(getMessages().addWallet, tagResolver("value", formatCurrency(amount)), tagResolver("player", player.name())));
+                                    context.getSource().getSender().sendMessage(miniMessage().deserialize(getMessages().addWallet, tagResolver("value", formatCurrency(amount)), tagResolver("player", player.name())));
                                     return amount;
                                 })
                                 .build())
@@ -83,7 +84,7 @@ public class WalletCommand {
                                     user.addWallet(remaining);
                                     amount -= remaining;
                                     database().saveUser(user);
-                                    context.getSource().getSender().sendMessage(deserializeMiniMessage(getMessages().withdrawWallet, tagResolver("value", formatCurrency(amount)), tagResolver("player", player.name())));
+                                    context.getSource().getSender().sendMessage(miniMessage().deserialize(getMessages().withdrawWallet, tagResolver("value", formatCurrency(amount)), tagResolver("player", player.name())));
                                     return amount;
                                 })
                         )
@@ -93,7 +94,7 @@ public class WalletCommand {
 
     static int printWallet(CommandContext<CommandSourceStack> context, Player player) {
         final double balance = database().getUser(player.getUniqueId()).getWallet();
-        context.getSource().getSender().sendMessage(deserializeMiniMessage(getMessages().wallet, tagResolver("player", player.name()), tagResolver("value", formatCurrency(balance))));
+        context.getSource().getSender().sendMessage(miniMessage().deserialize(getMessages().wallet, tagResolver("player", player.name()), tagResolver("value", formatCurrency(balance))));
         return (int) balance;
     }
 
