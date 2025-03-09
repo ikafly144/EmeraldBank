@@ -1,12 +1,15 @@
 # EmeraldBank - A Simple Emerald Economy Plugin
 
 A simple and lightweight economics plugin using Emerald.
-All messages can be customized in `messages.yml`.
+All messages and configurations are customizable in `config.yml`.
 
-## Requires
+## Dependencies
 
-- [Paper](https://papermc.io/) `1.21.x` only supported
+- [Paper](https://papermc.io/) (Recommended using latest version.)
 - [Vault](https://github.com/MilkBowl/Vault/releases)
+
+### Optional Dependencies
+
 - [OpenInv](https://github.com/Jikoo/OpenInv/releases)
 
 ## Commands
@@ -30,7 +33,8 @@ All messages can be customized in `messages.yml`.
 - `/emeraldbank bank account delete <bank>` Close the specified bank account.
 - `/emeraldbank bank account add <bank> <player>` Add a member that can access the bank account.
 - `/emeraldbank bank account remove <bank> <player>` Remove a member from the bank account.
-- `/emeraldbank bank account transfer <bank> <player>` Change the bank owner to other player.
+- `/emeraldbank bank account addowner <bank> <player>` Add a owner that can manage the bank account.
+- `/emeraldbank bank account removeowner <bank> <player>` Remove a owner from the bank account.
 - `/emeraldbank bank account list` Show all bank accounts.
 - `/emeraldbank bank account list <bank>` Show all members of bank.
 - `/emeraldbank bank balance <bank>` Show bank balance.
@@ -96,7 +100,7 @@ All messages can be customized in `messages.yml`.
 # DO NOT CHANGE THIS VALUE!
 config_version: 0
 
-# The cost for creating a bank.
+# The cost for paying a player.
 pay-cost: disabled
 
 #################################################################
@@ -130,6 +134,11 @@ banking:
 # INVENTORY: The player's inventory.
 # WALLET: The player's wallet.
 default-destination: INVENTORY
+
+# Load offline players' inventories.
+# This setting requires OpenInv (https://github.com/Jikoo/OpenInv).
+# Change of this setting will require a restart of the server.
+load-offline-players-inventories: false
 
 #################################################################
 ##                                                              #

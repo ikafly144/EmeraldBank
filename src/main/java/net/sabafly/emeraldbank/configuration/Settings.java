@@ -25,7 +25,7 @@ public class Settings extends BaseConfig {
     @Comment("DO NOT CHANGE THIS VALUE!")
     public int version = ConfigurationLoader.CURRENT_VERSION;
 
-    @Comment("The cost for creating a bank.")
+    @Comment("The cost for paying a player.")
     public IntOr.Disabled payCost = IntOr.Disabled.DISABLED;
 
     @Comment("""
@@ -80,6 +80,13 @@ public class Settings extends BaseConfig {
         INVENTORY,
         WALLET
     }
+
+    @Comment("""
+            Load offline players' inventories.
+            This setting requires OpenInv (https://github.com/Jikoo/OpenInv).
+            Change of this setting will require a restart of the server.
+            """)
+    public boolean loadOfflinePlayersInventories = false;
 
     @Comment("""
             ################################################################

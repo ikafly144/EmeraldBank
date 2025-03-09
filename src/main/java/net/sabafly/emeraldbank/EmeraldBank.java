@@ -15,7 +15,8 @@ import net.sabafly.emeraldbank.configuration.ConfigurationLoader;
 import net.sabafly.emeraldbank.configuration.Settings;
 import net.sabafly.emeraldbank.database.Database;
 import net.sabafly.emeraldbank.economy.EmeraldEconomy;
-import net.sabafly.emeraldbank.essentials.EssentialsAccess;
+import net.sabafly.emeraldbank.external.EssentialsAccess;
+import net.sabafly.emeraldbank.external.OpenInvAccess;
 import net.sabafly.emeraldbank.placeholder.EmeraldBankPlaceholderExpansion;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
@@ -109,11 +110,8 @@ public final class EmeraldBank extends JavaPlugin implements Listener {
 
         migrate();
 
-        if (getServer().getPluginManager().getPlugin("OpenInv") == null) {
-            getComponentLogger().warn(MiniMessage.miniMessage().deserialize( "<red>Disabled due to no OpenInv dependency found!", TagResolver.empty()));
-            getServer().getPluginManager().disablePlugin(this);
-            return;
-        }
+        if (config().loadOfflinePlayersInventories)
+            OpenInvAccess.load();
 
         if (!setupEconomy()) {
             getComponentLogger().warn(MiniMessage.miniMessage().deserialize("<red>Disabled due to no Vault dependency found!", TagResolver.empty()));

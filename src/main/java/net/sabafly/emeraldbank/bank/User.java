@@ -5,6 +5,7 @@ import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import net.sabafly.emeraldbank.configuration.Settings;
 import net.sabafly.emeraldbank.economy.EmeraldEconomy;
+import net.sabafly.emeraldbank.external.OpenInvAccess;
 import net.sabafly.emeraldbank.util.PlayerInventoryUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -59,7 +60,7 @@ public class User {
     }
 
     public Optional<Player> player() {
-        return Optional.ofNullable(Bukkit.getPlayer(uuid));
+        return Optional.ofNullable(OpenInvAccess.getOpenInvPlayer(Bukkit.getOfflinePlayer(uuid)));
     }
 
     public int balance() {

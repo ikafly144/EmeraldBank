@@ -1,4 +1,4 @@
-package net.sabafly.emeraldbank.essentials;
+package net.sabafly.emeraldbank.external;
 
 import com.earth2me.essentials.economy.EconomyLayer;
 import com.earth2me.essentials.economy.EconomyLayers;

@@ -18,7 +18,7 @@ dependencies:
       required: true
     OpenInv:
       load: BEFORE
-      required: true
+      required: false
     PlaceholderAPI:
       load: BEFORE
       required: false

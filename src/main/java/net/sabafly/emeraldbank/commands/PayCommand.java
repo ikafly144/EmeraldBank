@@ -15,6 +15,7 @@ import org.bukkit.entity.Player;
 
 import java.util.Optional;
 
+import static net.sabafly.emeraldbank.EmeraldBank.database;
 import static net.sabafly.emeraldbank.util.EmeraldUtils.*;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -32,7 +33,7 @@ public class PayCommand {
                                                             final String target = context.getArgument("target", String.class);
                                                             if (!(context.getSource().getExecutor() instanceof Player player))
                                                                 throw net.minecraft.commands.CommandSourceStack.ERROR_NOT_PLAYER.create();
-                                                            if (!Bukkit.getOfflinePlayer(target).hasPlayedBefore())
+                                                            if (!database().existsUser(Bukkit.getOfflinePlayer(target).getUniqueId()))
                                                                 throw createCommandException(getMessages().errorPlayerNotFound, tagResolver("player", Component.text(target)));
                                                             final int amount = context.getArgument("amount", Integer.class);
                                                             return pay(context, amount, player, Bukkit.getOfflinePlayer(target));
@@ -46,7 +47,7 @@ public class PayCommand {
                                                             final String target = context.getArgument("target", String.class);
                                                             if (!(context.getSource().getExecutor() instanceof Player player))
                                                                 throw net.minecraft.commands.CommandSourceStack.ERROR_NOT_PLAYER.create();
-                                                            if (!Bukkit.getOfflinePlayer(target).hasPlayedBefore())
+                                                            if (!database().existsUser(Bukkit.getOfflinePlayer(target).getUniqueId()))
                                                                 throw createCommandException(getMessages().errorPlayerNotFound, tagResolver("player", Component.text(target)));
                                                             final int amount = (int) EmeraldBank.getInstance().getEconomy().getBalance(player);
                                                             return pay(context, amount, player, Bukkit.getOfflinePlayer(target));

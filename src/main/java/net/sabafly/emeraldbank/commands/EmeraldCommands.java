@@ -9,13 +9,14 @@ import io.papermc.paper.plugin.lifecycle.event.registrar.ReloadableRegistrarEven
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.sabafly.emeraldbank.EmeraldBank;
-import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
+import net.sabafly.emeraldbank.bank.User;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
+import static net.sabafly.emeraldbank.EmeraldBank.database;
 import static net.sabafly.emeraldbank.util.EmeraldUtils.*;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -75,15 +76,12 @@ public class EmeraldCommands implements LifecycleEventHandler<@NotNull Reloadabl
     static int printLeaderboard(CommandContext<CommandSourceStack> context) {
         var result = Component.text();
         int i =0;
-        var offlinePlayers = new ArrayList<>(List.of(Bukkit.getServer().getOfflinePlayers()));
-        offlinePlayers.sort((o1, o2) -> Double.compare(getEconomy().getBalance(o2), getEconomy().getBalance(o1)));
-        for (@NotNull OfflinePlayer offlinePlayer : offlinePlayers) {
+        var offlinePlayers = new ArrayList<>(database().getUsers());
+        offlinePlayers.sort(Comparator.comparingDouble(User::balance));
+        for (@NotNull User user : offlinePlayers) {
             i++;
-            var name = offlinePlayer.getName();
-            if (name == null) {
-                name = offlinePlayer.getUniqueId().toString();
-            }
-            result.append(deserializeMiniMessage(getMessages().leaderboard, tagResolver("player", Component.text(name)), tagResolver("balance", formatCurrency(getEconomy().getBalance(offlinePlayer)))));
+            var name = user.getName();
+            result.append(deserializeMiniMessage(getMessages().leaderboard, tagResolver("player", Component.text(name)), tagResolver("balance", formatCurrency(user.balance()))));
             if (i == offlinePlayers.size()) {
                 break;
             }
