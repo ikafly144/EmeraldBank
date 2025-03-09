@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Deprecated
 public class BankAccount {
     public static final NamespacedKey BALANCE_KEY = new NamespacedKey(EmeraldBank.getInstance(), "balance");
     public static final NamespacedKey MEMBERS_KEY = new NamespacedKey(EmeraldBank.getInstance(), "members");

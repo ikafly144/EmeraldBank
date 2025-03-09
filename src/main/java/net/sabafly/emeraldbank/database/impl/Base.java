@@ -41,14 +41,6 @@ public abstract class Base implements Database {
             )
             """;
 
-    //TODO: Implement bank invites
-//    private final String CREATE_TABLE_BANK_INVITES = """
-//            CREATE TABLE IF NOT EXISTS emeraldbank_bank_invites (
-//                bank VARCHAR(36) NOT NULL REFERENCES emeraldbank_banks(name) ON DELETE CASCADE,
-//                member VARCHAR(36) NOT NULL REFERENCES emeraldbank_users(uuid) ON DELETE CASCADE
-//            )
-//            """;
-
 //    private final String CREATE_TABLE_TRANSACTIONS = """
 //            CREATE TABLE IF NOT EXISTS emeraldbank_transactions (
 //                id SERIAL PRIMARY KEY,
