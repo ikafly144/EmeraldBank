@@ -44,7 +44,7 @@ public class PlayerInventoryUtils {
             }
         }
 
-        return false;
+        return remain <= 0;
     }
 
     public static int addEmeralds(Player player, final int amount) {

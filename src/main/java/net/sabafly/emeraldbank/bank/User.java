@@ -25,7 +25,6 @@ public class User {
 
     @Getter
     private final @NotNull UUID uuid;
-    @Getter
     private double wallet;
     @Setter
     @Getter
@@ -47,9 +46,7 @@ public class User {
     }
 
     public void onSave() {
-        player().ifPresent(player -> {
-            new EmeraldEconomy().archive(player);
-        });
+        player().ifPresent(player -> new EmeraldEconomy().archive(player));
     }
 
     public void notifyOfflineTransaction() {
@@ -83,17 +80,17 @@ public class User {
         }
 
         return player().map(p -> {
-            double remain = amount;
+            int remain = (int) Math.ceil(amount);
             if (useWalletFirst && wallet > 0 && getEmeraldsAmount(p) + wallet >= amount) {
+                remain -= (int) wallet;
                 wallet = 0;
-                remain -= wallet;
             } else if (!useWalletFirst && getEmeraldsAmount(p) < amount) {
                 removeWallet(getEmeraldsAmount(p));
                 remain -= getEmeraldsAmount(p);
                 wallet -= remain;
                 return true;
             }
-            return removeEmeralds(p, (int) Math.ceil(remain));
+            return removeEmeralds(p, remain);
         }).orElseGet(()-> {
             if (offlineTransaction == null) {
                 offlineTransaction = 0.0;
@@ -129,4 +126,9 @@ public class User {
     public void removeWallet(int amount) {
         wallet -= amount;
     }
+
+    public double wallet() {
+        return wallet;
+    }
+
 }

@@ -39,7 +39,7 @@ public class BalanceCommand {
 
     static int printBalance(CommandContext<CommandSourceStack> context, Player player) {
         final double balance = economy().getBalance(player);
-        context.getSource().getSender().sendMessage(miniMessage().deserialize(getMessages().balance, tagResolver("player", player.name()), tagResolver("value", formatCurrency(balance)), tagResolver("wallet", formatCurrency(database().getUser(player.getUniqueId()).getWallet()))));
+        context.getSource().getSender().sendMessage(miniMessage().deserialize(getMessages().balance, tagResolver("player", player.name()), tagResolver("value", formatCurrency(balance)), tagResolver("wallet", formatCurrency(database().getUser(player.getUniqueId()).wallet()))));
         return (int) balance;
     }
 }

@@ -135,7 +135,7 @@ public class Economy extends VaultEconomy {
     @Override
     public EconomyResponse bankBalance(String name) {
         return database().getBank(name)
-                .map(bank -> createResponse(bank.getBalance(), bank.getBalance(), true))
+                .map(bank -> createResponse(bank.balance(), bank.balance(), true))
                 .orElseGet(() -> new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, "Bank does not exist"));
     }
 
@@ -152,9 +152,9 @@ public class Economy extends VaultEconomy {
             return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, "Bank does not exist");
         }
         final var bankAccount = bank.get();
-        final double balance = bankAccount.withdraw(amount);
+        amount = bankAccount.withdraw(amount);
         database().saveBank(bankAccount);
-        return createResponse(amount, balance, true);
+        return createResponse(amount, bankAccount.balance(), true);
     }
 
     @Override
@@ -166,7 +166,7 @@ public class Economy extends VaultEconomy {
         final var bankAccount = bank.get();
         bankAccount.deposit(amount);
         database().saveBank(bankAccount);
-        return createResponse(amount, bankAccount.getBalance(), true);
+        return createResponse(amount, bankAccount.balance(), true);
     }
 
     @Override
@@ -181,7 +181,7 @@ public class Economy extends VaultEconomy {
 
     @Override
     public List<String> getBanks() {
-        return database().getBanks().stream().map(Bank::getName).toList();
+        return database().getBanks().stream().map(Bank::name).toList();
     }
 
     @Override

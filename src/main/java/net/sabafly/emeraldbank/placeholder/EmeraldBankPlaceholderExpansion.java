@@ -68,7 +68,7 @@ public class EmeraldBankPlaceholderExpansion extends PlaceholderExpansion {
             }
             if (params.startsWith("wallet_")) {
                 OfflinePlayer offlinePlayer = plugin.getServer().getOfflinePlayer(params.substring(7));
-                return economy().format(database().getUser(offlinePlayer.getUniqueId()).getWallet());
+                return economy().format(database().getUser(offlinePlayer.getUniqueId()).wallet());
             }
             try {
                 if (params.startsWith("bank_balance_")) {
@@ -99,7 +99,7 @@ public class EmeraldBankPlaceholderExpansion extends PlaceholderExpansion {
                 return economy().format(economy().getBalance(player));
             }
             if (params.equals("wallet")) {
-                return economy().format(database().getUser(player.getUniqueId()).getWallet());
+                return economy().format(database().getUser(player.getUniqueId()).wallet());
             }
             return null;
         } catch (Exception e) {

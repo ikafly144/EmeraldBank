@@ -1,13 +1,10 @@
 package net.sabafly.emeraldbank.bank;
 
-import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
 public class Bank {
 
-    @Getter
     private final String name;
-    @Getter
     private double balance;
 
     public Bank(@NotNull String name, double balance) {
@@ -27,4 +24,11 @@ public class Bank {
         return amount;
     }
 
+    public double balance() {
+        return balance;
+    }
+
+    public String name() {
+        return name;
+    }
 }

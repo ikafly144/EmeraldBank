@@ -89,8 +89,8 @@ public abstract class Base implements Database {
         try (Connection connection = getConnection()) {
             user.onSave();
             runner.update(connection, "INSERT INTO emeraldbank_users (uuid, balance, use_wallet_first, offline_transaction) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE balance = ?, use_wallet_first = ?, offline_transaction = ?",
-                    user.getUuid().toString(), user.getWallet(), user.isUseWalletFirst(), user.getOfflineTransaction(),
-                    user.getWallet(), user.isUseWalletFirst(), user.getOfflineTransaction()
+                    user.getUuid().toString(), user.wallet(), user.isUseWalletFirst(), user.getOfflineTransaction(),
+                    user.wallet(), user.isUseWalletFirst(), user.getOfflineTransaction()
             );
         } catch (Exception e) {
             e.printStackTrace();
@@ -132,7 +132,7 @@ public abstract class Base implements Database {
     public void saveBank(@NotNull Bank bank) {
         try (Connection connection = getConnection()) {
             runner.update(connection, "INSERT INTO emeraldbank_banks (name, balance) VALUES (?, ?) ON DUPLICATE KEY UPDATE balance = ?",
-                    bank.getName(), bank.getBalance(), bank.getBalance());
+                    bank.name(), bank.balance(), bank.balance());
         } catch (Exception e) {
             e.printStackTrace();
         }

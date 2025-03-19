@@ -76,7 +76,7 @@ public class WalletCommand {
                                         throw net.minecraft.commands.CommandSourceStack.ERROR_NOT_PLAYER.create();
                                     int amount = context.getArgument("amount", Integer.class);
                                     User user = database().getUser(player.getUniqueId());
-                                    if (user.getWallet() < amount)
+                                    if (user.wallet() < amount)
                                         throw createCommandException(getMessages().errorWithdrawWallet, tagResolver("value", formatCurrency(amount)), tagResolver("player", player.name()));
                                     user.removeWallet(amount);
                                     // 余り
@@ -93,7 +93,7 @@ public class WalletCommand {
     }
 
     static int printWallet(CommandContext<CommandSourceStack> context, Player player) {
-        final double balance = database().getUser(player.getUniqueId()).getWallet();
+        final double balance = database().getUser(player.getUniqueId()).wallet();
         context.getSource().getSender().sendMessage(miniMessage().deserialize(getMessages().wallet, tagResolver("player", player.name()), tagResolver("value", formatCurrency(balance))));
         return (int) balance;
     }
