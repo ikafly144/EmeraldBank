@@ -101,6 +101,12 @@ public final class EmeraldBank extends JavaPlugin implements Listener {
 
     @Override
     public void onEnable() {
+        if (!ServerBuildInfo.buildInfo().isBrandCompatible(ServerBuildInfo.BRAND_PAPER_ID)) {
+            getSLF4JLogger().error("This plugin is not compatible with {} server", ServerBuildInfo.buildInfo().brandName());
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
+
         loadConfiguration();
 
         this.database = config().database.createDatabase();
@@ -165,7 +171,7 @@ public final class EmeraldBank extends JavaPlugin implements Listener {
     private void updateCheck() {
         getSLF4JLogger().info("Checking for updates");
         try (var client = HttpClient.newHttpClient()) {
-            var param = URLEncoder.encode("loaders=[\"paper\"]&game_versions=[\"" + ServerBuildInfo.buildInfo().minecraftVersionId() + "\"]", StandardCharsets.UTF_8);
+            var param = URLEncoder.encode("featured=true&loaders=[\"paper\"]&game_versions=[\"" + ServerBuildInfo.buildInfo().minecraftVersionId() + "\"]", StandardCharsets.UTF_8);
             var uri = URI.create("https://api.modrinth.com/v2/project/fPQBnIe2/version?" + param);
             var request = HttpRequest.newBuilder()
                     .uri(uri)
@@ -177,13 +183,11 @@ public final class EmeraldBank extends JavaPlugin implements Listener {
                         // .[0].version_number
                         var version = ((java.util.List<?>) raw).getFirst();
                         var versionNumber = ((java.util.Map<?, ?>) version).get("version_number");
-                        if (getPluginMeta().getVersion().equals(versionNumber)) {
-                            getSLF4JLogger().info("You are running the latest version");
-                        } else {
+                        if (!getPluginMeta().getVersion().equals(versionNumber)) {
                             getSLF4JLogger().info("A new version is available");
+                            getSLF4JLogger().info("Latest version: {}", versionNumber);
+                            getSLF4JLogger().info("Current version: {}", getPluginMeta().getVersion());
                         }
-                        getSLF4JLogger().info("Latest version: {}", versionNumber);
-                        getSLF4JLogger().info("Current version: {}", getPluginMeta().getVersion());
                     }).join();
         } catch (Exception e) {
             getSLF4JLogger().error("Failed to check for updates: {}", e.getLocalizedMessage());

@@ -5,12 +5,26 @@ All messages and configurations are customizable in `config.yml`.
 
 ## Dependencies
 
-- [Paper](https://papermc.io/) (Recommended using latest version.)
+- [Paper](https://papermc.io/)
 - [Vault](https://github.com/MilkBowl/Vault/releases)
 
 ### Optional Dependencies
 
 - [OpenInv](https://github.com/Jikoo/OpenInv/releases)
+
+## MC Version Policy
+
+EmeraldBank basically supports latest version of Minecraft.
+However, we will support the previous version for a while.
+We will not support the version that is no longer supported by PaperMC.
+The following table shows the support status of each version.
+
+| Version       | Support                        |
+|---------------|--------------------------------|
+| 1.21.5        | ✅ Active support               |
+| 1.21.4        | ✅ Active support               |
+| 1.21 ~ 1.21.3 | 🔁 May work, but not supported |
+| < 1.20.X      | 🚧 No longer supported         |
 
 ## Commands
 
