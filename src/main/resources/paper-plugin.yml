@@ -45,6 +45,7 @@ permissions:
       emeraldbank.balance.all: true
       emeraldbank.wallet.balance.all: true
       emeraldbank.reload: true
+      emeraldbank.currency.rate.set: true
       emeraldbank.default:
         default: true
         description: Allows the player to use the EmeraldBank command
@@ -78,3 +79,14 @@ permissions:
               emeraldbank.banking.balance: true
               emeraldbank.banking.send: true
               emeraldbank.banking.pay: true
+          emeraldbank.currency:
+            default: true
+            description: Allows the player to use the EmeraldBank command
+            children:
+              emeraldbank.currency.rate:
+                default: true
+                description: Allows the player to use the EmeraldBank command
+                children:
+                  emeraldbank.currency.rate.get: true
+              emeraldbank.currency.exchange: true
+              emeraldbank.currency.exchange.*: true

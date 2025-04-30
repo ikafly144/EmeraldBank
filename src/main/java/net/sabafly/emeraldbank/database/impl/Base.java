@@ -87,7 +87,6 @@ public abstract class Base implements Database {
     @Override
     public void saveUser(@NotNull User user) {
         try (Connection connection = getConnection()) {
-            user.onSave();
             runner.update(connection, "INSERT INTO emeraldbank_users (uuid, balance, use_wallet_first, offline_transaction) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE balance = ?, use_wallet_first = ?, offline_transaction = ?",
                     user.getUuid().toString(), user.wallet(), user.isUseWalletFirst(), user.getOfflineTransaction(),
                     user.wallet(), user.isUseWalletFirst(), user.getOfflineTransaction()

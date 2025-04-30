@@ -8,12 +8,13 @@ import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
 import net.sabafly.emeraldbank.bank.User;
-import net.sabafly.emeraldbank.util.PlayerInventoryUtils;
 import org.bukkit.entity.Player;
 
 import static net.kyori.adventure.text.minimessage.MiniMessage.miniMessage;
+import static net.sabafly.emeraldbank.EmeraldBank.config;
 import static net.sabafly.emeraldbank.EmeraldBank.database;
 import static net.sabafly.emeraldbank.util.EmeraldUtils.*;
+import static net.sabafly.emeraldbank.util.PlayerInventoryUtils.*;
 
 @SuppressWarnings("UnstableApiUsage")
 public class WalletCommand {
@@ -42,9 +43,9 @@ public class WalletCommand {
                                     if (!(context.getSource().getExecutor() instanceof Player player))
                                         throw net.minecraft.commands.CommandSourceStack.ERROR_NOT_PLAYER.create();
                                     final int amount = context.getArgument("amount", Integer.class);
-                                    if (PlayerInventoryUtils.getEmeraldsAmount(player) < amount)
+                                    if (getCurrencyCount(player, config().getDefaultCurrency()) < amount)
                                         throw createCommandException(getMessages().errorAddWallet, tagResolver("value", formatCurrency(amount)), tagResolver("player", player.name()));
-                                    PlayerInventoryUtils.removeEmeralds(player, amount);
+                                    removeCurrency(player, config().getDefaultCurrency(), amount);
                                     User user = database().getUser(player.getUniqueId());
                                     user.addWallet(amount);
                                     database().saveUser(user);
@@ -57,13 +58,13 @@ public class WalletCommand {
                                 .executes(context -> {
                                     if (!(context.getSource().getExecutor() instanceof Player player))
                                         throw net.minecraft.commands.CommandSourceStack.ERROR_NOT_PLAYER.create();
-                                    final int amount = PlayerInventoryUtils.getEmeraldsAmount(player);
-                                    PlayerInventoryUtils.removeEmeralds(player, amount);
+                                    final int count = getCurrencyCount(player, config().getDefaultCurrency());
+                                    removeCurrency(player, config().getDefaultCurrency(), count);
                                     User user = database().getUser(player.getUniqueId());
-                                    user.addWallet(amount);
+                                    user.addWallet(count);
                                     database().saveUser(user);
-                                    context.getSource().getSender().sendMessage(miniMessage().deserialize(getMessages().addWallet, tagResolver("value", formatCurrency(amount)), tagResolver("player", player.name())));
-                                    return amount;
+                                    context.getSource().getSender().sendMessage(miniMessage().deserialize(getMessages().addWallet, tagResolver("value", formatCurrency(count)), tagResolver("player", player.name())));
+                                    return count;
                                 })
                                 .build())
                         .build())
@@ -80,7 +81,7 @@ public class WalletCommand {
                                         throw createCommandException(getMessages().errorWithdrawWallet, tagResolver("value", formatCurrency(amount)), tagResolver("player", player.name()));
                                     user.removeWallet(amount);
                                     // 余り
-                                    int remaining = PlayerInventoryUtils.addEmeralds(player, amount);
+                                    int remaining = addCurrency(player, config().getDefaultCurrency(), amount);
                                     user.addWallet(remaining);
                                     amount -= remaining;
                                     database().saveUser(user);

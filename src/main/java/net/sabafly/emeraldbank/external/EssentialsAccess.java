@@ -66,9 +66,10 @@ public class EssentialsAccess {
             return "EmeraldBank";
         }
 
+        @SuppressWarnings("UnstableApiUsage")
         @Override
         public String getPluginVersion() {
-            return plugin.getDescription().getVersion();
+            return plugin.getPluginMeta().getVersion();
         }
 
         @Override

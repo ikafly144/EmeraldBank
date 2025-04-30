@@ -4,9 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import net.sabafly.emeraldbank.configuration.Settings;
-import net.sabafly.emeraldbank.economy.EmeraldEconomy;
 import net.sabafly.emeraldbank.external.OpenInvAccess;
-import net.sabafly.emeraldbank.util.PlayerInventoryUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -18,8 +16,7 @@ import java.util.UUID;
 import static net.kyori.adventure.text.minimessage.MiniMessage.miniMessage;
 import static net.sabafly.emeraldbank.EmeraldBank.config;
 import static net.sabafly.emeraldbank.util.EmeraldUtils.tagResolver;
-import static net.sabafly.emeraldbank.util.PlayerInventoryUtils.getEmeraldsAmount;
-import static net.sabafly.emeraldbank.util.PlayerInventoryUtils.removeEmeralds;
+import static net.sabafly.emeraldbank.util.PlayerInventoryUtils.*;
 
 public class User {
 
@@ -37,21 +34,11 @@ public class User {
         this.wallet = wallet;
         this.useWalletFirst = useWalletFirst;
         this.offlineTransaction = offlineTransaction;
-        migrate();
-    }
-
-    @Deprecated(since = "1.0.0", forRemoval = true)
-    private void migrate() {
-        player().ifPresent(player -> addWallet(new EmeraldEconomy().migratePlayer(player)));
-    }
-
-    public void onSave() {
-        player().ifPresent(player -> new EmeraldEconomy().archive(player));
     }
 
     public void notifyOfflineTransaction() {
         if (offlineTransaction != null) {
-            player().ifPresent(player -> player.sendMessage(miniMessage().deserialize(config().messages.offlineTransaction, tagResolver("value", Component.text(offlineTransaction)))));
+            player().ifPresent(player -> player.sendMessage(miniMessage().deserialize(config().messages.offlineTransaction, tagResolver("value", Component.text(Math.abs(offlineTransaction))))));
             offlineTransaction = null;
         }
     }
@@ -61,57 +48,57 @@ public class User {
     }
 
     public int balance() {
-        return player().map(PlayerInventoryUtils::getEmeraldsAmount).orElse(0) + (int) wallet;
+        return player().map(p -> getCurrencyCount(p, config().getDefaultCurrency())).orElse(0) + (int) wallet;
     }
 
     /**
      * @return true if the transaction was successful
      */
-    public boolean withdraw(final double amount) {
-        if (amount <= 0) {
+    public boolean withdraw(final double count) {
+        if (count <= 0) {
             return false;
         }
-        if (balance() < Math.ceil(amount)) {
+        if (balance() < Math.ceil(count)) {
             return false;
         }
-        if (useWalletFirst && wallet >= amount) {
-            wallet -= amount;
+        if (isOffline()) {
+            this.offlineTransaction = (this.offlineTransaction == null ? 0.0 : this.offlineTransaction) - count;
+        }
+        if (useWalletFirst && wallet >= count) {
+            wallet -= count;
             return true;
         }
 
         return player().map(p -> {
-            int remain = (int) Math.ceil(amount);
-            if (useWalletFirst && wallet > 0 && getEmeraldsAmount(p) + wallet >= amount) {
+            int remain = (int) Math.ceil(count);
+            if (useWalletFirst && wallet > 0 && getCurrencyCount(p, config().getDefaultCurrency()) + wallet >= count) {
                 remain -= (int) wallet;
                 wallet = 0;
-            } else if (!useWalletFirst && getEmeraldsAmount(p) < amount) {
-                removeWallet(getEmeraldsAmount(p));
-                remain -= getEmeraldsAmount(p);
+            } else if (!useWalletFirst && getCurrencyCount(p, config().getDefaultCurrency()) < count) {
+                removeWallet(getCurrencyCount(p, config().getDefaultCurrency()));
+                remain -= getCurrencyCount(p, config().getDefaultCurrency());
                 wallet -= remain;
                 return true;
             }
-            return removeEmeralds(p, remain);
-        }).orElseGet(()-> {
-            if (offlineTransaction == null) {
-                offlineTransaction = 0.0;
-            }
-            this.offlineTransaction += amount;
-            return false;
-        });
+            return removeCurrency(p, config().getDefaultCurrency(), remain);
+        }).orElse(false);
     }
 
-    public void deposit(double amount) {
+    public void deposit(double count) {
+        if (isOffline()) {
+            this.offlineTransaction = (this.offlineTransaction == null ? 0.0 : this.offlineTransaction) + count;
+        }
         if (config().defaultDestination == Settings.DefaultDestination.WALLET) {
-            wallet += amount;
+            wallet += count;
             return;
         }
         player().ifPresentOrElse(p -> {
-            var items = PlayerInventoryUtils.addEmeralds(p, (int) Math.floor(amount));
+            var items = addCurrency(p, config().getDefaultCurrency(), (int) Math.floor(count));
             if (items == 0) {
                 return;
             }
             wallet += items;
-        }, () -> wallet += amount);
+        }, () -> wallet += count);
     }
 
     public @NotNull String getName() {
@@ -129,6 +116,10 @@ public class User {
 
     public double wallet() {
         return wallet;
+    }
+
+    public boolean isOffline() {
+        return player().map(Player::isOnline).orElse(false);
     }
 
 }

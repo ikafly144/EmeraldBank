@@ -2,8 +2,11 @@ package net.sabafly.emeraldbank.configuration;
 
 import com.google.common.base.Preconditions;
 import net.sabafly.emeraldbank.EmeraldBank;
+import net.sabafly.emeraldbank.configuration.serializer.NamespacedKeySerializer;
+import net.sabafly.emeraldbank.configuration.type.DoubleOr;
 import net.sabafly.emeraldbank.configuration.type.IntOr;
 import net.sabafly.emeraldbank.util.LogUtils;
+import org.bukkit.NamespacedKey;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.spongepowered.configurate.CommentedConfigurationNode;
@@ -25,23 +28,7 @@ public class ConfigurationLoader {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     public static @NotNull Settings loadConfig(Path path) throws ConfigurateException {
-        YamlConfigurationLoader loader = YamlConfigurationLoader.builder()
-                .defaultOptions(options -> options
-                        .mapFactory(MapFactories.insertionOrdered())
-                        .shouldCopyDefaults(true)
-                        .header(Settings.HEADER)
-                        .serializers(
-                                builder -> builder
-                                        .register(IntOr.Default.SERIALIZER)
-                                        .register(IntOr.Disabled.SERIALIZER)
-                                        .build()
-                        )
-                )
-                .indent(2)
-                .nodeStyle(NodeStyle.BLOCK)
-                .headerMode(HeaderMode.PRESET)
-                .path(path)
-                .build();
+        YamlConfigurationLoader loader=defaultLoader(path);
         CommentedConfigurationNode node;
 
         if (Files.notExists(path)) {
@@ -62,6 +49,36 @@ public class ConfigurationLoader {
 
         loader.save(loader.createNode(c -> c.set(Settings.class, settings)));
         return settings;
+    }
+
+    public static void saveConfig(Path path, Settings settings) throws ConfigurateException {
+        YamlConfigurationLoader loader = defaultLoader(path);
+
+        CommentedConfigurationNode node = loader.createNode(c -> c.set(Settings.class, settings));
+        loader.save(node);
+    }
+
+    private static YamlConfigurationLoader defaultLoader(Path path) {
+        return YamlConfigurationLoader.builder()
+                .defaultOptions(options -> options
+                        .mapFactory(MapFactories.insertionOrdered())
+                        .shouldCopyDefaults(true)
+                        .header(Settings.HEADER)
+                        .serializers(
+                                builder -> builder
+                                        .register(IntOr.Default.SERIALIZER)
+                                        .register(IntOr.Disabled.SERIALIZER)
+                                        .register(DoubleOr.Default.SERIALIZER)
+                                        .register(DoubleOr.Disabled.SERIALIZER)
+                                        .register(NamespacedKey.class, new NamespacedKeySerializer())
+                                        .build()
+                        )
+                )
+                .indent(2)
+                .nodeStyle(NodeStyle.BLOCK)
+                .headerMode(HeaderMode.PRESET)
+                .path(path)
+                .build();
     }
 
     static final int CURRENT_VERSION = 0;

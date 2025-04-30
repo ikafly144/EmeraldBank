@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import io.papermc.paper.ServerBuildInfo;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import lombok.Getter;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.Tag;
@@ -14,10 +15,10 @@ import net.sabafly.emeraldbank.commands.EmeraldCommands;
 import net.sabafly.emeraldbank.configuration.ConfigurationLoader;
 import net.sabafly.emeraldbank.configuration.Settings;
 import net.sabafly.emeraldbank.database.Database;
-import net.sabafly.emeraldbank.economy.EmeraldEconomy;
 import net.sabafly.emeraldbank.external.EssentialsAccess;
 import net.sabafly.emeraldbank.external.OpenInvAccess;
 import net.sabafly.emeraldbank.placeholder.EmeraldBankPlaceholderExpansion;
+import net.sabafly.emeraldbank.util.LogUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -57,6 +58,15 @@ public final class EmeraldBank extends JavaPlugin implements Listener {
         return getInstance().settings;
     }
 
+    public static void setConfig(Settings settings) {
+        EmeraldBank.getInstance().settings = settings;
+        try {
+            ConfigurationLoader.saveConfig(dataDir.resolve("config.yml"), settings);
+        } catch (ConfigurateException e) {
+            LogUtils.getLogger().error("Could not save config", e);
+        }
+    }
+
     public static Database database() {
         return getInstance().database;
     }
@@ -78,11 +88,6 @@ public final class EmeraldBank extends JavaPlugin implements Listener {
         }, 20 * 10);
     }
 
-    @Deprecated(forRemoval = true, since = "1.0.0")
-    private void migrate() {
-        Bukkit.getScheduler().runTask(this, () -> new EmeraldEconomy().migrate());
-    }
-
     @Override
     public void onDisable() {
         // Plugin shutdown logic
@@ -101,7 +106,7 @@ public final class EmeraldBank extends JavaPlugin implements Listener {
 
     @Override
     public void onEnable() {
-        if (!ServerBuildInfo.buildInfo().isBrandCompatible(ServerBuildInfo.BRAND_PAPER_ID)) {
+        if (!ServerBuildInfo.buildInfo().isBrandCompatible(Key.key("papermc","paper"))) {
             getSLF4JLogger().error("This plugin is not compatible with {} server", ServerBuildInfo.buildInfo().brandName());
             getServer().getPluginManager().disablePlugin(this);
             return;
@@ -111,8 +116,6 @@ public final class EmeraldBank extends JavaPlugin implements Listener {
 
         this.database = config().database.createDatabase();
         this.database.setup();
-
-        migrate();
 
         if (config().loadOfflinePlayersInventories)
             OpenInvAccess.load();

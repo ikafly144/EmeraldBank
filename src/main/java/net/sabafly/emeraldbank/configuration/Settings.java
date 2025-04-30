@@ -1,12 +1,21 @@
 package net.sabafly.emeraldbank.configuration;
 
+import com.google.common.base.Preconditions;
+import net.sabafly.emeraldbank.configuration.type.DoubleOr;
 import net.sabafly.emeraldbank.configuration.type.IntOr;
 import net.sabafly.emeraldbank.database.Database;
+import org.bukkit.NamespacedKey;
+import org.bukkit.inventory.ItemType;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
+import org.spongepowered.configurate.objectmapping.meta.Required;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
 
+import java.util.HashMap;
+import java.util.Map;
+
+@SuppressWarnings("UnstableApiUsage")
 @ConfigSerializable
 public class Settings extends BaseConfig {
     public static final String HEADER = """
@@ -36,6 +45,12 @@ public class Settings extends BaseConfig {
             ################################################################
             """)
     public Banking banking = new Banking();
+
+    public @NotNull Currency getCurrency(@NotNull NamespacedKey currency) {
+        Preconditions.checkNotNull(currency, "Currency cannot be null");
+        Preconditions.checkState(currencies.containsKey(currency), "Currency %s not found", currency);
+        return currencies.get(currency);
+    }
 
     @ConfigSerializable
     public static class Banking extends BaseConfig {
@@ -87,6 +102,86 @@ public class Settings extends BaseConfig {
             Change of this setting will require a restart of the server.
             """)
     public boolean loadOfflinePlayersInventories = false;
+
+    public @NotNull Currency getDefaultCurrency() {
+        return currencies.values().stream().filter(c -> c.defaultCurrency).findFirst().orElse(currencies.values().stream().findFirst().orElseThrow());
+    }
+
+    @Comment("""
+            Enable or disable the exchange feature.
+            
+            WARNING: This setting is experimental feature.
+            This setting may change in the future.
+            """)
+    public boolean exchangeEnabled = false;
+
+    @Comment("""
+            ################################################################
+            #                                                              #
+            #  Currencies                                                  #
+            #                                                              #
+            ################################################################
+            
+            The currencies used in the plugin.
+            
+            WARNING: Changing this setting is experimental feature.
+            This setting may change in the future.
+            You should not change this setting unless you know what you are doing.
+            """)
+    public @NotNull Map<NamespacedKey, @NotNull Currency> currencies;
+
+    {
+        var emerald = new Currency();
+        emerald.name = "Emerald";
+        emerald.namePlural = "Emeralds";
+        emerald.defaultCurrency = true;
+        emerald.rate = 1;
+        emerald.itemType = ItemType.EMERALD.getKey();
+        emerald.children = new HashMap<>();
+        emerald.children.put(ItemType.EMERALD_BLOCK.getKey(), 9);
+        this.currencies = new HashMap<>();
+        this.currencies.put(emerald.itemType, emerald);
+    }
+
+    @ConfigSerializable
+    public static class Currency extends BaseConfig {
+        @Comment("The name of the currency.")
+        @Required
+        public String name = "Emerald";
+
+        @Comment("The plural name of the currency.")
+        @Required
+        public String namePlural = "Emeralds";
+
+        @Comment("Use this currency as the default currency.")
+        public boolean defaultCurrency = false;
+
+        @Comment("The rate of the currency.")
+        public double rate = 1;
+
+        @NotNull
+        @Comment("The item type of the currency.")
+        public NamespacedKey itemType = ItemType.EMERALD.getKey();
+
+        @Comment("The children item type and rate of the currency.")
+        public @NotNull Map<@NotNull NamespacedKey, @NotNull Integer> children = new HashMap<>();
+
+        @Comment("The cost for exchanging.")
+        public DoubleOr.Disabled cost = DoubleOr.Disabled.DISABLED;
+
+        @Override
+        public String toString() {
+            return "Currency{" +
+                    "name='" + name + '\'' +
+                    ", namePlural='" + namePlural + '\'' +
+                    ", defaultCurrency=" + defaultCurrency +
+                    ", rate=" + rate +
+                    ", itemType=" + itemType +
+                    ", children=" + children +
+                    ", cost=" + cost +
+                    '}';
+        }
+    }
 
     @Comment("""
             ################################################################
@@ -164,6 +259,14 @@ public class Settings extends BaseConfig {
 
         public String leaderboard = "<player>: <balance>";
 
+        public String rateValue = "rate: <value>";
+        public String rateValueOfCurrency = "<green>Rate of <currency>: <value>";
+        public String setRate = "<green>Set rate of <currency> to <value>";
+        public String exchangeRate = "<green>Exchange rate: 1 <currency> = <value> <target>";
+        public String exchangeCost = "<green>Exchange cost: <cost> <currency>";
+        public String exchangeReceive = "<green>Estimated exchange amount: <value> <currency>";
+        public String exchangeStart = "<green>Exchanging <value> <currency> to <target>";
+
         public String paySuccess = "<green>Successfully paid <value> to <player>";
         public String errorPay = "<red>Failed to pay <value> to <player>";
         public String errorPaySelf = "<red>You cannot pay yourself!";
@@ -219,6 +322,11 @@ public class Settings extends BaseConfig {
         public String errorBankingRemoveLastOwner = "<red>Failed to remove <player> as owner of bank <bank>!";
         public String errorBankingRemoveLastMember = "<red>Failed to remove <player> as member of bank <bank>!";
         public String errorPlayerNotFound = "<red>Player <player> not found!";
+        public String errorSameCurrency = "<red>You cannot exchange the same currency <currency>!";
+        public String errorCurrencyNotFound = "<red>Currency not found!";
+        public String errorNotEnoughCurrency = "<red>You do not have <value> of <currency> to pay!";
+        public String errorNoPermission = "<red>You do not have permission to do this!";
+        public String errorExchangeTooLow = "<red>Exchange amount is too low!";
     }
 
 }
