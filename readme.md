@@ -154,6 +154,47 @@ default-destination: INVENTORY
 # Change of this setting will require a restart of the server.
 load-offline-players-inventories: false
 
+# Enable or disable the exchange feature.
+
+# WARNING: This setting is experimental feature.
+# This setting may change in the future.
+exchange-enabled: false
+
+#################################################################
+##                                                              #
+##  Currencies                                                  #
+##                                                              #
+#################################################################
+
+# The currencies used in the plugin.
+
+# WARNING: Changing this setting is experimental feature.
+# This setting may change in the future.
+# You should not change this setting unless you know what you are doing.
+currencies:
+  emerald:
+    # The name of the currency.
+    name: Emerald
+
+    # The plural name of the currency.
+    name-plural: Emeralds
+
+    # Use this currency as the default currency.
+    default-currency: true
+
+    # The rate of the currency.
+    rate: 1.0
+
+    # The item type of the currency.
+    item-type: emerald
+
+    # The children item type and rate of the currency.
+    children:
+      emerald_block: 9
+
+    # The cost for exchanging.
+    cost: disabled
+
 #################################################################
 ##                                                              #
 ##  Database                                                     #
@@ -195,6 +236,13 @@ messages:
   balance: '<green><player>''s Balance: <value> (Wallet: <wallet>)'
   balance-bank: '<green><bank>''s Balance: <value>'
   leaderboard: '<player>: <balance>'
+  rate-value: 'rate: <value>'
+  rate-value-of-currency: '<green>Rate of <currency>: <value>'
+  set-rate: <green>Set rate of <currency> to <value>
+  exchange-rate: '<green>Exchange rate: 1 <currency> = <value> <target>'
+  exchange-cost: '<green>Exchange cost: <cost> <currency>'
+  exchange-receive: '<green>Estimated exchange amount: <value> <currency>'
+  exchange-start: <green>Exchanging <value> <currency> to <target>
   pay-success: <green>Successfully paid <value> to <player>
   error-pay: <red>Failed to pay <value> to <player>
   error-pay-self: <red>You cannot pay yourself!
@@ -245,5 +293,10 @@ messages:
   error-banking-remove-last-owner: <red>Failed to remove <player> as owner of bank <bank>!
   error-banking-remove-last-member: <red>Failed to remove <player> as member of bank <bank>!
   error-player-not-found: <red>Player <player> not found!
+  error-same-currency: <red>You cannot exchange the same currency <currency>!
+  error-currency-not-found: <red>Currency not found!
+  error-not-enough-currency: <red>You do not have <value> of <currency> to pay!
+  error-no-permission: <red>You do not have permission to do this!
+  error-exchange-too-low: <red>Exchange amount is too low!
 
 ```
