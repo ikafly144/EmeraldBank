@@ -119,7 +119,7 @@ The following table shows the support status of each version.
 #                                                                 
 
 # DO NOT CHANGE THIS VALUE!
-config_version: 0
+config_version: 1
 
 # The cost for paying a player.
 pay-cost: disabled
@@ -238,8 +238,6 @@ messages:
   name: EmeraldBank
   reload: <green>Reloaded configuration and messages
   economy-format: <value> <green><currency></green>
-  currency-name: Emerald
-  currency-name-plural: Emeralds
   balance: '<green><player>''s Balance: <value> (Wallet: <wallet>)'
   balance-bank: '<green><bank>''s Balance: <value>'
   leaderboard: '<player>: <balance>'
