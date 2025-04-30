@@ -47,8 +47,8 @@ The following table shows the support status of each version.
 - `/emeraldbank bank account delete <bank>` Close the specified bank account.
 - `/emeraldbank bank account add <bank> <player>` Add a member that can access the bank account.
 - `/emeraldbank bank account remove <bank> <player>` Remove a member from the bank account.
-- `/emeraldbank bank account addowner <bank> <player>` Add a owner that can manage the bank account.
-- `/emeraldbank bank account removeowner <bank> <player>` Remove a owner from the bank account.
+- `/emeraldbank bank account addowner <bank> <player>` Add an owner that can manage the bank account.
+- `/emeraldbank bank account removeowner <bank> <player>` Remove an owner from the bank account.
 - `/emeraldbank bank account list` Show all bank accounts.
 - `/emeraldbank bank account list <bank>` Show all members of bank.
 - `/emeraldbank bank balance <bank>` Show bank balance.
@@ -62,7 +62,7 @@ The following table shows the support status of each version.
 - `emeraldbank.admin`
     - `emeraldbank.balance.all`
     - `emeraldbank.reload`
-    - `emeraldbank.bypass`
+    - `emeraldbank.currency.rate.set`
 - `emeraldbank.bypass`
     - `emeraldbank.bypass.cost`
     - `emeraldbank.bypass.deposit`
@@ -87,6 +87,13 @@ The following table shows the support status of each version.
     - `emeraldbank.banking.account.remove`
     - `emeraldbank.banking.account.list`
     - `emeraldbank.banking.account.transfer`
+- `emeraldbank.currency`
+  - `emeraldbank.currency.rate`
+  - `emeraldbank.currency.exchange`
+  - `emeraldbank.currency.exchange.<currency>`
+  - `emeraldbank.currency.exchange.*`
+- `emeraldbank.currency.rate` 
+  - `emeraldbank.currency.rate.get`
 
 ## Placeholders
 
@@ -300,3 +307,18 @@ messages:
   error-exchange-too-low: <red>Exchange amount is too low!
 
 ```
+
+---
+
+## Change Log
+
+### 1.1.0
+
+- Currencies are now modifiable in `config.yml` (experimental feature)
+- Added support for multiple currencies (experimental feature)
+- Added support for exchange rates (experimental feature)
+- Removed data migration feature for pre 1.0.0 versions (aka `0.X.X` versions)
+
+### 1.0.0
+
+- Initial release

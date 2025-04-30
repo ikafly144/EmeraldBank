@@ -48,12 +48,12 @@ public class Economy extends VaultEconomy {
 
     @Override
     public String currencyNamePlural() {
-        return config().messages.currencyNamePlural;
+        return config().getDefaultCurrency().namePlural;
     }
 
     @Override
     public String currencyNameSingular() {
-        return config().messages.currencyName;
+        return config().getDefaultCurrency().name;
     }
 
     @Override

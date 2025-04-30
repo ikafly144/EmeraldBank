@@ -128,9 +128,15 @@ public class Settings extends BaseConfig {
             This setting may change in the future.
             You should not change this setting unless you know what you are doing.
             """)
-    public @NotNull Map<NamespacedKey, @NotNull Currency> currencies;
+    public @NotNull Map<@NotNull NamespacedKey, @NotNull Currency> currencies;
 
     {
+        final var emerald = defaultCurrency();
+        this.currencies = new HashMap<>();
+        this.currencies.put(emerald.itemType, emerald);
+    }
+
+    static @NotNull Currency defaultCurrency() {
         var emerald = new Currency();
         emerald.name = "Emerald";
         emerald.namePlural = "Emeralds";
@@ -139,8 +145,7 @@ public class Settings extends BaseConfig {
         emerald.itemType = ItemType.EMERALD.getKey();
         emerald.children = new HashMap<>();
         emerald.children.put(ItemType.EMERALD_BLOCK.getKey(), 9);
-        this.currencies = new HashMap<>();
-        this.currencies.put(emerald.itemType, emerald);
+        return emerald;
     }
 
     @ConfigSerializable
@@ -251,8 +256,6 @@ public class Settings extends BaseConfig {
         public String reload = "<green>Reloaded configuration and messages";
 
         public String economyFormat = "<value> <green><currency></green>";
-        public String currencyName = "Emerald";
-        public String currencyNamePlural = "Emeralds";
 
         public String balance = "<green><player>'s Balance: <value> (Wallet: <wallet>)";
         public String balanceBank = "<green><bank>'s Balance: <value>";

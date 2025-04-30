@@ -22,6 +22,8 @@ import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ConfigurationLoader {
 
@@ -81,18 +83,34 @@ public class ConfigurationLoader {
                 .build();
     }
 
-    static final int CURRENT_VERSION = 0;
+    static final int CURRENT_VERSION = 1;
 
     static ConfigurationTransformation.Versioned transformer() {
         var builder = ConfigurationTransformation.versionedBuilder()
                 .versionKey(Settings.VERSION_FIELD)
-                .addVersion(0, initialTransform())
+                .addVersion(0, transform0())
+                .addVersion(1, transform1())
                 .build();
         Preconditions.checkState(builder.latestVersion() == CURRENT_VERSION, "Latest version is not current");
         return builder;
     }
 
-    private static ConfigurationTransformation initialTransform() {
+    private static ConfigurationTransformation transform1() {
+        return ConfigurationTransformation.builder()
+                .moveStrategy(MoveStrategy.MERGE)
+                .addAction(NodePath.path(), (inputPath, valueAtPath) ->{
+                    var currencyName = valueAtPath.node("messages").node("currency-name").getString();
+                    var currencyPluralName = valueAtPath.node("messages").node("currency-name-plural").getString();
+                    var emerald = Settings.defaultCurrency();
+                    emerald.name = currencyName;
+                    emerald.namePlural = currencyPluralName;
+                    valueAtPath.node("currencies").node("emerald").set(emerald);
+                    return null;
+                })
+                .build();
+    }
+
+    private static ConfigurationTransformation transform0() {
         return ConfigurationTransformation.builder()
                 .moveStrategy(MoveStrategy.OVERWRITE)
                 .addAction(NodePath.path(), (inputPath, valueAtPath) -> {
