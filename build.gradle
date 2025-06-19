@@ -119,6 +119,6 @@ tasks {
             url("https://download.luckperms.net/1589/bukkit/loader/LuckPerms-Bukkit-5.5.4.jar")
             url("https://ci.extendedclip.com/job/PlaceholderAPI/208/artifact/build/libs/PlaceholderAPI-2.11.7-DEV-208.jar")
         }
-        minecraftVersion("1.21.4")
+        minecraftVersion("1.21.6")
     }
 }
