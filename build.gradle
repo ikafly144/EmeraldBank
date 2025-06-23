@@ -36,7 +36,7 @@ dependencies {
     compileOnly("com.mysql:mysql-connector-j:9.2.0")
     implementation("com.zaxxer:HikariCP:6.2.1")
     implementation("commons-dbutils:commons-dbutils:1.8.1")
-    implementation 'org.spongepowered:configurate-yaml:4.2.0-SNAPSHOT'
+    implementation 'org.spongepowered:configurate-yaml:4.2.0'
 
     compileOnly("com.github.MilkBowl:VaultAPI:1.7.1") {
         transitive = false
