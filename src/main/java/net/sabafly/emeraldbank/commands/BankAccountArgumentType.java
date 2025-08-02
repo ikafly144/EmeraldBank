@@ -16,7 +16,6 @@ import java.util.concurrent.CompletableFuture;
 
 import static net.sabafly.emeraldbank.EmeraldBank.economy;
 
-@SuppressWarnings("UnstableApiUsage")
 public class BankAccountArgumentType implements CustomArgumentType<String, String> {
     @Override
     public @NotNull String parse(@NotNull StringReader reader) throws CommandSyntaxException {

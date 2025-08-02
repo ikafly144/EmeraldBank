@@ -20,7 +20,6 @@ import static net.sabafly.emeraldbank.EmeraldBank.config;
 import static net.sabafly.emeraldbank.EmeraldBank.database;
 import static net.sabafly.emeraldbank.util.EmeraldUtils.*;
 
-@SuppressWarnings("UnstableApiUsage")
 public class EmeraldCommands implements LifecycleEventHandler<@NotNull ReloadableRegistrarEvent<@NotNull Commands>> {
     @Override
     public void run(@NotNull ReloadableRegistrarEvent<@NotNull Commands> event) {

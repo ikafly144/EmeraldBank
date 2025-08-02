@@ -10,14 +10,14 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-@SuppressWarnings({"UnstableApiUsage", "unused"})
+@SuppressWarnings({"unused", "UnstableApiUsage"})
 public class EmeraldLoader implements PluginLoader {
     @Override
     public void classloader(@NotNull PluginClasspathBuilder classpathBuilder) {
         MavenLibraryResolver resolver = new MavenLibraryResolver();
         List<String> dependencies = List.of(
                 "com.h2database:h2:2.3.232",
-                "com.mysql:mysql-connector-j:9.2.0"
+                "com.mysql:mysql-connector-j:9.4.0"
         );
 
         for (String dependency : dependencies) {

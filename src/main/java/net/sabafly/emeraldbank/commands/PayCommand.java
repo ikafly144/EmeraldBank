@@ -18,7 +18,6 @@ import static net.kyori.adventure.text.minimessage.MiniMessage.miniMessage;
 import static net.sabafly.emeraldbank.EmeraldBank.*;
 import static net.sabafly.emeraldbank.util.EmeraldUtils.*;
 
-@SuppressWarnings("UnstableApiUsage")
 public class PayCommand {
     public static LiteralCommandNode<CommandSourceStack> command() {
         return Commands.literal("pay")

@@ -10,7 +10,6 @@ import org.bukkit.inventory.ItemType;
 
 import java.util.Map;
 
-@SuppressWarnings("UnstableApiUsage")
 public class PlayerInventoryUtils {
 
     private PlayerInventoryUtils() {

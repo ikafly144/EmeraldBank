@@ -14,7 +14,6 @@ import java.util.stream.Stream;
 import static net.sabafly.emeraldbank.EmeraldBank.database;
 import static net.sabafly.emeraldbank.EmeraldBank.economy;
 
-@SuppressWarnings("UnstableApiUsage")
 public class EmeraldBankPlaceholderExpansion extends PlaceholderExpansion {
 
     private final EmeraldBank plugin;

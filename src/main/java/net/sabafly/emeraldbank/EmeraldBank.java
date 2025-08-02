@@ -1,6 +1,7 @@
 package net.sabafly.emeraldbank;
 
 import com.google.gson.Gson;
+import com.vdurmont.semver4j.Semver;
 import io.papermc.paper.ServerBuildInfo;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import lombok.Getter;
@@ -137,7 +138,7 @@ public final class EmeraldBank extends JavaPlugin implements Listener {
         getSLF4JLogger().info("Commands registered");
 
         getComponentLogger().info(MiniMessage.miniMessage().deserialize("Enabled <version>", TagResolver.builder().tag("version", Tag.inserting(Component.text(getPluginMeta().getVersion()))).build()));
-        Bukkit.getScheduler().runTaskTimerAsynchronously(this, task -> updateCheck(), 1, 60 * 60 * 20);
+        Bukkit.getScheduler().runTaskTimerAsynchronously(this, task -> updateCheck(), 1, 6 * 60 * 60 * 20);
     }
 
     private boolean setupEconomy() {
@@ -184,12 +185,19 @@ public final class EmeraldBank extends JavaPlugin implements Listener {
                     .thenApplyAsync(HttpResponse::body).thenAcceptAsync(buf -> {
                         var raw = new Gson().fromJson(buf, Object.class);
                         // .[0].version_number
-                        var version = ((java.util.List<?>) raw).getFirst();
-                        var versionNumber = ((java.util.Map<?, ?>) version).get("version_number");
-                        if (!getPluginMeta().getVersion().equals(versionNumber)) {
-                            getSLF4JLogger().info("A new version is available");
-                            getSLF4JLogger().info("Latest version: {}", versionNumber);
+                        var versionNumber = ((java.util.Map<?, ?>) ((java.util.List<?>) raw).getFirst()).get("version_number");
+                        final Semver version = new Semver((String) versionNumber);
+                        if (new Semver(getPluginMeta().getVersion()).isLowerThan(version)) {
+                            if (version.isStable()) {
+                                getSLF4JLogger().info("A new version is available");
+                                getSLF4JLogger().info("Latest version: {}", versionNumber);
+                            } else {
+                                getSLF4JLogger().warn("A new development version is available");
+                                getSLF4JLogger().warn("Development version: {}", versionNumber);
+                            }
                             getSLF4JLogger().info("Current version: {}", getPluginMeta().getVersion());
+                        } else {
+                            getSLF4JLogger().info("No updates available");
                         }
                     }).join();
         } catch (Exception e) {

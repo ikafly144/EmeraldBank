@@ -24,7 +24,6 @@ import static net.kyori.adventure.text.minimessage.MiniMessage.miniMessage;
 import static net.sabafly.emeraldbank.EmeraldBank.config;
 import static net.sabafly.emeraldbank.EmeraldBank.economy;
 
-@SuppressWarnings("UnstableApiUsage")
 public class EmeraldUtils {
     public static Settings.Messages getMessages() {
         return config().messages;

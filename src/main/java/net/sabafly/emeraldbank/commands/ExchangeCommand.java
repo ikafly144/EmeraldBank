@@ -28,7 +28,6 @@ import static net.sabafly.emeraldbank.EmeraldBank.setConfig;
 import static net.sabafly.emeraldbank.util.EmeraldUtils.createCommandException;
 import static net.sabafly.emeraldbank.util.EmeraldUtils.tagResolver;
 
-@SuppressWarnings("UnstableApiUsage")
 public class ExchangeCommand {
     public static LiteralCommandNode<CommandSourceStack> command() {
         return Commands.literal("exchange")

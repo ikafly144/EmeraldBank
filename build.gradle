@@ -37,6 +37,7 @@ dependencies {
     implementation("com.zaxxer:HikariCP:7.0.0")
     implementation("commons-dbutils:commons-dbutils:1.8.1")
     implementation 'org.spongepowered:configurate-yaml:4.2.0'
+    implementation("com.vdurmont:semver4j:3.1.0")
 
     compileOnly("com.github.MilkBowl:VaultAPI:1.7.1") {
         transitive = false
@@ -44,9 +45,7 @@ dependencies {
     compileOnly('me.clip:placeholderapi:2.11.6') {
         transitive = false
     }
-    compileOnly('com.github.Jikoo.OpenInv:openinvapi:5.1.4') {
-        transitive = false
-    }
+    compileOnly('com.github.Jikoo:OpenInv:5.1.13')
     compileOnly("net.essentialsx:EssentialsX:2.21.0-SNAPSHOT") {
         exclude(group: 'org.spigotmc', module: 'spigot-api')
         transitive = false
@@ -54,7 +53,7 @@ dependencies {
 
     compileOnly 'org.projectlombok:lombok:1.18.38'
     annotationProcessor 'org.projectlombok:lombok:1.18.38'
-    paperweight.paperDevBundle("1.21.6-R0.1-SNAPSHOT")
+    paperweight.paperDevBundle("1.21.8-R0.1-SNAPSHOT")
 }
 
 def targetJavaVersion = 21
@@ -103,6 +102,8 @@ tasks.named('shadowJar', com.github.jengelman.gradle.plugins.shadow.tasks.Shadow
 
     relocate("com.zaxxer.hikari", "net.sabafly.libs.com.zaxxer.hikari")
     relocate("org.apache.commons.dbutils", "net.sabafly.libs.org.apache.commons.dbutils")
+
+    relocate("com.vdurmont.semver4j", "net.sabafly.libs.com.vdurmont.semver4j")
 }
 
 tasks.build {
@@ -119,6 +120,6 @@ tasks {
             url("https://download.luckperms.net/1589/bukkit/loader/LuckPerms-Bukkit-5.5.4.jar")
             url("https://ci.extendedclip.com/job/PlaceholderAPI/208/artifact/build/libs/PlaceholderAPI-2.11.7-DEV-208.jar")
         }
-        minecraftVersion("1.21.6")
+        minecraftVersion("1.21.8")
     }
 }

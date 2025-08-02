@@ -16,7 +16,6 @@ import static net.sabafly.emeraldbank.EmeraldBank.database;
 import static net.sabafly.emeraldbank.util.EmeraldUtils.*;
 import static net.sabafly.emeraldbank.util.PlayerInventoryUtils.*;
 
-@SuppressWarnings("UnstableApiUsage")
 public class WalletCommand {
     public static LiteralCommandNode<CommandSourceStack> command() {
         return Commands.literal("wallet")
