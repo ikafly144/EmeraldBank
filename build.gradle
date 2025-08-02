@@ -10,7 +10,6 @@ group = 'net.sabafly'
 version = '1.1.2'
 
 repositories {
-    mavenLocal()
     mavenCentral()
     maven {
         url = 'https://jitpack.io'
@@ -36,7 +35,7 @@ dependencies {
     compileOnly("com.mysql:mysql-connector-j:9.4.0")
     implementation("com.zaxxer:HikariCP:7.0.0")
     implementation("commons-dbutils:commons-dbutils:1.8.1")
-    implementation 'org.spongepowered:configurate-yaml:4.2.0'
+    implementation 'org.spongepowered:configurate-yaml:4.3.0-SNAPSHOT'
     implementation("com.vdurmont:semver4j:3.1.0")
 
     compileOnly("com.github.MilkBowl:VaultAPI:1.7.1") {
