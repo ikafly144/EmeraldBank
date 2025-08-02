@@ -114,10 +114,10 @@ tasks {
     runServer {
         //noinspection GroovyMissingReturnStatement
         downloadPlugins {
-//            github("Jikoo", "OpenInv", "5.1.6", "OpenInv.jar")
+            github("Jikoo", "OpenInv", "5.1.13", "OpenInv.jar")
             github("MilkBowl", "Vault", "1.7.3", "Vault.jar")
-//            url("https://ci.ender.zone/job/EssentialsX/lastSuccessfulBuild/artifact/jars/EssentialsX-2.21.0-dev+185-5bf158c.jar")
-            url("https://download.luckperms.net/1589/bukkit/loader/LuckPerms-Bukkit-5.5.4.jar")
+            url("https://ci.ender.zone/job/EssentialsX/1699/artifact/jars/EssentialsX-2.21.2-dev+36-c01ba4e.jar")
+            url("https://download.luckperms.net/1595/bukkit/loader/LuckPerms-Bukkit-5.5.10.jar")
             url("https://ci.extendedclip.com/job/PlaceholderAPI/208/artifact/build/libs/PlaceholderAPI-2.11.7-DEV-208.jar")
         }
         minecraftVersion("1.21.8")

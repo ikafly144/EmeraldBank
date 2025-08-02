@@ -75,9 +75,9 @@ public class User {
                 remain -= (int) wallet;
                 wallet = 0;
             } else if (!useWalletFirst && getCurrencyCount(p, config().getDefaultCurrency()) < count) {
-                removeWallet(getCurrencyCount(p, config().getDefaultCurrency()));
                 remain -= getCurrencyCount(p, config().getDefaultCurrency());
-                wallet -= remain;
+                removeCurrency(p, config().getDefaultCurrency(), getCurrencyCount(p, config().getDefaultCurrency()));
+                removeWallet(remain);
                 return true;
             }
             return removeCurrency(p, config().getDefaultCurrency(), remain);
@@ -119,7 +119,7 @@ public class User {
     }
 
     public boolean isOffline() {
-        return player().map(Player::isOnline).orElse(false);
+        return !player().map(Player::isOnline).orElse(false);
     }
 
 }

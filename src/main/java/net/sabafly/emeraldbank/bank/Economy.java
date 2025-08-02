@@ -88,6 +88,9 @@ public class Economy extends VaultEconomy {
 
     @Override
     public EconomyResponse withdrawPlayer(OfflinePlayer player, double amount) {
+        if (amount < 0) {
+            return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, "Cannot withdraw negative amount");
+        }
         User user = database().getUser(player.getUniqueId());
         boolean succeed = user.withdraw(amount);
         database().saveUser(user);
@@ -101,6 +104,9 @@ public class Economy extends VaultEconomy {
 
     @Override
     public EconomyResponse depositPlayer(OfflinePlayer player, double amount) {
+        if (amount < 0) {
+            return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, "Cannot deposit negative amount");
+        }
         User user = database().getUser(player.getUniqueId());
         user.deposit(amount);
         database().saveUser(user);

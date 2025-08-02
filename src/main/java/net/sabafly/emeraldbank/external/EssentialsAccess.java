@@ -52,7 +52,6 @@ public class EssentialsAccess {
         public boolean onServerLoad() {
             this.economy = EmeraldBank.economy();
             return this.economy != null;
-
         }
 
         @Override
@@ -88,19 +87,30 @@ public class EssentialsAccess {
 
         @Override
         public boolean deposit(OfflinePlayer player, BigDecimal amount) {
+            if (amount.signum() < 0) {
+                return withdraw(player, amount.negate());
+            }
             return economy.depositPlayer(player, amount.doubleValue()).transactionSuccess();
         }
 
         @Override
         public boolean withdraw(OfflinePlayer player, BigDecimal amount) {
+            if (amount.signum() < 0) {
+                return deposit(player, amount.negate());
+            }
             return economy.withdrawPlayer(player, amount.doubleValue()).transactionSuccess();
         }
 
         @Override
         public boolean set(OfflinePlayer player, BigDecimal amount) {
+            if (amount.signum() < 0) {
+                throw new IllegalArgumentException("Cannot set a negative balance");
+            }
             amount = getBalance(player).subtract(amount);
-            if (amount.signum() == -1) {
-                return deposit(player, amount.abs());
+            if (amount.signum() < 0) {
+                return deposit(player, amount.negate());
+            } else if (amount.signum() == 0) {
+                return true; // No change needed
             } else {
                 return withdraw(player, amount);
             }
