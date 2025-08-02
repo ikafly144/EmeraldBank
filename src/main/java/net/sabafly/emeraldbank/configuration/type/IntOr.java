@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.spongepowered.configurate.serialize.ScalarSerializer;
 
+import java.lang.reflect.AnnotatedType;
 import java.util.OptionalInt;
 import java.util.function.Function;
 import java.util.function.IntPredicate;
@@ -75,10 +76,10 @@ public interface IntOr {
             return value.getAsInt() < 0;
         }
 
-//        @Override
-//        protected @NotNull Object serialize(@NotNull AnnotatedType type, T item, @NotNull Predicate<Class<?>> typeSupported) {
-//            return serialize(item, typeSupported);
-//        }
+        @Override
+        protected @NotNull Object serialize(@NotNull AnnotatedType type, T item, @NotNull Predicate<Class<?>> typeSupported) {
+            return serialize(item, typeSupported);
+        }
 
         @Override
         protected @NotNull Object serialize(final T item, final @NotNull Predicate<Class<?>> typeSupported) {
