@@ -23,7 +23,7 @@ public class EssentialsAccess {
 
     public void enable(Plugin plugin) {
         EconomyLayer layer = EconomyLayers.onPluginEnable(plugin);
-        if (layer != null) {
+        if (layer instanceof EssentialsEconomy) {
             LogUtils.getLogger().info("Successfully hooked as Essentials payment resolution method for {} ({})", layer.getName(), layer.getPluginVersion());
         }
     }
@@ -66,7 +66,6 @@ public class EssentialsAccess {
             return "EmeraldBank";
         }
 
-        @SuppressWarnings("UnstableApiUsage")
         @Override
         public String getPluginVersion() {
             return plugin.getPluginMeta().getVersion();
