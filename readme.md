@@ -19,12 +19,12 @@ However, we will support the previous version for a while.
 We will not support the version that is no longer supported by PaperMC.
 The following table shows the support status of each version.
 
-| Version       | Support                        |
-|---------------|--------------------------------|
-| 1.21.5        | ✅ Active support               |
-| 1.21.4        | ✅ Active support               |
-| 1.21 ~ 1.21.3 | 🔁 May work, but not supported |
-| < 1.20.X      | 🚧 No longer supported         |
+| Version         | Support                        |
+|-----------------|--------------------------------|
+| 1.21.8          | ✅ Active support               |
+| 1.21.6 ~ 1.21.7 | ✅ Active support               |
+| 1.21 ~ 1.21.5   | 🔁 May work, but not supported |
+| < 1.20.X        | 🚧 No longer supported         |
 
 ## Commands
 
@@ -60,39 +60,39 @@ The following table shows the support status of each version.
 ## Permissions
 
 - `emeraldbank.admin`
-    - `emeraldbank.balance.all`
-    - `emeraldbank.reload`
-    - `emeraldbank.currency.rate.set`
+  - `emeraldbank.balance.all`
+  - `emeraldbank.reload`
+  - `emeraldbank.currency.rate.set`
 - `emeraldbank.bypass`
-    - `emeraldbank.bypass.cost`
-    - `emeraldbank.bypass.deposit`
-    - `emeraldbank.bypass.member`
-    - `emeraldbank.bypass.owner`
+  - `emeraldbank.bypass.cost`
+  - `emeraldbank.bypass.deposit`
+  - `emeraldbank.bypass.member`
+  - `emeraldbank.bypass.owner`
 - `emeraldbank.default`
-    - `emeraldbank.balance`
-    - `emeraldbank.pay`
-    - `emeraldbank.leaderboard`
-    - `emeraldbank.banking`
+  - `emeraldbank.balance`
+  - `emeraldbank.pay`
+  - `emeraldbank.leaderboard`
+  - `emeraldbank.banking`
 - `emeraldbank.banking`
-    - `emeraldbank.banking.balance`
-    - `emeraldbank.banking.deposit`
-    - `emeraldbank.banking.withdraw`
-    - `emeraldbank.banking.send`
-    - `emeraldbank.banking.pay`
-    - `emeraldbank.banking.account`
+  - `emeraldbank.banking.balance`
+  - `emeraldbank.banking.deposit`
+  - `emeraldbank.banking.withdraw`
+  - `emeraldbank.banking.send`
+  - `emeraldbank.banking.pay`
+  - `emeraldbank.banking.account`
 - `emeraldbank.banking.account`
-    - `emeraldbank.banking.account.create`
-    - `emeraldbank.banking.account.delete`
-    - `emeraldbank.banking.account.add`
-    - `emeraldbank.banking.account.remove`
-    - `emeraldbank.banking.account.list`
-    - `emeraldbank.banking.account.transfer`
+  - `emeraldbank.banking.account.create`
+  - `emeraldbank.banking.account.delete`
+  - `emeraldbank.banking.account.add`
+  - `emeraldbank.banking.account.remove`
+  - `emeraldbank.banking.account.list`
+  - `emeraldbank.banking.account.transfer`
 - `emeraldbank.currency`
   - `emeraldbank.currency.rate`
   - `emeraldbank.currency.exchange`
   - `emeraldbank.currency.exchange.<currency>`
   - `emeraldbank.currency.exchange.*`
-- `emeraldbank.currency.rate` 
+- `emeraldbank.currency.rate`
   - `emeraldbank.currency.rate.get`
 
 ## Placeholders
@@ -305,18 +305,3 @@ messages:
   error-exchange-too-low: <red>Exchange amount is too low!
 
 ```
-
----
-
-## Change Log
-
-### 1.1.0
-
-- Currencies are now modifiable in `config.yml` (experimental feature)
-- Added support for multiple currencies (experimental feature)
-- Added support for exchange rates (experimental feature)
-- Removed data migration feature for pre 1.0.0 versions (aka `0.X.X` versions)
-
-### 1.0.0
-
-- Initial release
