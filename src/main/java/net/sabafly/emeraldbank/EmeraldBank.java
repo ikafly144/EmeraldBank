@@ -173,6 +173,7 @@ public final class EmeraldBank extends JavaPlugin implements Listener {
     }
 
     private void updateCheck() {
+        if (!config().notifyNewVersion) return;
         getSLF4JLogger().info("Checking for updates");
         try (var client = HttpClient.newHttpClient()) {
             var param = URLEncoder.encode("featured=true&loaders=[\"paper\"]&game_versions=[\"" + ServerBuildInfo.buildInfo().minecraftVersionId() + "\"]", StandardCharsets.UTF_8);

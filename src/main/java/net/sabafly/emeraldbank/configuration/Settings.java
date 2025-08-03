@@ -37,6 +37,9 @@ public class Settings extends BaseConfig {
     @Comment("The cost for paying a player.")
     public IntOr.Disabled payCost = IntOr.Disabled.DISABLED;
 
+    @Comment("Notify when there is a new version of EmeraldBank available.")
+    public boolean notifyNewVersion = true;
+
     @Comment("""
             ################################################################
             #                                                              #
