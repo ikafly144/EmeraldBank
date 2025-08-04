@@ -22,6 +22,7 @@ import net.sabafly.emeraldbank.placeholder.EmeraldBankPlaceholderExpansion;
 import net.sabafly.emeraldbank.util.LogUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.ServicePriority;
@@ -76,17 +77,27 @@ public final class EmeraldBank extends JavaPlugin implements Listener {
         return getInstance().economy;
     }
 
-    @EventHandler(ignoreCancelled = true)
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onPlayerJoin(PlayerJoinEvent event) {
         var player = event.getPlayer();
         database().getUser(player.getUniqueId());
-
         Bukkit.getScheduler().runTaskLater(this, () -> {
+            var p = player.getPlayer();
+            if (p == null) return; // Player might have left the server before the task runs
+            if (newVersion != null && config().notifyNewVersion && p.hasPermission("emeraldbank.admin")) {
+                if (newVersion.isStable()) {
+                    p.sendMessage(MiniMessage.miniMessage().deserialize("<green>[EmeraldBank] A new version is available: <version>",
+                            TagResolver.builder().tag("version", Tag.inserting(Component.text(newVersion.getValue()))).build()));
+                } else {
+                    p.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>[EmeraldBank] A new development version is available: <version>",
+                            TagResolver.builder().tag("version", Tag.inserting(Component.text(newVersion.getValue()))).build()));
+                }
+            }
             User user = database().getUser(player.getUniqueId());
             user.notifyOfflineTransaction();
             if (user.player().isPresent())
                 database().saveUser(user);
-        }, 20 * 10);
+        }, 1);
     }
 
     @Override
@@ -137,6 +148,8 @@ public final class EmeraldBank extends JavaPlugin implements Listener {
         getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, new EmeraldCommands());
         getSLF4JLogger().info("Commands registered");
 
+        getServer().getPluginManager().registerEvents(this, this);
+
         getComponentLogger().info(MiniMessage.miniMessage().deserialize("Enabled <version>", TagResolver.builder().tag("version", Tag.inserting(Component.text(getPluginMeta().getVersion()))).build()));
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, task -> updateCheck(), 1, 6 * 60 * 60 * 20);
     }
@@ -172,6 +185,8 @@ public final class EmeraldBank extends JavaPlugin implements Listener {
         }
     }
 
+    private @Nullable Semver newVersion = null;
+
     private void updateCheck() {
         if (!config().notifyNewVersion) return;
         getSLF4JLogger().info("Checking for updates");
@@ -187,7 +202,7 @@ public final class EmeraldBank extends JavaPlugin implements Listener {
                         var raw = new Gson().fromJson(buf, Object.class);
                         // .[0].version_number
                         var versionNumber = ((java.util.Map<?, ?>) ((java.util.List<?>) raw).getFirst()).get("version_number");
-                        final Semver version = new Semver((String) versionNumber);
+                        Semver version = new Semver((String) versionNumber);
                         if (new Semver(getPluginMeta().getVersion()).isLowerThan(version)) {
                             if (version.isStable()) {
                                 getSLF4JLogger().info("A new version is available");
@@ -196,6 +211,7 @@ public final class EmeraldBank extends JavaPlugin implements Listener {
                                 getSLF4JLogger().warn("A new development version is available");
                                 getSLF4JLogger().warn("Development version: {}", versionNumber);
                             }
+                            newVersion = version;
                             getSLF4JLogger().info("Current version: {}", getPluginMeta().getVersion());
                         } else {
                             getSLF4JLogger().info("No updates available");

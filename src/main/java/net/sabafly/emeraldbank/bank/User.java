@@ -37,10 +37,10 @@ public class User {
     }
 
     public void notifyOfflineTransaction() {
-        if (offlineTransaction != null) {
+        if (offlineTransaction != null && offlineTransaction != 0.0) {
             player().ifPresent(player -> player.sendMessage(miniMessage().deserialize(config().messages.offlineTransaction, tagResolver("value", Component.text(Math.abs(offlineTransaction))))));
-            offlineTransaction = null;
         }
+        offlineTransaction = null;
     }
 
     public Optional<Player> player() {
