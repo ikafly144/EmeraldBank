@@ -7,7 +7,6 @@ import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import lombok.Getter;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.Tag;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.sabafly.emeraldbank.bank.Economy;
@@ -39,6 +38,8 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.Duration;
+
+import static net.kyori.adventure.text.minimessage.MiniMessage.miniMessage;
 
 @SuppressWarnings("UnstableApiUsage")
 public final class EmeraldBank extends JavaPlugin implements Listener {
@@ -86,10 +87,10 @@ public final class EmeraldBank extends JavaPlugin implements Listener {
             if (p == null) return; // Player might have left the server before the task runs
             if (newVersion != null && config().notifyNewVersion && p.hasPermission("emeraldbank.admin")) {
                 if (newVersion.isStable()) {
-                    p.sendMessage(MiniMessage.miniMessage().deserialize("<green>[EmeraldBank] A new version is available: <version>",
+                    p.sendMessage(miniMessage().deserialize("<green>[EmeraldBank] A new version is available: <version>",
                             TagResolver.builder().tag("version", Tag.inserting(Component.text(newVersion.getValue()))).build()));
                 } else {
-                    p.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>[EmeraldBank] A new development version is available: <version>",
+                    p.sendMessage(miniMessage().deserialize("<yellow>[EmeraldBank] A new development version is available: <version>",
                             TagResolver.builder().tag("version", Tag.inserting(Component.text(newVersion.getValue()))).build()));
                 }
             }
@@ -104,7 +105,7 @@ public final class EmeraldBank extends JavaPlugin implements Listener {
     public void onDisable() {
         // Plugin shutdown logic
         database.close();
-        getComponentLogger().info(MiniMessage.miniMessage().deserialize("Disabled <version>", TagResolver.builder().tag("version", Tag.inserting(Component.text(getPluginMeta().getVersion()))).build()));
+        getComponentLogger().info(miniMessage().deserialize("Disabled <version>", TagResolver.builder().tag("version", Tag.inserting(Component.text(getPluginMeta().getVersion()))).build()));
     }
 
     @Override
@@ -133,7 +134,7 @@ public final class EmeraldBank extends JavaPlugin implements Listener {
             OpenInvAccess.load();
 
         if (!setupEconomy()) {
-            getComponentLogger().warn(MiniMessage.miniMessage().deserialize("<red>Disabled due to no Vault dependency found!", TagResolver.empty()));
+            getComponentLogger().warn(miniMessage().deserialize("<red>Disabled due to no Vault dependency found!", TagResolver.empty()));
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
@@ -150,7 +151,7 @@ public final class EmeraldBank extends JavaPlugin implements Listener {
 
         getServer().getPluginManager().registerEvents(this, this);
 
-        getComponentLogger().info(MiniMessage.miniMessage().deserialize("Enabled <version>", TagResolver.builder().tag("version", Tag.inserting(Component.text(getPluginMeta().getVersion()))).build()));
+        getComponentLogger().info(miniMessage().deserialize("Enabled <version>", TagResolver.builder().tag("version", Tag.inserting(Component.text(getPluginMeta().getVersion()))).build()));
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, task -> updateCheck(), 1, 6 * 60 * 60 * 20);
     }
 

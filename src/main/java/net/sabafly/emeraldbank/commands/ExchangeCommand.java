@@ -19,6 +19,7 @@ import net.sabafly.emeraldbank.configuration.Settings.Currency;
 import net.sabafly.emeraldbank.util.PlayerInventoryUtils;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -122,7 +123,7 @@ public class ExchangeCommand {
                 .build();
     }
 
-    private static int exchange(Player player, Currency currency, Currency target, int amount) throws CommandSyntaxException {
+    private static int exchange(@NotNull Player player, @NotNull Currency currency, @NotNull Currency target, int amount) throws CommandSyntaxException {
         player.sendMessage(miniMessage().deserialize(config().messages.exchangeStart, tagResolver("currency", Component.text(currency.name)), tagResolver("target", Component.text(target.name)), tagResolver("value", Component.text(amount))));
         final double rate = currency.rate / target.rate;
         final int receive = (int) Math.floor(amount * rate);
