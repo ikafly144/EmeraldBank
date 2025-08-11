@@ -34,7 +34,7 @@ repositories {
 dependencies {
     compileOnly("com.h2database:h2:2.3.232")
     compileOnly("com.mysql:mysql-connector-j:9.4.0")
-    implementation("com.zaxxer:HikariCP:7.0.0")
+    implementation("com.zaxxer:HikariCP:7.0.1")
     implementation("commons-dbutils:commons-dbutils:1.8.1")
     implementation 'org.spongepowered:configurate-yaml:4.3.0-SNAPSHOT'
     implementation("com.vdurmont:semver4j:3.1.0")
