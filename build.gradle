@@ -51,8 +51,8 @@ dependencies {
         transitive = false
     }
 
-    compileOnly 'org.projectlombok:lombok:1.18.38'
-    annotationProcessor 'org.projectlombok:lombok:1.18.38'
+    compileOnly 'org.projectlombok:lombok:1.18.40'
+    annotationProcessor 'org.projectlombok:lombok:1.18.40'
     paperweight.paperDevBundle("1.21.8-R0.1-SNAPSHOT")
 }
 
