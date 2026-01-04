@@ -7,7 +7,7 @@ plugins {
 }
 
 group = 'net.sabafly'
-version = '1.1.2-SNAPSHOT'
+version = '1.2.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
@@ -53,7 +53,7 @@ dependencies {
 
     compileOnly 'org.projectlombok:lombok:1.18.42'
     annotationProcessor 'org.projectlombok:lombok:1.18.42'
-    paperweight.paperDevBundle("1.21.10-R0.1-SNAPSHOT")
+    paperweight.foliaDevBundle("1.21.11-R0.1-SNAPSHOT")
 }
 
 def targetJavaVersion = 21
@@ -110,16 +110,30 @@ tasks.build {
     dependsOn shadowJar
 }
 
+runPaper.folia.registerTask()
+
 tasks {
     runServer {
         //noinspection GroovyMissingReturnStatement
         downloadPlugins {
-            github("Jikoo", "OpenInv", "5.1.15", "OpenInv.jar")
+            github("Jikoo", "OpenInv", "5.2.0", "OpenInv.jar")
             github("MilkBowl", "Vault", "1.7.3", "Vault.jar")
-            url("https://ci.ender.zone/job/EssentialsX/1734/artifact/jars/EssentialsX-2.22.0-dev+39-adf77dc.jar")
+            url("https://ci.ender.zone/job/EssentialsX/1748/artifact/jars/EssentialsX-2.22.0-dev+53-9ad754b.jar")
             modrinth("luckperms", "v5.5.17-bukkit")
             url("https://ci.extendedclip.com/job/PlaceholderAPI/208/artifact/build/libs/PlaceholderAPI-2.11.7-DEV-208.jar")
         }
-        minecraftVersion("1.21.10")
+        minecraftVersion("1.21.11")
+    }
+
+    runFolia {
+        //noinspection GroovyMissingReturnStatement
+        downloadPlugins {
+            github("Jikoo", "OpenInv", "5.2.0", "OpenInv.jar")
+            github("SirBlobman", "Vault-Folia", "v1.7.3-folia", "Vault-1.7.3.jar")
+            url("https://ci.ender.zone/job/EssentialsX/1748/artifact/jars/EssentialsX-2.22.0-dev+53-9ad754b.jar")
+            modrinth("luckperms", "v5.5.17-bukkit")
+            url("https://ci.extendedclip.com/job/PlaceholderAPI/221/artifact/build/libs/PlaceholderAPI-2.11.8-DEV-221.jar")
+        }
+        minecraftVersion("1.21.11")
     }
 }

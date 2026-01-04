@@ -38,6 +38,7 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 
 import static net.kyori.adventure.text.minimessage.MiniMessage.miniMessage;
 
@@ -82,7 +83,7 @@ public final class EmeraldBank extends JavaPlugin implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event) {
         var player = event.getPlayer();
         database().getUser(player.getUniqueId());
-        Bukkit.getScheduler().runTaskLater(this, () -> {
+        Bukkit.getGlobalRegionScheduler().runDelayed(this, task -> {
             var p = player.getPlayer();
             if (p == null) return; // Player might have left the server before the task runs
             if (newVersion != null && config().notifyNewVersion && p.hasPermission("emeraldbank.admin")) {
@@ -119,7 +120,8 @@ public final class EmeraldBank extends JavaPlugin implements Listener {
 
     @Override
     public void onEnable() {
-        if (!ServerBuildInfo.buildInfo().isBrandCompatible(Key.key("papermc","paper"))) {
+        if (!ServerBuildInfo.buildInfo().isBrandCompatible(Key.key("papermc", "paper")) &&
+            !ServerBuildInfo.buildInfo().isBrandCompatible(Key.key("papermc", "folia"))) {
             getSLF4JLogger().error("This plugin is not compatible with {} server", ServerBuildInfo.buildInfo().brandName());
             getServer().getPluginManager().disablePlugin(this);
             return;
@@ -152,7 +154,7 @@ public final class EmeraldBank extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(this, this);
 
         getComponentLogger().info(miniMessage().deserialize("Enabled <version>", TagResolver.builder().tag("version", Tag.inserting(Component.text(getPluginMeta().getVersion()))).build()));
-        Bukkit.getScheduler().runTaskTimerAsynchronously(this, task -> updateCheck(), 1, 6 * 60 * 60 * 20);
+        Bukkit.getAsyncScheduler().runAtFixedRate(this, task -> updateCheck(), 1, 6, TimeUnit.HOURS);
     }
 
     private boolean setupEconomy() {
