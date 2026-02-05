@@ -42,7 +42,7 @@ dependencies {
     compileOnly("com.github.MilkBowl:VaultAPI:1.7.1") {
         transitive = false
     }
-    compileOnly('me.clip:placeholderapi:2.11.7') {
+    compileOnly('me.clip:placeholderapi:2.12.0') {
         transitive = false
     }
     compileOnly('com.github.Jikoo:OpenInv:5.3.0')
