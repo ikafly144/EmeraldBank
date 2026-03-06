@@ -1,6 +1,9 @@
 package net.sabafly.emeraldbank.configuration;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
+import io.papermc.paper.registry.RegistryAccess;
+import io.papermc.paper.registry.RegistryKey;
 import net.sabafly.emeraldbank.configuration.type.DoubleOr;
 import net.sabafly.emeraldbank.configuration.type.IntOr;
 import net.sabafly.emeraldbank.database.Database;
@@ -118,6 +121,8 @@ public class Settings extends BaseConfig {
             """)
     public boolean exchangeEnabled = false;
 
+    public boolean villagerIntegration = true;
+
     @Comment("""
             ################################################################
             #                                                              #
@@ -189,6 +194,19 @@ public class Settings extends BaseConfig {
                     ", cost=" + cost +
                     '}';
         }
+
+        public @NotNull ItemType getItemType() {
+            return RegistryAccess.registryAccess().getRegistry(RegistryKey.ITEM).getOrThrow(itemType);
+        }
+
+        public @NotNull Map<@NotNull ItemType, @NotNull Integer> getChildren() {
+            Map<ItemType, Integer> result = new HashMap<>();
+            for (var entry : children.entrySet()) {
+                result.put(RegistryAccess.registryAccess().getRegistry(RegistryKey.ITEM).getOrThrow(entry.getKey()), entry.getValue());
+            }
+            return ImmutableMap.copyOf(result);
+        }
+
     }
 
     @Comment("""

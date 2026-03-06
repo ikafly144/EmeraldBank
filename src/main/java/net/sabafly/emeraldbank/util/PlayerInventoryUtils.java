@@ -1,8 +1,6 @@
 package net.sabafly.emeraldbank.util;
 
 import com.google.common.base.Preconditions;
-import io.papermc.paper.registry.RegistryAccess;
-import io.papermc.paper.registry.RegistryKey;
 import net.sabafly.emeraldbank.configuration.Settings.Currency;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -22,11 +20,35 @@ public class PlayerInventoryUtils {
 
     public static int getCurrencyCount(Player player, Currency currency) {
         int amount = 0;
-        amount += player.getInventory().all(RegistryAccess.registryAccess().getRegistry(RegistryKey.ITEM).getOrThrow(currency.itemType).createItemStack().getType()).values().stream().mapToInt(ItemStack::getAmount).sum();
-        for (var child : currency.children.entrySet()) {
-            amount += player.getInventory().all(RegistryAccess.registryAccess().getRegistry(RegistryKey.ITEM).getOrThrow(child.getKey()).createItemStack().getType()).values().stream().mapToInt(ItemStack::getAmount).map(v -> v * child.getValue()).sum();
+        amount += player.getInventory().all(currency.getItemType().createItemStack().getType()).values().stream().mapToInt(ItemStack::getAmount).sum();
+        for (var child : currency.getChildren().entrySet()) {
+            amount += player.getInventory().all(child.getKey().createItemStack().getType()).values().stream().mapToInt(ItemStack::getAmount).map(v -> v * child.getValue()).sum();
         }
         return amount;
+    }
+
+    public static boolean convertToParentIfNeeded(Player player, Currency currency, int countOfParent) {
+        if (getCurrencyCount(player, currency) < countOfParent)
+            return false;
+        int remain = countOfParent;
+        remain -= player.getInventory().all(currency.getItemType().createItemStack().getType()).values().stream().mapToInt(ItemStack::getAmount).sum();
+        if (remain <= 0) return true;
+        for (var child : currency.getChildren().entrySet()) {
+            var childAmount = player.getInventory().all(child.getKey().createItemStack().getType()).values().stream().mapToInt(ItemStack::getAmount).sum();
+            if (childAmount > 0) {
+                var removed = removeCurrency1(player, child.getKey(), (int) Math.ceil((double) remain / (double) child.getValue()));
+                if (removed > 0) {
+                    remain -= removed * child.getValue();
+                    if (addCurrency1(player, currency.getItemType(), removed * child.getValue()) > 0) {
+                        throw new IllegalStateException("Failed to add currency to inventory after removing child currency");
+                    }
+                }
+            }
+            if (remain <= 0) {
+                return true;
+            }
+        }
+        return true;
     }
 
 
@@ -38,14 +60,14 @@ public class PlayerInventoryUtils {
             return 0;
         }
         int remain = count;
-        for (var child : currency.children.entrySet()) {
+        for (var child : currency.getChildren().entrySet()) {
             var childAmount = (int) Math.ceil((double) remain / (double) child.getValue());
-            remain -= removeCurrency1(player, RegistryAccess.registryAccess().getRegistry(RegistryKey.ITEM).getOrThrow(child.getKey()), childAmount) * child.getValue();
+            remain -= removeCurrency1(player, child.getKey(), childAmount) * child.getValue();
             if (remain <= 0) {
                 return count + addCurrency(player, currency, -remain);
             }
         }
-        remain -= removeCurrency1(player, RegistryAccess.registryAccess().getRegistry(RegistryKey.ITEM).getOrThrow(currency.itemType), remain);
+        remain -= removeCurrency1(player, currency.getItemType(), remain);
         if (remain < 0) {
             return count + addCurrency(player, currency, -remain);
         }
@@ -102,16 +124,16 @@ public class PlayerInventoryUtils {
      */
     private static int addCurrency0(Player player, Currency currency, int count) {
         int remain = count;
-        for (var child : currency.children.entrySet()) {
+        for (var child : currency.getChildren().entrySet()) {
             var childAmount = remain / child.getValue();
             remain -= childAmount * child.getValue();
             if (childAmount > 0)
-                remain += addCurrency1(player, RegistryAccess.registryAccess().getRegistry(RegistryKey.ITEM).getOrThrow(child.getKey()), childAmount) * child.getValue();
+                remain += addCurrency1(player, child.getKey(), childAmount) * child.getValue();
             if (remain <= 0) {
                 return 0;
             }
         }
-        return addCurrency1(player, RegistryAccess.registryAccess().getRegistry(RegistryKey.ITEM).getOrThrow(currency.itemType), remain);
+        return addCurrency1(player, currency.getItemType(), remain);
     }
 
     /**
@@ -128,7 +150,7 @@ public class PlayerInventoryUtils {
     public static void addCurrencyItem(Player player, Currency target, int count) {
         var remain = addCurrency(player, target, count);
         if (remain > 0) {
-            ItemStack itemStack = RegistryAccess.registryAccess().getRegistry(RegistryKey.ITEM).getOrThrow(target.itemType).createItemStack(remain);
+            ItemStack itemStack = target.getItemType().createItemStack(remain);
             Map<Integer, ItemStack> map = player.getInventory().addItem(itemStack);
             remain = map.values().stream().mapToInt(ItemStack::getAmount).sum();
             if (remain > 0) {

@@ -17,6 +17,7 @@ import net.sabafly.emeraldbank.configuration.Settings;
 import net.sabafly.emeraldbank.database.Database;
 import net.sabafly.emeraldbank.external.EssentialsAccess;
 import net.sabafly.emeraldbank.external.OpenInvAccess;
+import net.sabafly.emeraldbank.listener.VillagerListener;
 import net.sabafly.emeraldbank.placeholder.EmeraldBankPlaceholderExpansion;
 import net.sabafly.emeraldbank.util.LogUtils;
 import org.bukkit.Bukkit;
@@ -152,6 +153,7 @@ public final class EmeraldBank extends JavaPlugin implements Listener {
         getSLF4JLogger().info("Commands registered");
 
         getServer().getPluginManager().registerEvents(this, this);
+        getServer().getPluginManager().registerEvents(new VillagerListener(), this);
 
         getComponentLogger().info(miniMessage().deserialize("Enabled <version>", TagResolver.builder().tag("version", Tag.inserting(Component.text(getPluginMeta().getVersion()))).build()));
         Bukkit.getAsyncScheduler().runAtFixedRate(this, task -> updateCheck(), 1, 6, TimeUnit.HOURS);
