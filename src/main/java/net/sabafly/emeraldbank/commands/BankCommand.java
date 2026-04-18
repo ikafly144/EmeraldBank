@@ -15,6 +15,7 @@ import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.milkbowl.vault.economy.EconomyResponse;
+import net.sabafly.emeraldbank.util.PayUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -239,17 +240,15 @@ public class BankCommand {
                         .then(
                                 Commands.literal("balance")
                                         .requires(context -> context.getSender().hasPermission("emeraldbank.banking.balance"))
-                                        .then(
-                                                Commands.argument("account", new BankAccountArgumentType())
-                                                        .requires(context -> context.getSender().hasPermission("emeraldbank.banking.balance"))
-                                                        .executes(context -> {
-                                                            isBankMember result = getIsBankMember(context);
-                                                            final double balance = economy().bankBalance(result.account).balance;
-                                                            context.getSource().getSender().sendMessage(miniMessage().deserialize(getMessages().balanceBank, tagResolver("bank", Component.text(result.account)), tagResolver("value", formatCurrency(balance))));
-                                                            return (int) balance;
-                                                        })
-                                                        .build()
-                                        )
+                                                         .then(
+                                                                 Commands.argument("account", new BankAccountArgumentType())
+                                                                         .requires(context -> context.getSender().hasPermission("emeraldbank.banking.balance"))
+                                                                         .executes(context -> {
+                                                                             isBankMember result = getIsBankMember(context);
+                                                                             return printBankBalance(context, result.account);
+                                                                         })
+                                                                         .build()
+                                                         )
                                         .build()
                         )
                         .then(
@@ -366,25 +365,25 @@ public class BankCommand {
                                                                         .then(
                                                                                 Commands.argument("amount", IntegerArgumentType.integer(1))
                                                                                         .requires(context -> context.getSender().hasPermission("emeraldbank.banking.pay"))
-                                                                                        .executes(context -> {
-                                                                                            final isBankMember result = getIsBankMember(context);
-                                                                                            final int amount = context.getArgument("amount", Integer.class);
-                                                                                            final Player target = context.getArgument("target", PlayerSelectorArgumentResolver.class).resolve(context.getSource()).getFirst();
-                                                                                            return payBank(context, amount, result.account, target);
-                                                                                        })
-                                                                                        .build()
-                                                                        )
+                                                                                         .executes(context -> {
+                                                                                             final isBankMember result = getIsBankMember(context);
+                                                                                             final int amount = context.getArgument("amount", Integer.class);
+                                                                                             final Player target = context.getArgument("target", PlayerSelectorArgumentResolver.class).resolve(context.getSource()).getFirst();
+                                                                                             return PayUtils.payFromBank(context, amount, result.account, target);
+                                                                                         })
+                                                                                         .build()
+                                                                         )
                                                                         .then(
                                                                                 Commands.literal("all")
                                                                                         .requires(context -> context.getSender().hasPermission("emeraldbank.banking.pay"))
-                                                                                        .executes(context -> {
-                                                                                            final isBankMember result = getIsBankMember(context);
-                                                                                            final int amount = (int) economy().bankBalance(result.account).balance;
-                                                                                            final Player target = context.getArgument("target", PlayerSelectorArgumentResolver.class).resolve(context.getSource()).getFirst();
-                                                                                            return payBank(context, amount, result.account, target);
-                                                                                        })
-                                                                                        .build()
-                                                                        )
+                                                                                         .executes(context -> {
+                                                                                             final isBankMember result = getIsBankMember(context);
+                                                                                             final int amount = (int) economy().bankBalance(result.account).balance;
+                                                                                             final Player target = context.getArgument("target", PlayerSelectorArgumentResolver.class).resolve(context.getSource()).getFirst();
+                                                                                             return PayUtils.payFromBank(context, amount, result.account, target);
+                                                                                         })
+                                                                                         .build()
+                                                                         )
                                                                         .build()
                                                         )
                                                         .build()
@@ -429,24 +428,10 @@ public class BankCommand {
         return amount;
     }
 
-    static int payBank(CommandContext<CommandSourceStack> context, int amount, String bankFrom, Player to) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
-        int cost = config().banking.tax.payCost.or(config().banking.tax.withdrawCost.or(0));
-        if (context.getSource().getSender().hasPermission("emeraldbank.bypass.cost"))
-            cost = 0;
-        if (amount <= cost)
-            throw createCommandException(getMessages().errorBankingPayCost, tagResolver("player", to.name()), tagResolver("value", formatCurrency(amount)), tagResolver("bank", Component.text(bankFrom)), tagResolver("cost", formatCurrency(cost)));
-        if (!economy().hasBankSupport())
-            throw createCommandException(getMessages().errorBankingDisabled);
-        EconomyResponse response = economy().bankWithdraw(bankFrom, amount);
-        if (!response.transactionSuccess())
-            throw createCommandException(getMessages().errorBankingPay, tagResolver("value", formatCurrency(amount)), tagResolver("bank", Component.text(bankFrom)), tagResolver("player", to.name()));
-        response = economy().depositPlayer(to, response.amount - cost);
-        if (!response.transactionSuccess())
-            throw createCommandException(getMessages().errorBankingPay, tagResolver("value", formatCurrency(amount)), tagResolver("bank", Component.text(bankFrom)), tagResolver("player", to.name()));
-        context.getSource().getSender().sendMessage(miniMessage().deserialize(getMessages().bankingPay, tagResolver("value", formatCurrency(amount)), tagResolver("bank", Component.text(bankFrom)), tagResolver("player", to.name()), tagResolver("cost", formatCurrency(cost))));
-        var src = context.getSource();
-        PayCommand.sendReceivedMessage(to, amount, src != null ? src.getExecutor() != null ? src.getExecutor().name() : Component.text("SERVER") : Component.text("SERVER"));
-        return amount;
+    static int printBankBalance(CommandContext<CommandSourceStack> context, String account) {
+        final double balance = economy().bankBalance(account).balance;
+        context.getSource().getSender().sendMessage(miniMessage().deserialize(getMessages().balanceBank, tagResolver("bank", Component.text(account)), tagResolver("value", formatCurrency(balance))));
+        return (int) balance;
     }
 
     private static @NotNull isBankOwner getIsBankOwner(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {

@@ -2,6 +2,7 @@ package net.sabafly.emeraldbank.commands;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
@@ -22,12 +23,17 @@ public class AdminCommand {
         return Commands.literal("admin")
                 .requires(context -> context.getSender().hasPermission("emeraldbank.admin"))
                 .then(Commands.literal("wallet")
+                        .then(Commands.literal("get")
+                                .then(Commands.argument("player", ArgumentTypes.player())
+                                        .executes(context -> WalletCommand.printWallet(context, getTargetPlayer(context)))
+                                )
+                        )
                         .then(Commands.literal("add")
                                 .then(Commands.argument("player", ArgumentTypes.player())
                                         .then(Commands.argument("amount", IntegerArgumentType.integer(1))
                                                 .executes(context -> {
-                                                    final Player target = context.getArgument("player", PlayerSelectorArgumentResolver.class).resolve(context.getSource()).getFirst();
-                                                    final int amount = context.getArgument("amount", Integer.class);
+                                                    final Player target = getTargetPlayer(context);
+                                                    final int amount = getAmount(context);
                                                     final User user = database().getUser(target.getUniqueId());
                                                     user.addWallet(amount);
                                                     database().saveUser(user);
@@ -41,8 +47,8 @@ public class AdminCommand {
                                 .then(Commands.argument("player", ArgumentTypes.player())
                                         .then(Commands.argument("amount", IntegerArgumentType.integer(1))
                                                 .executes(context -> {
-                                                    final Player target = context.getArgument("player", PlayerSelectorArgumentResolver.class).resolve(context.getSource()).getFirst();
-                                                    final int amount = context.getArgument("amount", Integer.class);
+                                                    final Player target = getTargetPlayer(context);
+                                                    final int amount = getAmount(context);
                                                     final User user = database().getUser(target.getUniqueId());
                                                     if (user.wallet() < amount) {
                                                         throw createCommandException(getMessages().errorWithdrawWallet, tagResolver("value", formatCurrency(amount)), tagResolver("player", target.name()));
@@ -59,8 +65,8 @@ public class AdminCommand {
                                 .then(Commands.argument("player", ArgumentTypes.player())
                                         .then(Commands.argument("amount", IntegerArgumentType.integer(0))
                                                 .executes(context -> {
-                                                    final Player target = context.getArgument("player", PlayerSelectorArgumentResolver.class).resolve(context.getSource()).getFirst();
-                                                    final int amount = context.getArgument("amount", Integer.class);
+                                                    final Player target = getTargetPlayer(context);
+                                                    final int amount = getAmount(context);
                                                     final User user = database().getUser(target.getUniqueId());
                                                     user.setWallet(amount);
                                                     database().saveUser(user);
@@ -72,12 +78,21 @@ public class AdminCommand {
                         )
                 )
                 .then(Commands.literal("bank")
+                        .then(Commands.literal("get")
+                                .then(Commands.argument("bank", new BankArgumentType())
+                                        .executes(context -> {
+                                            ensureBankingEnabled();
+                                            return BankCommand.printBankBalance(context, getBank(context));
+                                        })
+                                )
+                        )
                         .then(Commands.literal("deposit")
                                 .then(Commands.argument("bank", new BankArgumentType())
                                         .then(Commands.argument("amount", IntegerArgumentType.integer(1))
                                                 .executes(context -> {
-                                                    final String bank = context.getArgument("bank", String.class);
-                                                    final int amount = context.getArgument("amount", Integer.class);
+                                                    ensureBankingEnabled();
+                                                    final String bank = getBank(context);
+                                                    final int amount = getAmount(context);
                                                     if (!economy().bankDeposit(bank, amount).transactionSuccess()) {
                                                         throw createCommandException(getMessages().errorBankingDeposit, tagResolver("value", formatCurrency(amount)), tagResolver("bank", Component.text(bank)));
                                                     }
@@ -91,8 +106,9 @@ public class AdminCommand {
                                 .then(Commands.argument("bank", new BankArgumentType())
                                         .then(Commands.argument("amount", IntegerArgumentType.integer(1))
                                                 .executes(context -> {
-                                                    final String bank = context.getArgument("bank", String.class);
-                                                    final int amount = context.getArgument("amount", Integer.class);
+                                                    ensureBankingEnabled();
+                                                    final String bank = getBank(context);
+                                                    final int amount = getAmount(context);
                                                     if (!economy().bankWithdraw(bank, amount).transactionSuccess()) {
                                                         throw createCommandException(getMessages().errorBankingWithdraw, tagResolver("value", formatCurrency(amount)), tagResolver("bank", Component.text(bank)));
                                                     }
@@ -106,8 +122,9 @@ public class AdminCommand {
                                 .then(Commands.argument("bank", new BankArgumentType())
                                         .then(Commands.argument("amount", IntegerArgumentType.integer(0))
                                                 .executes(context -> {
-                                                    final String bank = context.getArgument("bank", String.class);
-                                                    final int amount = context.getArgument("amount", Integer.class);
+                                                    ensureBankingEnabled();
+                                                    final String bank = getBank(context);
+                                                    final int amount = getAmount(context);
                                                     final double balance = economy().bankBalance(bank).balance;
                                                     if (amount > balance) {
                                                         final double delta = amount - balance;
@@ -120,14 +137,31 @@ public class AdminCommand {
                                                             throw createCommandException(getMessages().errorBankingWithdraw, tagResolver("value", formatCurrency(delta)), tagResolver("bank", Component.text(bank)));
                                                         }
                                                     }
-                                                    context.getSource().getSender().sendMessage(miniMessage().deserialize(getMessages().balanceBank, tagResolver("bank", Component.text(bank)), tagResolver("value", formatCurrency(amount))));
-                                                    return Command.SINGLE_SUCCESS;
+                                                    return BankCommand.printBankBalance(context, bank);
                                                 })
                                         )
                                 )
                         )
                 )
                 .build();
+    }
+
+    private static Player getTargetPlayer(CommandContext<CommandSourceStack> context) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+        return context.getArgument("player", PlayerSelectorArgumentResolver.class).resolve(context.getSource()).getFirst();
+    }
+
+    private static int getAmount(CommandContext<CommandSourceStack> context) {
+        return context.getArgument("amount", Integer.class);
+    }
+
+    private static String getBank(CommandContext<CommandSourceStack> context) {
+        return context.getArgument("bank", String.class);
+    }
+
+    private static void ensureBankingEnabled() throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+        if (!economy().hasBankSupport()) {
+            throw createCommandException(getMessages().errorBankingDisabled);
+        }
     }
 
 }
