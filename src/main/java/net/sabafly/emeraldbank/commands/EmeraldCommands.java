@@ -59,6 +59,9 @@ public class EmeraldCommands implements LifecycleEventHandler<@NotNull Reloadabl
                         .then(
                                 ExchangeCommand.command()
                         )
+                        .then(
+                                AdminCommand.command()
+                        )
                         .build(),
                 List.of("em", "embank", "emeraldbank", "emerald")
         );

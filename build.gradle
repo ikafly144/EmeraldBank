@@ -3,7 +3,7 @@ plugins {
     // Check for new versions at https://plugins.gradle.org/plugin/io.papermc.paperweight.userdev
     id("io.papermc.paperweight.userdev") version "2.0.0-beta.21"
     id("xyz.jpenilla.run-paper") version "3.0.2"
-    id 'com.gradleup.shadow' version '9.4.1'
+    id 'com.gradleup.shadow' version '9.3.1'
 }
 
 group = 'net.sabafly'
@@ -51,8 +51,8 @@ dependencies {
         transitive = false
     }
 
-    compileOnly 'org.projectlombok:lombok:1.18.44'
-    annotationProcessor 'org.projectlombok:lombok:1.18.44'
+    compileOnly 'org.projectlombok:lombok:1.18.42'
+    annotationProcessor 'org.projectlombok:lombok:1.18.42'
     paperweight.foliaDevBundle("1.21.11-R0.1-SNAPSHOT")
 }
 
@@ -118,11 +118,10 @@ tasks {
         downloadPlugins {
             github("Jikoo", "OpenInv", "5.3.0", "OpenInv.jar")
             github("MilkBowl", "Vault", "1.7.3", "Vault.jar")
-            url("https://ci.ender.zone/job/EssentialsX/1763/artifact/jars/EssentialsX-2.22.0-dev+68-5abe8b6.jar")
             modrinth("luckperms", "v5.5.17-bukkit")
             modrinth("placeholderapi", "2.12.2")
         }
-        minecraftVersion("1.21.11")
+        minecraftVersion("26.1.2")
     }
 
     runFolia {
@@ -130,10 +129,9 @@ tasks {
         downloadPlugins {
             github("Jikoo", "OpenInv", "5.3.0", "OpenInv.jar")
             github("SirBlobman", "Vault-Folia", "v1.7.3-folia", "Vault-1.7.3.jar")
-            url("https://ci.ender.zone/job/EssentialsX/1763/artifact/jars/EssentialsX-2.22.0-dev+68-5abe8b6.jar")
             modrinth("luckperms", "v5.5.17-bukkit")
             modrinth("placeholderapi", "2.12.2")
         }
-        minecraftVersion("1.21.11")
+        minecraftVersion("26.1.2")
     }
 }

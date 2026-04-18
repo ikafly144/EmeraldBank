@@ -114,6 +114,10 @@ public class User {
         wallet -= amount;
     }
 
+    public void setWallet(double amount) {
+        wallet = amount;
+    }
+
     public double wallet() {
         return wallet;
     }
