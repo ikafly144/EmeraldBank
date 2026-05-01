@@ -1,4 +1,6 @@
 # EmeraldBank - A Simple Emerald Economy Plugin
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fikafly144%2FEmeraldBank.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fikafly144%2FEmeraldBank?ref=badge_shield)
+
 
 A simple and lightweight economics plugin using Emerald.
 All messages and configurations are customizable in `config.yml`.
@@ -305,3 +307,7 @@ messages:
   error-exchange-too-low: <red>Exchange amount is too low!
 
 ```
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fikafly144%2FEmeraldBank.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fikafly144%2FEmeraldBank?ref=badge_large)
