@@ -20,7 +20,11 @@ public interface Database {
 
     @NotNull Optional<Bank> getBank(@NotNull String name);
 
-    @NotNull List<User> getUsers();
+    @NotNull List<@NotNull User> getUsers();
+
+    @NotNull User getUserTop(int position);
+
+    @NotNull List<@NotNull User> getTopUsers(int after, int limit);
 
     void saveBank(@NotNull Bank bank);
 

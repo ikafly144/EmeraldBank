@@ -351,6 +351,8 @@ public class Settings extends BaseConfig {
         public String errorNotEnoughCurrency = "<red>You do not have <value> of <currency> to pay!";
         public String errorNoPermission = "<red>You do not have permission to do this!";
         public String errorExchangeTooLow = "<red>Exchange amount is too low!";
+        public String leaderboardHeader = "<green>--- Leaderboard (Page <page>) ---";
+        public String leaderboardEmpty = "<green>NO ENTRIES";
     }
 
 }

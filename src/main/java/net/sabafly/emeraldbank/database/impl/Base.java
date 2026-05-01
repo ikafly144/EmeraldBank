@@ -112,7 +112,7 @@ public abstract class Base implements Database {
     }
 
     @Override
-    public @NotNull List<User> getUsers() {
+    public @NotNull List<@NotNull User> getUsers() {
         try (Connection connection = getConnection()) {
             return runner.query(connection, "SELECT * FROM emeraldbank_users", rs -> {
                 List<User> users = new ArrayList<>();
@@ -121,6 +121,37 @@ public abstract class Base implements Database {
                 }
                 return users;
             });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return List.of();
+    }
+
+    @Override
+    public @NotNull User getUserTop(int position) {
+        try (Connection connection = getConnection()) {
+            return runner.query(connection, "SELECT * FROM emeraldbank_users ORDER BY balance DESC LIMIT 1 OFFSET ?", rs -> {
+                if (!rs.next()) {
+                    throw new IllegalStateException("No users found");
+                }
+                return new User(UUID.fromString(rs.getString("uuid")), rs.getDouble("balance"), rs.getBoolean("use_wallet_first"), rs.getDouble("offline_transaction"));
+            }, position - 1);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        throw new IllegalStateException("Failed to get user top");
+    }
+
+    @Override
+    public @NotNull List<@NotNull User> getTopUsers(int after, int limit) {
+        try (Connection connection = getConnection()) {
+            return runner.query(connection, "SELECT * FROM emeraldbank_users ORDER BY balance DESC LIMIT ? OFFSET ?", rs -> {
+                List<User> users = new ArrayList<>();
+                while (rs.next()) {
+                    users.add(new User(UUID.fromString(rs.getString("uuid")), rs.getDouble("balance"), rs.getBoolean("use_wallet_first"), rs.getDouble("offline_transaction")));
+                }
+                return users;
+            }, limit, after);
         } catch (Exception e) {
             e.printStackTrace();
         }

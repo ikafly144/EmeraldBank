@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static net.sabafly.emeraldbank.EmeraldBank.database;
@@ -44,18 +45,27 @@ public class EmeraldBankPlaceholderExpansion extends PlaceholderExpansion {
 
     @Override
     public @NotNull List<String> getPlaceholders() {
-        return Stream.of(
-                "balance",
-                "balance_<player>",
-                "wallet",
-                "wallet_<player>",
-                "bank_balance_<bank>",
-                "bank_owner_<bank>",
-                "bank_members_<bank>",
-                "bank_list"
-        ).map(s -> "%" + getIdentifier() + "_" + s + "%").toList();
+        return Stream.concat(
+                        Stream.of(
+                                "balance",
+                                "balance_<player>",
+                                "wallet",
+                                "wallet_<player>",
+                                "bank_balance_<bank>",
+                                "bank_owner_<bank>",
+                                "bank_members_<bank>",
+                                "bank_list"
+                        ),
+                        IntStream.rangeClosed(1, 10)
+                                .mapToObj(i -> "top_" + i)
+                                .mapMulti((s, consumer) -> {
+                                    consumer.accept(s);
+                                    consumer.accept(s + "_balance");
+                                })
+                )
+                .map(s -> "%" + getIdentifier() + "_" + s + "%")
+                .toList();
     }
-
 
 
     @Override
@@ -68,6 +78,18 @@ public class EmeraldBankPlaceholderExpansion extends PlaceholderExpansion {
             if (params.startsWith("wallet_")) {
                 OfflinePlayer offlinePlayer = plugin.getServer().getOfflinePlayer(params.substring(7));
                 return economy().format(database().getUser(offlinePlayer.getUniqueId()).wallet());
+            }
+            if (params.startsWith("top_")) {
+                String[] parts = params.split("_");
+                if (parts.length < 2) return null;
+                int rank = Integer.parseInt(parts[1]);
+                var user = database().getUserTop(rank);
+                if (parts.length == 2) {
+                    return user.getName();
+                } else if (parts.length == 3 && parts[2].equals("balance")) {
+                    return economy().format(user.balance());
+                }
+                return null;
             }
             try {
                 if (params.startsWith("bank_balance_")) {
@@ -88,6 +110,7 @@ public class EmeraldBankPlaceholderExpansion extends PlaceholderExpansion {
                     List<String> banks = economy().getBanks();
                     return String.join(", ", banks);
                 }
+
             } catch (Exception e) {
                 return "";
             }

@@ -1,12 +1,14 @@
 package net.sabafly.emeraldbank.commands;
 
 import com.mojang.brigadier.Command;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.plugin.lifecycle.event.handler.LifecycleEventHandler;
 import io.papermc.paper.plugin.lifecycle.event.registrar.ReloadableRegistrarEvent;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.sabafly.emeraldbank.EmeraldBank;
 import net.sabafly.emeraldbank.bank.User;
 import org.jetbrains.annotations.NotNull;
@@ -41,7 +43,10 @@ public class EmeraldCommands implements LifecycleEventHandler<@NotNull Reloadabl
                         .then(
                                 Commands.literal("leaderboard")
                                         .requires(context -> context.getSender().hasPermission("emeraldbank.leaderboard"))
-                                        .executes(EmeraldCommands::printLeaderboard)
+                                        .then(Commands.argument("page", IntegerArgumentType.integer(1, 100))
+                                                .executes(context -> printLeaderboard(context, IntegerArgumentType.getInteger(context, "page")))
+                                        )
+                                        .executes(context -> printLeaderboard(context, 1))
                                         .build()
                         )
                         .then(
@@ -82,16 +87,26 @@ public class EmeraldCommands implements LifecycleEventHandler<@NotNull Reloadabl
         );
     }
 
-    static int printLeaderboard(CommandContext<CommandSourceStack> context) {
+    private static final int ENTRIES_PER_PAGE = 10;
+
+    static int printLeaderboard(CommandContext<CommandSourceStack> context, int page) {
         var result = Component.text();
-        int i =0;
-        var offlinePlayers = new ArrayList<>(database().getUsers());
-        offlinePlayers.sort(Comparator.comparingDouble(User::balance));
-        for (@NotNull User user : offlinePlayers) {
+        result.append(miniMessage().deserialize(getMessages().leaderboardHeader,
+                Placeholder.unparsed("page", String.valueOf(page))
+        ));
+        int i = 0;
+        int after = (page - 1) * ENTRIES_PER_PAGE;
+        var users = new ArrayList<>(database().getTopUsers(after, ENTRIES_PER_PAGE));
+        result.appendNewline();
+        if (users.isEmpty()) {
+            result.append(miniMessage().deserialize(config().messages.leaderboardEmpty));
+        }
+        users.sort(Comparator.comparingDouble(User::balance));
+        for (@NotNull User user : users) {
             i++;
             var name = user.getName();
             result.append(miniMessage().deserialize(getMessages().leaderboard, tagResolver("player", Component.text(name)), tagResolver("balance", formatCurrency(user.balance()))));
-            if (i == offlinePlayers.size()) {
+            if (i == users.size()) {
                 break;
             }
             result.appendNewline();
