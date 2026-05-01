@@ -7,8 +7,12 @@ import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.sabafly.emeraldbank.bank.User;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+
+import java.util.Objects;
 
 import static net.kyori.adventure.text.minimessage.MiniMessage.miniMessage;
 import static net.sabafly.emeraldbank.EmeraldBank.config;
@@ -92,9 +96,11 @@ public class WalletCommand {
                 .build();
     }
 
-    static int printWallet(CommandContext<CommandSourceStack> context, Player player) {
+    static int printWallet(CommandContext<CommandSourceStack> context, OfflinePlayer player) {
         final double balance = database().getUser(player.getUniqueId()).wallet();
-        context.getSource().getSender().sendMessage(miniMessage().deserialize(getMessages().wallet, tagResolver("player", player.name()), tagResolver("value", formatCurrency(balance))));
+        context.getSource().getSender().sendMessage(miniMessage().deserialize(getMessages().wallet,
+                Placeholder.unparsed("player", Objects.requireNonNull(player.getName())),
+                tagResolver("value", formatCurrency(balance))));
         return (int) balance;
     }
 

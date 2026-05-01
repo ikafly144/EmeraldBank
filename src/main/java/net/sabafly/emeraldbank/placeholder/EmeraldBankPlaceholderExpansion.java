@@ -83,7 +83,7 @@ public class EmeraldBankPlaceholderExpansion extends PlaceholderExpansion {
                 String[] parts = params.split("_");
                 if (parts.length < 2 || parts.length > 3) return null;
                 int rank = Integer.parseInt(parts[1]);
-                if (rank < 1 || rank > 100) return null;
+                if (rank < 1 || rank > 1000) return null;
                 var user = database().getUserTop(rank);
                 if (user == null) return "";
                 if (parts.length == 2) {

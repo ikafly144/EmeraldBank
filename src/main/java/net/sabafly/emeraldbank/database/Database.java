@@ -23,6 +23,10 @@ public interface Database {
 
     @NotNull List<@NotNull User> getUsers();
 
+    int getUserCount();
+
+    int getBankCount();
+
     @Nullable User getUserTop(int position);
 
     @NotNull List<@NotNull User> getTopUsers(int after, int limit);

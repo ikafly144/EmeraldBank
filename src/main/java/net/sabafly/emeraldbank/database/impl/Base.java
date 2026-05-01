@@ -129,6 +129,32 @@ public abstract class Base implements Database {
     }
 
     @Override
+    public int getBankCount() {
+        try (Connection connection = getConnection()) {
+            return runner.query(connection, "SELECT COUNT(*) FROM emeraldbank_banks", rs -> {
+                rs.next();
+                return rs.getInt(1);
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    @Override
+    public int getUserCount() {
+        try (Connection connection = getConnection()) {
+            return runner.query(connection, "SELECT COUNT(*) FROM emeraldbank_users", rs -> {
+                rs.next();
+                return rs.getInt(1);
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    @Override
     public @Nullable User getUserTop(int position) {
         try (Connection connection = getConnection()) {
             return runner.query(connection, "SELECT * FROM emeraldbank_users ORDER BY balance DESC LIMIT 1 OFFSET ?", rs -> {

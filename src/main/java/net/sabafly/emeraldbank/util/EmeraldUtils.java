@@ -7,8 +7,8 @@ import io.papermc.paper.command.brigadier.MessageComponentSerializer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.minimessage.tag.Tag;
 import net.kyori.adventure.text.minimessage.tag.TagPattern;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.sabafly.emeraldbank.EmeraldBank;
 import net.sabafly.emeraldbank.configuration.Settings;
@@ -50,11 +50,11 @@ public class EmeraldUtils {
     }
 
     public static TagResolver tagResolver(@TagPattern @NotNull String name, Component value) {
-        return TagResolver.builder().tag(name, Tag.inserting(value)).build();
+        return Placeholder.component(name, value);
     }
 
     public static TagResolver tagResolver(@TagPattern @NotNull String name, ComponentLike value) {
-        return TagResolver.builder().tag(name, Tag.inserting(value)).build();
+        return Placeholder.component(name, value.asComponent());
     }
 
     @Deprecated

@@ -2,15 +2,18 @@ package net.sabafly.emeraldbank.commands;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
-import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
-import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.sabafly.emeraldbank.bank.User;
-import org.bukkit.entity.Player;
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
+
+import java.util.Objects;
 
 import static net.kyori.adventure.text.minimessage.MiniMessage.miniMessage;
 import static net.sabafly.emeraldbank.EmeraldBank.database;
@@ -24,53 +27,65 @@ public class AdminCommand {
                 .requires(context -> context.getSender().hasPermission("emeraldbank.admin"))
                 .then(Commands.literal("wallet")
                         .then(Commands.literal("get")
-                                .then(Commands.argument("player", ArgumentTypes.player())
+                                .then(Commands.argument("player", StringArgumentType.word())
                                         .executes(context -> WalletCommand.printWallet(context, getTargetPlayer(context)))
                                 )
                         )
                         .then(Commands.literal("add")
-                                .then(Commands.argument("player", ArgumentTypes.player())
+                                .then(Commands.argument("player", StringArgumentType.word())
                                         .then(Commands.argument("amount", IntegerArgumentType.integer(1))
                                                 .executes(context -> {
-                                                    final Player target = getTargetPlayer(context);
+                                                    final var target = getTargetPlayer(context);
                                                     final int amount = getAmount(context);
                                                     final User user = database().getUser(target.getUniqueId());
                                                     user.addWallet(amount);
                                                     database().saveUser(user);
-                                                    context.getSource().getSender().sendMessage(miniMessage().deserialize(getMessages().addWallet, tagResolver("value", formatCurrency(amount)), tagResolver("player", target.name())));
+                                                    context.getSource().getSender().sendMessage(miniMessage().deserialize(getMessages().addWallet,
+                                                            tagResolver("value", formatCurrency(amount)),
+                                                            Placeholder.unparsed("player", Objects.requireNonNull(target.getName()))
+                                                    ));
                                                     return Command.SINGLE_SUCCESS;
                                                 })
                                         )
                                 )
                         )
                         .then(Commands.literal("remove")
-                                .then(Commands.argument("player", ArgumentTypes.player())
+                                .then(Commands.argument("player", StringArgumentType.word())
                                         .then(Commands.argument("amount", IntegerArgumentType.integer(1))
                                                 .executes(context -> {
-                                                    final Player target = getTargetPlayer(context);
+                                                    final var target = getTargetPlayer(context);
                                                     final int amount = getAmount(context);
                                                     final User user = database().getUser(target.getUniqueId());
                                                     if (user.wallet() < amount) {
-                                                        throw createCommandException(getMessages().errorWithdrawWallet, tagResolver("value", formatCurrency(amount)), tagResolver("player", target.name()));
+                                                        throw createCommandException(getMessages().errorWithdrawWallet,
+                                                                tagResolver("value", formatCurrency(amount)),
+                                                                Placeholder.unparsed("player", Objects.requireNonNull(target.getName()))
+                                                        );
                                                     }
                                                     user.removeWallet(amount);
                                                     database().saveUser(user);
-                                                    context.getSource().getSender().sendMessage(miniMessage().deserialize(getMessages().withdrawWallet, tagResolver("value", formatCurrency(amount)), tagResolver("player", target.name())));
+                                                    context.getSource().getSender().sendMessage(miniMessage().deserialize(getMessages().withdrawWallet,
+                                                            tagResolver("value", formatCurrency(amount)),
+                                                            Placeholder.unparsed("player", Objects.requireNonNull(target.getName()))
+                                                    ));
                                                     return Command.SINGLE_SUCCESS;
                                                 })
                                         )
                                 )
                         )
                         .then(Commands.literal("set")
-                                .then(Commands.argument("player", ArgumentTypes.player())
+                                .then(Commands.argument("player", StringArgumentType.word())
                                         .then(Commands.argument("amount", IntegerArgumentType.integer(0))
                                                 .executes(context -> {
-                                                    final Player target = getTargetPlayer(context);
+                                                    final var target = getTargetPlayer(context);
                                                     final int amount = getAmount(context);
                                                     final User user = database().getUser(target.getUniqueId());
                                                     user.setWallet(amount);
                                                     database().saveUser(user);
-                                                    context.getSource().getSender().sendMessage(miniMessage().deserialize(getMessages().wallet, tagResolver("player", target.name()), tagResolver("value", formatCurrency(amount))));
+                                                    context.getSource().getSender().sendMessage(miniMessage().deserialize(getMessages().wallet,
+                                                            Placeholder.unparsed("player", Objects.requireNonNull(target.getName())),
+                                                            tagResolver("value", formatCurrency(amount))
+                                                    ));
                                                     return Command.SINGLE_SUCCESS;
                                                 })
                                         )
@@ -146,8 +161,13 @@ public class AdminCommand {
                 .build();
     }
 
-    private static Player getTargetPlayer(CommandContext<CommandSourceStack> context) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
-        return context.getArgument("player", PlayerSelectorArgumentResolver.class).resolve(context.getSource()).getFirst();
+    private static OfflinePlayer getTargetPlayer(CommandContext<CommandSourceStack> context) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+        var name = context.getArgument("player", String.class);
+        var player = Bukkit.getOfflinePlayerIfCached(name);
+        if (player == null) {
+            throw createCommandException(getMessages().errorPlayerNotFound, tagResolver("player", Component.text(name)));
+        }
+        return player;
     }
 
     private static int getAmount(CommandContext<CommandSourceStack> context) {

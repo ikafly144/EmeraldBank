@@ -1,8 +1,11 @@
 package net.sabafly.emeraldbank.commands;
 
 import com.mojang.brigadier.Command;
+import com.mojang.brigadier.LiteralMessage;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.plugin.lifecycle.event.handler.LifecycleEventHandler;
@@ -23,6 +26,9 @@ import static net.sabafly.emeraldbank.EmeraldBank.database;
 import static net.sabafly.emeraldbank.util.EmeraldUtils.*;
 
 public class EmeraldCommands implements LifecycleEventHandler<@NotNull ReloadableRegistrarEvent<@NotNull Commands>> {
+
+    private static final DynamicCommandExceptionType INVALID_PAGE_EXCEPTION = new DynamicCommandExceptionType(page -> new LiteralMessage("Page " + page + " does not exist."));
+
     @Override
     public void run(@NotNull ReloadableRegistrarEvent<@NotNull Commands> event) {
         final Commands commands = event.registrar();
@@ -89,17 +95,23 @@ public class EmeraldCommands implements LifecycleEventHandler<@NotNull Reloadabl
 
     private static final int ENTRIES_PER_PAGE = 10;
 
-    static int printLeaderboard(CommandContext<CommandSourceStack> context, int page) {
+    static int printLeaderboard(CommandContext<CommandSourceStack> context, int page) throws CommandSyntaxException {
         var result = Component.text();
+        int userCount = database().getUserCount();
         result.append(miniMessage().deserialize(getMessages().leaderboardHeader,
-                Placeholder.unparsed("page", String.valueOf(page))
+                Placeholder.unparsed("page", String.valueOf(page)),
+                Placeholder.unparsed("page_max", String.valueOf(ENTRIES_PER_PAGE)),
+                Placeholder.unparsed("total_page", String.valueOf(userCount / ENTRIES_PER_PAGE + (userCount % ENTRIES_PER_PAGE == 0 ? 0 : 1)))
         ));
         int i = 0;
         int after = (page - 1) * ENTRIES_PER_PAGE;
+        if (after >= userCount) {
+            throw INVALID_PAGE_EXCEPTION.create(page);
+        }
         var users = new ArrayList<>(database().getTopUsers(after, ENTRIES_PER_PAGE));
         result.appendNewline();
         if (users.isEmpty()) {
-            result.append(miniMessage().deserialize(config().messages.leaderboardEmpty));
+            throw INVALID_PAGE_EXCEPTION.create(page);
         }
         users.sort(Comparator.comparingDouble(User::balance));
         for (@NotNull User user : users) {
