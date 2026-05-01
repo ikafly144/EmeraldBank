@@ -5,6 +5,7 @@ import net.sabafly.emeraldbank.bank.User;
 import net.sabafly.emeraldbank.database.Database;
 import org.apache.commons.dbutils.QueryRunner;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.sql.Connection;
 import java.util.ArrayList;
@@ -128,11 +129,11 @@ public abstract class Base implements Database {
     }
 
     @Override
-    public @NotNull User getUserTop(int position) {
+    public @Nullable User getUserTop(int position) {
         try (Connection connection = getConnection()) {
             return runner.query(connection, "SELECT * FROM emeraldbank_users ORDER BY balance DESC LIMIT 1 OFFSET ?", rs -> {
                 if (!rs.next()) {
-                    throw new IllegalStateException("No users found");
+                    return null;
                 }
                 return new User(UUID.fromString(rs.getString("uuid")), rs.getDouble("balance"), rs.getBoolean("use_wallet_first"), rs.getDouble("offline_transaction"));
             }, position - 1);

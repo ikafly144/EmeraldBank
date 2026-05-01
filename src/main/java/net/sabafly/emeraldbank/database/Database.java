@@ -3,6 +3,7 @@ package net.sabafly.emeraldbank.database;
 import net.sabafly.emeraldbank.bank.Bank;
 import net.sabafly.emeraldbank.bank.User;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,7 +23,7 @@ public interface Database {
 
     @NotNull List<@NotNull User> getUsers();
 
-    @NotNull User getUserTop(int position);
+    @Nullable User getUserTop(int position);
 
     @NotNull List<@NotNull User> getTopUsers(int after, int limit);
 

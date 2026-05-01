@@ -81,16 +81,18 @@ public class EmeraldBankPlaceholderExpansion extends PlaceholderExpansion {
             }
             if (params.startsWith("top_")) {
                 String[] parts = params.split("_");
-                if (parts.length < 2) return null;
+                if (parts.length < 2 || parts.length > 3) return null;
                 int rank = Integer.parseInt(parts[1]);
                 if (rank < 1 || rank > 100) return null;
                 var user = database().getUserTop(rank);
+                if (user == null) return "";
                 if (parts.length == 2) {
                     return user.getName();
-                } else if (parts.length == 3 && parts[2].equals("balance")) {
+                } else if (parts[2].equals("balance")) {
                     return economy().format(user.balance());
+                } else {
+                    return null;
                 }
-                return null;
             }
             try {
                 if (params.startsWith("bank_balance_")) {
