@@ -19,7 +19,7 @@ allprojects {
 
 val buildNumber: String? = System.getenv("BUILD_NUMBER")
 val releaseVersion =
-    version.toString() + (if (buildNumber != null) "+.build.$buildNumber" else "")
+    version.toString() + (if (buildNumber != null) "+build.$buildNumber" else "")
 
 repositories {
     mavenCentral()
@@ -219,6 +219,10 @@ tasks.withType<JavaCompile>().configureEach {
     if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible) {
         options.release.set(targetJavaVersion)
     }
+}
+
+tasks.named<Jar>("jar") {
+    enabled = false
 }
 
 val shadowJarTask = tasks.named<ShadowJar>("shadowJar") {
