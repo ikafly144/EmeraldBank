@@ -208,7 +208,13 @@ public final class EmeraldBank extends JavaPlugin implements Listener {
                         // .[0].version_number
                         var versionNumber = ((java.util.Map<?, ?>) ((java.util.List<?>) raw).getFirst()).get("version_number");
                         Semver version = new Semver((String) versionNumber);
-                        if (new Semver(getPluginMeta().getVersion()).isLowerThan(version)) {
+                        var current = new Semver(getPluginMeta().getVersion());
+                        if (!current.getBuild().isEmpty()) {
+                            getSLF4JLogger().warn("============== WARNING ==============");
+                            getSLF4JLogger().warn("You are running a development version, update checks might not work correctly");
+                            getSLF4JLogger().warn("============== WARNING ==============");
+                        }
+                        if (current.isLowerThan(version)) {
                             if (version.isStable()) {
                                 getSLF4JLogger().info("A new version is available");
                                 getSLF4JLogger().info("Latest version: {}", versionNumber);

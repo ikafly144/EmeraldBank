@@ -17,6 +17,10 @@ allprojects {
     version = "1.2.1"
 }
 
+val buildNumber: String? = System.getenv("BUILD_NUMBER")
+val releaseVersion =
+    version.toString() + (if (buildNumber != null) "+.build.$buildNumber" else "")
+
 repositories {
     mavenCentral()
     maven {
@@ -219,7 +223,7 @@ tasks.withType<JavaCompile>().configureEach {
 val shadowJarTask = tasks.named<ShadowJar>("shadowJar") {
     archiveBaseName = project.name
     archiveClassifier = ""
-    archiveVersion = project.version.toString()
+    archiveVersion = releaseVersion
 
     dependencies {
         exclude(dependency("org.slf4j:slf4j-api"))
