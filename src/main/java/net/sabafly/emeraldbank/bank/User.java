@@ -61,15 +61,12 @@ public class User {
         if (balance() < Math.ceil(count)) {
             return false;
         }
-        if (isOffline()) {
-            this.offlineTransaction = (this.offlineTransaction == null ? 0.0 : this.offlineTransaction) - count;
-        }
         if (useWalletFirst && wallet >= count) {
             wallet -= count;
             return true;
         }
 
-        return player().map(p -> {
+        boolean success = player().map(p -> {
             int remain = (int) Math.ceil(count);
             if (useWalletFirst && wallet > 0 && getCurrencyCount(p, config().getDefaultCurrency()) + wallet >= count) {
                 remain -= (int) wallet;
@@ -81,7 +78,19 @@ public class User {
                 return true;
             }
             return removeCurrency(p, config().getDefaultCurrency(), remain);
+        }).or(() -> {
+            if (isOffline() && wallet >= count) {
+                wallet -= count;
+                return Optional.of(true);
+            }
+            return Optional.empty();
         }).orElse(false);
+
+        if (isOffline() && success) {
+            this.offlineTransaction = (this.offlineTransaction == null ? 0.0 : this.offlineTransaction) - count;
+        }
+
+        return success;
     }
 
     public void deposit(double count) {

@@ -16,7 +16,11 @@ import static net.sabafly.emeraldbank.util.EmeraldUtils.tagResolver;
 public class Economy extends VaultEconomy {
 
     private EconomyResponse createResponse(double amount, double balance, boolean success) {
-        return new EconomyResponse(success ? amount : 0, balance, success ? EconomyResponse.ResponseType.SUCCESS : EconomyResponse.ResponseType.FAILURE, "");
+        return new EconomyResponse(
+                success ? amount : 0,
+                balance,
+                success ? EconomyResponse.ResponseType.SUCCESS : EconomyResponse.ResponseType.FAILURE,
+                "");
     }
 
     @Override

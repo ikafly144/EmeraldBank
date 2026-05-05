@@ -101,6 +101,11 @@ paper {
             load = PaperPluginDescription.RelativeLoadOrder.BEFORE
             joinClasspath = true
         }
+        register("Towny") {
+            required = false
+            load = PaperPluginDescription.RelativeLoadOrder.AFTER
+            joinClasspath = false
+        }
     }
 
     permissions {
@@ -253,6 +258,7 @@ tasks.named<RunServer>("runServer") {
         github("MilkBowl", "Vault", "1.7.3", "Vault.jar")
         modrinth("luckperms", "v5.5.17-bukkit")
         modrinth("placeholderapi", "2.12.2")
+        modrinth("towny", "0.102.0.0")
     }
     runDirectory = file("run/paper")
     minecraftVersion("26.1.2")
