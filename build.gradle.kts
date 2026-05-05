@@ -76,6 +76,7 @@ paper {
     loader = "net.sabafly.emeraldbank.EmeraldLoader"
     generateLibrariesJson = true
     foliaSupported = true
+    authors = listOf("ikafly144")
 
     bootstrapDependencies {
         register("Essentials") {
