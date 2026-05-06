@@ -1,10 +1,11 @@
 # EmeraldBank - A Simple Emerald Economy Plugin
 
 A simple and lightweight economics plugin using Emerald.
-All messages and configurations are customizable in `config.yml`.
+All messages and configurations are customisable in `config.yml`.
 
 ## Dependencies
 
+- Java 25 or higher
 - [Paper](https://papermc.io/)
 - [Vault](https://github.com/MilkBowl/Vault/releases)
 
@@ -19,12 +20,12 @@ However, we will support the previous version for a while.
 We will not support the version that is no longer supported by PaperMC.
 The following table shows the support status of each version.
 
-| Version         | Support                        |
-|-----------------|--------------------------------|
-| 1.21.8          | ✅ Active support               |
-| 1.21.6 ~ 1.21.7 | ✅ Active support               |
-| 1.21 ~ 1.21.5   | 🔁 May work, but not supported |
-| < 1.20.X        | 🚧 No longer supported         |
+| Version          | Support                          |
+|------------------|----------------------------------|
+| 26.1.X           | ✅ Main target                    |
+| 1.21.6 ~ 1.21.11 | 🔁 Supported                     |
+| 1.21 ~ 1.21.5    | 🚧 Not supported                 |
+| < 1.20.X         | ⚠️ Not works with legacy version |
 
 ## Commands
 
