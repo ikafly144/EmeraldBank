@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 @SuppressWarnings({"unused", "UnstableApiUsage"})
@@ -23,10 +24,7 @@ public class EmeraldLoader implements PluginLoader {
         PluginLibraries pluginLibraries = loadLibraries();
         pluginLibraries.asDependencies().forEach(resolver::addDependency);
 
-        resolver.addRepository(new RemoteRepository.Builder("central", "default", MavenLibraryResolver.MAVEN_CENTRAL_DEFAULT_MIRROR).build());
-        resolver.addRepository(new RemoteRepository.Builder("papermc", "default", "https://repo.papermc.io/repository/maven-public/").build());
-        resolver.addRepository(new RemoteRepository.Builder("sonatype", "default", "https://oss.sonatype.org/content/groups/public/").build());
-
+        pluginLibraries.asRepositories().forEach(resolver::addRepository);
         classpathBuilder.addLibrary(resolver);
     }
 
@@ -47,10 +45,15 @@ public class EmeraldLoader implements PluginLoader {
         }
     }
 
-    private record PluginLibraries(List<String> dependencies) {
+    private record PluginLibraries(Map<String, String> repositories, List<String> dependencies) {
         private Stream<Dependency> asDependencies() {
             return (dependencies == null ? List.<String>of() : dependencies).stream()
                     .map(coordinates -> new Dependency(new DefaultArtifact(coordinates), "compile"));
+        }
+
+        private Stream<RemoteRepository> asRepositories() {
+            return (repositories == null ? Map.<String, String>of() : repositories).entrySet().stream()
+                    .map(entry -> new RemoteRepository.Builder(entry.getKey(), "default", entry.getValue()).build());
         }
     }
 }
