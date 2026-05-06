@@ -14,7 +14,7 @@ plugins {
 
 allprojects {
     group = "net.sabafly"
-    version = "1.2.2"
+    version = "1.2.3-dev"
 }
 
 val buildNumber: String? = System.getenv("BUILD_NUMBER")
@@ -70,6 +70,7 @@ dependencies {
 paper {
     name = rootProject.name
     main = "net.sabafly.emeraldbank.EmeraldBank"
+    version = releaseVersion
     apiVersion = "1.21.6"
     website = "https://modrinth.com/plugin/emeraldbank"
     bootstrapper = "net.sabafly.emeraldbank.EmeraldBootstrapper"
@@ -271,4 +272,18 @@ tasks.named<RunServer>("runServer") {
     }
     runDirectory = file("run/paper")
     minecraftVersion("26.1.2")
+}
+
+tasks.register<RunServer>("runLegacyServer") {
+    description = "Runs a legacy server with Minecraft 1.21.6 for testing purposes."
+    downloadPlugins {
+        modrinth("openinv", "5.3.1")
+        github("MilkBowl", "Vault", "1.7.3", "Vault.jar")
+        modrinth("luckperms", "v5.5.17-bukkit")
+        modrinth("placeholderapi", "2.12.2")
+        modrinth("towny", "0.102.0.0")
+    }
+    pluginJars.from(shadowJarTask.flatMap { it.archiveFile })
+    runDirectory = file("run/legacy")
+    minecraftVersion("1.21.6")
 }
