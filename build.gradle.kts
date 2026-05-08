@@ -52,7 +52,7 @@ dependencies {
     paperLibrary("com.mysql:mysql-connector-j:9.7.0")
     implementation("com.zaxxer:HikariCP:7.0.2")
     implementation("commons-dbutils:commons-dbutils:1.8.1")
-    implementation("org.spongepowered:configurate-yaml:4.2.0+lunar.5")
+    implementation("org.spongepowered:configurate-yaml:4.2.0")
     implementation("com.vdurmont:semver4j:3.1.0")
 
     compileOnly("com.github.MilkBowl:VaultAPI:1.7.1") {
