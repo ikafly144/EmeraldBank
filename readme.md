@@ -1,7 +1,7 @@
 # EmeraldBank - A Simple Emerald Economy Plugin
 
 A simple and lightweight economics plugin using Emerald.
-All messages and configurations are customisable in `config.yml`.
+All messages and configurations are customizable in `config.yml`.
 
 ## Dependencies
 
@@ -35,6 +35,7 @@ The following table shows the support status of each version.
 - `/wallet` Alias of `/emeraldbank wallet`
 - `/em` Alias of `/emeraldbank`
 - `/embank` Alias of `/emeraldbank`
+- `/emeraldbank admin <subcommand>` Admin command.
 - `/emeraldbank balance` Show your balance that count of emeralds you have.
 - `/emeraldbank balance <player>` Show other player's balance.
 - `/emeraldbank leaderboard` Show all player's balance in leaderboard.
@@ -106,6 +107,8 @@ The following table shows the support status of each version.
 - `%emeraldbank_bank_owner_<bank>%`
 - `%emeraldbank_bank_members_<bank>%`
 - `%emeraldbank_bank_list%`
+- `%emeraldbank_top_<number>%`
+- `%emeraldbank_top_<number>_balance%`
 
 ## Configuration
 
@@ -121,10 +124,10 @@ The following table shows the support status of each version.
 
 # DO NOT CHANGE THIS VALUE!
 config_version: 1
-
 # The cost for paying a player.
 pay-cost: disabled
-
+# Notify when there is a new version of EmeraldBank available.
+notify-new-version: true
 #################################################################
 ##                                                              #
 ##  Banking                                                     #
@@ -136,38 +139,30 @@ banking:
   tax:
     # The cost for creating a bank.
     create-cost: disabled
-
     # The cost for creating a bank.
     add-member-cost: disabled
-
     # The cost for removing a member from a bank.
     transfer-bank-cost: disabled
-
     # The cost for sending from a bank to another bank.
     deposit-cost: disabled
-
     # The cost for withdrawing from a bank.
     withdraw-cost: disabled
-
     # The cost for paying from a bank to a player.
     pay-cost: disabled
-
 # The default destination for payments.
 # INVENTORY: The player's inventory.
 # WALLET: The player's wallet.
 default-destination: INVENTORY
-
 # Load offline players' inventories.
 # This setting requires OpenInv (https://github.com/Jikoo/OpenInv).
 # Change of this setting will require a restart of the server.
 load-offline-players-inventories: false
-
 # Enable or disable the exchange feature.
 
 # WARNING: This setting is experimental feature.
 # This setting may change in the future.
 exchange-enabled: false
-
+villager-integration: true
 #################################################################
 ##                                                              #
 ##  Currencies                                                  #
@@ -183,26 +178,19 @@ currencies:
   emerald:
     # The name of the currency.
     name: Emerald
-
     # The plural name of the currency.
     name-plural: Emeralds
-
     # Use this currency as the default currency.
     default-currency: true
-
     # The rate of the currency.
     rate: 1.0
-
     # The item type of the currency.
     item-type: emerald
-
     # The children item type and rate of the currency.
     children:
       emerald_block: 9
-
     # The cost for exchanging.
     cost: disabled
-
 #################################################################
 ##                                                              #
 ##  Database                                                    #
@@ -214,22 +202,16 @@ database:
   # H2: H2 Database
   # MYSQL: MySQL Database
   type: H2
-
   # The host of the database.
   host: localhost
-
   # The port of the database.
   port: 3306
-
   # The name of the database.
   database: emeraldbank
-
   # The username of the database.
   username: root
-
   # The password of the database.
   password: password
-
 #################################################################
 ##                                                              #
 ##  Messages                                                    #
@@ -304,5 +286,6 @@ messages:
   error-not-enough-currency: <red>You do not have <value> of <currency> to pay!
   error-no-permission: <red>You do not have permission to do this!
   error-exchange-too-low: <red>Exchange amount is too low!
+  leaderboard-header: <green>--- Leaderboard (Page <page>/<total_page>) ---
 
 ```
