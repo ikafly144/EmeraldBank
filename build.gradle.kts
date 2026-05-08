@@ -14,7 +14,7 @@ plugins {
 
 allprojects {
     group = "net.sabafly"
-    version = "1.2.3-dev"
+    version = "1.2.3-rc.0"
 }
 
 val buildNumber: String? = System.getenv("BUILD_NUMBER")
