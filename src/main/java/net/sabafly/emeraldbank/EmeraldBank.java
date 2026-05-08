@@ -39,6 +39,7 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import static net.kyori.adventure.text.minimessage.MiniMessage.miniMessage;
@@ -122,7 +123,7 @@ public final class EmeraldBank extends JavaPlugin implements Listener {
     @Override
     public void onEnable() {
         if (!ServerBuildInfo.buildInfo().isBrandCompatible(Key.key("papermc", "paper")) &&
-            !ServerBuildInfo.buildInfo().isBrandCompatible(Key.key("papermc", "folia"))) {
+                !ServerBuildInfo.buildInfo().isBrandCompatible(Key.key("papermc", "folia"))) {
             getSLF4JLogger().error("This plugin is not compatible with {} server", ServerBuildInfo.buildInfo().brandName());
             getServer().getPluginManager().disablePlugin(this);
             return;
@@ -209,7 +210,7 @@ public final class EmeraldBank extends JavaPlugin implements Listener {
                         var versionNumber = ((java.util.Map<?, ?>) ((java.util.List<?>) raw).getFirst()).get("version_number");
                         Semver version = new Semver((String) versionNumber);
                         var current = new Semver(getPluginMeta().getVersion());
-                        if (!current.getBuild().isEmpty()) {
+                        if (current.getBuild() != null) {
                             getSLF4JLogger().warn("============== WARNING ==============");
                             getSLF4JLogger().warn("You are running a development version, update checks might not work correctly");
                             getSLF4JLogger().warn("============== WARNING ==============");
