@@ -35,7 +35,14 @@ The following table shows the support status of each version.
 - `/wallet` Alias of `/emeraldbank wallet`
 - `/em` Alias of `/emeraldbank`
 - `/embank` Alias of `/emeraldbank`
-- `/emeraldbank admin <subcommand>` Admin command.
+- `/emeraldbank admin bank get <bank>` Get bank information.
+- `/emeraldbank admin bank deposit <bank> <count>` Deposit emeralds to the bank.
+- `/emeraldbank admin bank withdraw <bank> <count>` Withdraw emeralds from the bank.
+- `/emeraldbank admin bank set <bank> <count>` Set the bank balance.
+- `/emeraldbank admin wallet get <player>` Get player's wallet balance.
+- `/emeraldbank admin wallet add <player> <count>` Add emeralds to player's wallet.
+- `/emeraldbank admin wallet remove <player> <count>` Remove emeralds from player's wallet.
+- `/emeraldbank admin wallet set <player> <count>` Set player's wallet balance
 - `/emeraldbank balance` Show your balance that count of emeralds you have.
 - `/emeraldbank balance <player>` Show other player's balance.
 - `/emeraldbank leaderboard` Show all player's balance in leaderboard.
