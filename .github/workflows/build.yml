@@ -1,0 +1,177 @@
+name: Build
+
+on:
+  push:
+    tags:
+      - "*"
+permissions:
+  contents: read
+
+jobs:
+  resolve-config:
+    runs-on: ubuntu-latest
+    outputs:
+      java_version: ${{ steps.gradle-props.outputs.java_version }}
+      build_mode: ${{ steps.config.outputs.build_mode }}
+      plugin_version: ${{ steps.config.outputs.plugin_version }}
+      modrinth_version_type: ${{ steps.config.outputs.modrinth_version_type }}
+      hangar_channel: ${{ steps.config.outputs.hangar_channel }}
+      channel_key: ${{ steps.config.outputs.channel_key }}
+      modrinth_project_id: ${{ steps.gradle-props.outputs.modrinth_project_id }}
+      hangar_project_id: ${{ steps.gradle-props.outputs.hangar_project_id }}
+      changelog: ${{ steps.changelog.outputs.changelog }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Read Gradle properties
+        id: gradle-props
+        run: |
+          echo "java_version=$(grep '^javaVersion=' gradle.properties | cut -d'=' -f2)" >> "$GITHUB_OUTPUT"
+          echo "base_plugin_version=$(grep '^pluginVersion=' gradle.properties | cut -d'=' -f2)" >> "$GITHUB_OUTPUT"
+          echo "modrinth_project_id=$(grep '^modrinthProjectId=' gradle.properties | cut -d'=' -f2)" >> "$GITHUB_OUTPUT"
+          echo "hangar_project_id=$(grep '^hangarProjectId=' gradle.properties | cut -d'=' -f2)" >> "$GITHUB_OUTPUT"
+
+      - name: Check version format
+        id: version-check
+        env:
+          BASE_PLUGIN_VERSION: ${{ steps.gradle-props.outputs.base_plugin_version }}
+        run: |
+          if [[ ! "$BASE_PLUGIN_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[A-Za-z0-9.-]+)?$ ]]; then
+            echo "Error: pluginVersion '$BASE_PLUGIN_VERSION' does not match required format x.y.z, x.y.z-qualifier.num, or x.y.z-qualifier."
+            exit 1
+          fi
+          # base version and tag version must exactly match
+          tag_version="${GITHUB_REF#refs/tags/}"
+          if [ "$BASE_PLUGIN_VERSION" != "$tag_version" ]; then
+            echo "Error: pluginVersion '$BASE_PLUGIN_VERSION' does not match tag version '$tag_version'."
+            exit 1
+          fi
+
+      - name: Resolve build and release settings
+        id: config
+        env:
+          BASE_PLUGIN_VERSION: ${{ steps.gradle-props.outputs.base_plugin_version }}
+        run: |
+          if [[ "$BASE_PLUGIN_VERSION" =~ -[A-Za-z0-9.-]+ ]]; then
+            if [[ "$BASE_PLUGIN_VERSION" =~ -[Bb][Ee][Tt][Aa] ]]; then
+              build_mode="beta"
+              plugin_version="${BASE_PLUGIN_VERSION}"
+              default_modrinth_version_type="beta"
+              default_hangar_channel="Beta"
+            else
+              build_mode="alpha"
+              plugin_version="${BASE_PLUGIN_VERSION}"
+              default_modrinth_version_type="alpha"
+              default_hangar_channel="Alpha"
+            fi
+          else
+            build_mode="release"
+            plugin_version="${BASE_PLUGIN_VERSION}"
+            default_modrinth_version_type="release"
+            default_hangar_channel="Release"
+          fi
+
+          modrinth_version_type="${default_modrinth_version_type}"
+          hangar_channel="${default_hangar_channel}"
+          channel_key="$(echo "$hangar_channel" | tr '[:lower:]' '[:upper:]' | sed -E 's/[^A-Z0-9]+/_/g' | sed -E 's/^_+|_+$//g')"
+          if [ -z "$channel_key" ]; then
+            channel_key="DEFAULT"
+          fi
+
+          echo "build_mode=$build_mode" >> "$GITHUB_OUTPUT"
+          echo "plugin_version=$plugin_version" >> "$GITHUB_OUTPUT"
+          echo "modrinth_version_type=$modrinth_version_type" >> "$GITHUB_OUTPUT"
+          echo "hangar_channel=$hangar_channel" >> "$GITHUB_OUTPUT"
+          echo "channel_key=$channel_key" >> "$GITHUB_OUTPUT"
+
+      - name: Generate Changelog
+        id: changelog
+        uses: mikepenz/release-changelog-builder-action@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          mode: "COMMIT"
+
+  publish:
+    needs: resolve-config
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: ${{ needs.resolve-config.outputs.java_version }}
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Ensure Gradle wrapper is executable
+        run: chmod +x ./gradlew
+
+      - name: Publish plugin release
+        env:
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+          HANGAR_API_TOKEN: ${{ secrets.HANGAR_API_TOKEN }}
+          RELEASE_CHANGELOG: ${{ needs.resolve-config.outputs.changelog || github.event.head_commit.message || format('Automated release for {0}', github.ref_name) }}
+        run: >
+          ./gradlew publishPluginRelease --stacktrace
+          -PpluginVersion=${{ needs.resolve-config.outputs.plugin_version }}
+          -PmodrinthVersionType=${{ needs.resolve-config.outputs.modrinth_version_type }}
+          -PhangarChannel=${{ needs.resolve-config.outputs.hangar_channel }}
+
+  notify-discord:
+    needs:
+      - resolve-config
+      - publish
+    if: startsWith(github.ref, 'refs/tags/') && needs.publish.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send changelog to Discord
+        env:
+          CHANNEL_KEY: ${{ needs.resolve-config.outputs.channel_key }}
+          RELEASE_CHANNEL: ${{ needs.resolve-config.outputs.hangar_channel }}
+          RELEASE_VERSION: ${{ needs.resolve-config.outputs.plugin_version }}
+          MODRINTH_PROJECT_ID: ${{ needs.resolve-config.outputs.modrinth_project_id }}
+          HANGAR_PROJECT_ID: ${{ needs.resolve-config.outputs.hangar_project_id }}
+          CHANGELOG: ${{ needs.resolve-config.outputs.changelog || github.event.head_commit.message || format('Automated release for {0}', github.ref_name) }}
+          WEBHOOK_URL_SECRET: ${{ secrets[format('DISCORD_WEBHOOK_{0}', needs.resolve-config.outputs.channel_key)] }}
+          ROLE_MENTION_VAR: ${{ vars[format('DISCORD_ROLE_MENTION_{0}', needs.resolve-config.outputs.channel_key)] }}
+        run: |
+          webhook_url="${WEBHOOK_URL_SECRET}"
+          role_mention="${ROLE_MENTION_VAR}"
+
+          if [ -z "$webhook_url" ]; then
+            echo "No Discord webhook configured for channel key '$CHANNEL_KEY'. Skipping notification."
+            exit 0
+          fi
+
+          if [ -n "$role_mention" ]; then
+            footer="$role_mention "
+          else
+            footer=""
+          fi
+
+          modrinth_version_id=$(curl --silent --show-error --fail "https://api.modrinth.com/v2/project/${MODRINTH_PROJECT_ID}/version" \
+            | jq -r --arg version "$RELEASE_VERSION" '.[] | select(.version_number == $version) | .id' \
+            | head -n 1)
+          if [ -n "$modrinth_version_id" ]; then
+            modrinth_release_url="https://modrinth.com/plugin/${MODRINTH_PROJECT_ID}/version/${modrinth_version_id}"
+          else
+            modrinth_release_url="https://modrinth.com/plugin/${MODRINTH_PROJECT_ID}/versions"
+          fi
+
+          hangar_release_url="https://hangar.papermc.io/${GITHUB_REPOSITORY_OWNER}/${HANGAR_PROJECT_ID}/versions/${RELEASE_VERSION}"
+
+          message=$(printf "# **EmeraldBank %s** \n%s\n\n%s\nModrinth: %s\nHangar: %s" \
+            "$RELEASE_VERSION" "$CHANGELOG" "$footer" "$modrinth_release_url" "$hangar_release_url")
+
+          payload=$(jq -n --arg content "$message" '{content:$content}')
+          curl --fail-with-body -X POST -H "Content-Type: application/json" -d "$payload" "$webhook_url"
