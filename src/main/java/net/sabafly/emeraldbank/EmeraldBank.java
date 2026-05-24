@@ -39,7 +39,6 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.Duration;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import static net.kyori.adventure.text.minimessage.MiniMessage.miniMessage;
@@ -50,6 +49,7 @@ public final class EmeraldBank extends JavaPlugin implements Listener {
     @Getter
     private static Path dataDir;
     private final Economy economy = new Economy();
+    private boolean vaultPresent = false;
     private Database database;
     @Nullable
     private EssentialsAccess essentialsAccess = null;
@@ -107,7 +107,7 @@ public final class EmeraldBank extends JavaPlugin implements Listener {
     @Override
     public void onDisable() {
         // Plugin shutdown logic
-        database.close();
+        if (database != null) database.close();
         getComponentLogger().info(miniMessage().deserialize("Disabled <version>", TagResolver.builder().tag("version", Tag.inserting(Component.text(getPluginMeta().getVersion()))).build()));
     }
 
@@ -118,6 +118,10 @@ public final class EmeraldBank extends JavaPlugin implements Listener {
             essentialsAccess.load();
             getSLF4JLogger().info("Detected Essentials plugin, enabling support for Essentials");
         }
+        if (!setupEconomy())
+            getComponentLogger().error(miniMessage().deserialize("<red>Vault is not installed, plugin will be disabled."));
+        else
+            vaultPresent = true;
     }
 
     @Override
@@ -125,6 +129,11 @@ public final class EmeraldBank extends JavaPlugin implements Listener {
         if (!ServerBuildInfo.buildInfo().isBrandCompatible(Key.key("papermc", "paper")) &&
                 !ServerBuildInfo.buildInfo().isBrandCompatible(Key.key("papermc", "folia"))) {
             getSLF4JLogger().error("This plugin is not compatible with {} server", ServerBuildInfo.buildInfo().brandName());
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
+
+        if (!vaultPresent) {
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
@@ -137,11 +146,6 @@ public final class EmeraldBank extends JavaPlugin implements Listener {
         if (config().loadOfflinePlayersInventories)
             OpenInvAccess.load();
 
-        if (!setupEconomy()) {
-            getComponentLogger().warn(miniMessage().deserialize("<red>Disabled due to no Vault dependency found!", TagResolver.empty()));
-            getServer().getPluginManager().disablePlugin(this);
-            return;
-        }
         if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new EmeraldBankPlaceholderExpansion(this).register();
         }
@@ -157,7 +161,7 @@ public final class EmeraldBank extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(new VillagerListener(), this);
 
         getComponentLogger().info(miniMessage().deserialize("Enabled <version>", TagResolver.builder().tag("version", Tag.inserting(Component.text(getPluginMeta().getVersion()))).build()));
-        Bukkit.getAsyncScheduler().runAtFixedRate(this, task -> updateCheck(), 1, 6, TimeUnit.HOURS);
+        Bukkit.getAsyncScheduler().runAtFixedRate(this, _ -> updateCheck(), 1, 24, TimeUnit.HOURS);
     }
 
     private boolean setupEconomy() {

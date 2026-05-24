@@ -84,6 +84,11 @@ paper {
     authors = listOf("ikafly144")
 
     bootstrapDependencies {
+        register("Vault") {
+            required = false
+            load = PaperPluginDescription.RelativeLoadOrder.BEFORE
+            joinClasspath = true
+        }
         register("Essentials") {
             required = false
             load = PaperPluginDescription.RelativeLoadOrder.BEFORE
