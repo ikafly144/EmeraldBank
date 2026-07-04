@@ -99,7 +99,7 @@ dependencies {
     compileOnly("me.clip:placeholderapi:2.12.2") {
         isTransitive = false
     }
-    compileOnly("com.github.Jikoo:OpenInv:5.3.2")
+    compileOnly("com.github.Jikoo:OpenInv:5.3.3")
     compileOnly("net.essentialsx:EssentialsX:2.21.2") {
         isTransitive = false
     }
