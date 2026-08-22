@@ -7,7 +7,7 @@ import xyz.jpenilla.runpaper.task.RunServer
 plugins {
     java
     id("de.eldoria.plugin-yml.paper") version "0.9.0"
-    id("io.papermc.paperweight.userdev") version "2.0.0-beta.21"
+    id("io.papermc.paperweight.userdev") version "2.0.0-beta.22"
     id("xyz.jpenilla.run-paper") version "3.1.0"
     id("com.gradleup.shadow") version "9.6.1"
     id("com.modrinth.minotaur") version "2.+"
