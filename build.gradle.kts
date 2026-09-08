@@ -86,7 +86,7 @@ repositories {
 }
 
 dependencies {
-    paperLibrary("com.h2database:h2:2.4.240")
+    paperLibrary("com.h2database:h2:2.5.250")
     paperLibrary("com.mysql:mysql-connector-j:26.7.0")
     implementation("com.zaxxer:HikariCP:7.1.0")
     implementation("commons-dbutils:commons-dbutils:1.8.1")
