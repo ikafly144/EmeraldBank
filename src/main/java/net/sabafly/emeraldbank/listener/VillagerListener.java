@@ -5,8 +5,9 @@ import io.papermc.paper.event.player.PlayerTradeEvent;
 import net.sabafly.emeraldbank.EmeraldBank;
 import net.sabafly.emeraldbank.util.LogUtils;
 import net.sabafly.emeraldbank.util.PlayerInventoryUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
-import org.bukkit.entity.EntityType;
+import org.bukkit.entity.AbstractVillager;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -29,7 +30,7 @@ public class VillagerListener implements Listener {
     public void onTradeSelect(TradeSelectEvent event) {
         if (!config().villagerIntegration) return;
 
-        if (event.getMerchant().getTrader() == null || !config().villagerTypes.contains(event.getMerchant().getTrader().getType().getKey().asMinimalString())) {
+        if (!(event.getMerchant() instanceof AbstractVillager villager) || !config().villagerTypes.contains(villager.getType().getKey().asMinimalString())) {
             return;
         }
 
@@ -41,15 +42,21 @@ public class VillagerListener implements Listener {
             return;
         }
         final var slot1 = event.getInventory().getItem(0);
+        var amount = 0;
+        final var currencyKey = config().getDefaultCurrencyKey().asMinimalString();
         if (slot1 != null && slot1.getAmount() > 0) return;
         if (PlayerInventoryUtils.getCurrencyCount(player, config().getDefaultCurrency()) < ingredient.getAmount()) {
             if (!economy().withdrawPlayer(player, ingredient.getAmount()).transactionSuccess())
                 return;
             PlayerInventoryUtils.addCurrencyItem(player, config().getDefaultCurrency(), ingredient.getAmount());
+            amount = ingredient.getAmount();
         }
 
-        var amount = ingredient.getAmount();
-        final var currencyKey = config().getDefaultCurrencyKey().asMinimalString();
+        if (!PlayerInventoryUtils.convertToParentIfNeeded(player, config().getDefaultCurrency(), ingredient.getAmount()))
+            LogUtils.getLogger().debug("Failed to convert currency for player {} for villager trade", player.getName());
+        player.updateInventory();
+
+        if (amount <= 0) return;
 
         if (event.getWhoClicked().getPersistentDataContainer().has(TRADE_AMOUNT, org.bukkit.persistence.PersistentDataType.INTEGER) &&
             event.getWhoClicked().getPersistentDataContainer().has(TRADE_CURRENCY, org.bukkit.persistence.PersistentDataType.STRING))
@@ -61,10 +68,6 @@ public class VillagerListener implements Listener {
 
         event.getWhoClicked().getPersistentDataContainer().set(TRADE_AMOUNT, org.bukkit.persistence.PersistentDataType.INTEGER, amount);
         event.getWhoClicked().getPersistentDataContainer().set(TRADE_CURRENCY, org.bukkit.persistence.PersistentDataType.STRING, currencyKey);
-
-        if (!PlayerInventoryUtils.convertToParentIfNeeded(player, config().getDefaultCurrency(), ingredient.getAmount()))
-            LogUtils.getLogger().debug("Failed to convert currency for player {} for villager trade", player.getName());
-        player.updateInventory();
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -97,13 +100,16 @@ public class VillagerListener implements Listener {
             final var amount = event.getPlayer().getPersistentDataContainer().get(TRADE_AMOUNT, org.bukkit.persistence.PersistentDataType.INTEGER);
             final var currencyKey = event.getPlayer().getPersistentDataContainer().get(TRADE_CURRENCY, org.bukkit.persistence.PersistentDataType.STRING);
             if (amount != null && currencyKey != null) {
-                final var currency = config().getCurrency(Objects.requireNonNull(NamespacedKey.fromString(currencyKey)));
-                if (PlayerInventoryUtils.removeCurrency((Player) event.getPlayer(), currency, amount)) {
-                    if (!economy().depositPlayer((Player) event.getPlayer(), amount).transactionSuccess())
-                        LogUtils.getLogger().debug("Failed to deposit {} to player {} for villager trade", amount, event.getPlayer().getName());
-                } else {
-                    LogUtils.getLogger().debug("Failed to remove {} of currency {} from player {} for villager trade", amount, currencyKey, event.getPlayer().getName());
-                }
+                Bukkit.getScheduler().runTask(EmeraldBank.getInstance(), () -> {
+                    final var currency = config().getCurrency(Objects.requireNonNull(NamespacedKey.fromString(currencyKey)));
+                    if (PlayerInventoryUtils.removeCurrency((Player) event.getPlayer(), currency, amount)) {
+                        if (!economy().depositPlayer((Player) event.getPlayer(), amount).transactionSuccess())
+                            LogUtils.getLogger().debug("Failed to deposit {} to player {} for villager trade", amount, event.getPlayer().getName());
+                    } else {
+                        LogUtils.getLogger().debug("Failed to remove {} of currency {} from player {} for villager trade", amount, currencyKey, event.getPlayer().getName());
+                    }
+                    ((Player) event.getPlayer()).updateInventory();
+                });
             }
         }
 
