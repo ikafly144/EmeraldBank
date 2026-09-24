@@ -159,6 +159,10 @@ jobs:
             footer=""
           fi
 
+          if [ "${#CHANGELOG}" -gt 2000 ]; then
+            CHANGELOG="${CHANGELOG:0:1997}..."
+          fi
+
           modrinth_version_id=$(curl --silent --show-error --fail "https://api.modrinth.com/v2/project/${MODRINTH_PROJECT_ID}/version" \
             | jq -r --arg version "$RELEASE_VERSION" '.[] | select(.version_number == $version) | .id' \
             | head -n 1)
