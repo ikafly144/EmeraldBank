@@ -20,12 +20,12 @@ However, we will support the previous version for a while.
 We will not support the version that is no longer supported by PaperMC.
 The following table shows the support status of each version.
 
-| Version          | Support                          |
-|------------------|----------------------------------|
-| 26.1.X           | ✅ Main target                    |
+|     Version      | Support                          |
+|:----------------:|----------------------------------|
+|   26.1 ~ 26.3    | ✅ Main target                   |
 | 1.21.6 ~ 1.21.11 | 🔁 Supported                     |
-| 1.21 ~ 1.21.5    | 🚧 Not supported                 |
-| < 1.20.X         | ⚠️ Not works with legacy version |
+|  1.21 ~ 1.21.5   | 🚧 Not supported                 |
+|     < 1.20.X     | ⚠️ Not works with legacy version |
 
 ## Commands
 
