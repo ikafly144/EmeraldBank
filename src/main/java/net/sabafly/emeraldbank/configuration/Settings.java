@@ -16,6 +16,7 @@ import org.spongepowered.configurate.objectmapping.meta.Required;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -113,6 +114,10 @@ public class Settings extends BaseConfig {
         return currencies.values().stream().filter(c -> c.defaultCurrency).findFirst().orElse(currencies.values().stream().findFirst().orElseThrow());
     }
 
+    public @NotNull NamespacedKey getDefaultCurrencyKey() {
+        return currencies.entrySet().stream().filter(e -> e.getValue().defaultCurrency).map(Map.Entry::getKey).findFirst().orElse(currencies.keySet().stream().findFirst().orElseThrow());
+    }
+
     @Comment("""
             Enable or disable the exchange feature.
             
@@ -122,6 +127,8 @@ public class Settings extends BaseConfig {
     public boolean exchangeEnabled = false;
 
     public boolean villagerIntegration = true;
+
+    public List<String> villagerTypes = List.of("villager", "wandering_trader");
 
     @Comment("""
             ################################################################

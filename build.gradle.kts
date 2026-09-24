@@ -14,23 +14,23 @@ plugins {
     id("io.papermc.hangar-publish-plugin") version "0.+"
 }
 
-val projectGroup: String by project
-val pluginVersion: String by project
+val projectGroup = project.findProperty("projectGroup") as String
+val pluginVersion = project.findProperty("pluginVersion") as String
 
 allprojects {
     group = projectGroup
     version = pluginVersion
 }
 
-val javaVersion: String by project
-val minecraftVersion: String by project
-val pluginArtifactName: String by project
-val supportedMinecraftVersions: String by project
-val modrinthProjectId: String by project
-val modrinthLoaders: String by project
-val modrinthVersionType: String by project
-val hangarProjectId: String by project
-val hangarChannel: String by project
+val javaVersion = project.findProperty("javaVersion") as String
+val minecraftVersion = project.findProperty("minecraftVersion") as String
+val pluginArtifactName = project.findProperty("pluginArtifactName") as String
+val supportedMinecraftVersions = project.findProperty("supportedMinecraftVersions") as String
+val modrinthProjectId = project.findProperty("modrinthProjectId") as String
+val modrinthLoaders = project.findProperty("modrinthLoaders") as String
+val modrinthVersionType = project.findProperty("modrinthVersionType") as String
+val hangarProjectId = project.findProperty("hangarProjectId") as String
+val hangarChannel = project.findProperty("hangarChannel") as String
 
 val targetJavaVersion = javaVersion.toInt()
 val supportedMcVersions = supportedMinecraftVersions.split(',').map(String::trim).filter(String::isNotEmpty)
@@ -42,7 +42,7 @@ val buildNumber: String? = System.getenv("BUILD_NUMBER")
 val releaseVersion =
     version.toString() + (if (buildNumber != null) "+build.$buildNumber" else "")
 
-val publishPluginRelease by tasks.registering {
+val publishPluginRelease = tasks.register("publishPluginRelease") {
     group = "publishing"
     description = "Builds and publishes plugin artifacts to Modrinth and Hangar."
 }
@@ -350,14 +350,15 @@ tasks.named<RunServer>("runServer") {
         modrinth("openinv", "5.3.1")
         github("MilkBowl", "Vault", "1.7.3", "Vault.jar")
         modrinth("luckperms", "v5.5.17-bukkit")
-        modrinth("placeholderapi", "2.12.2")
+        modrinth("placeholderapi", "2.12.3")
         modrinth("towny", "0.102.0.0")
     }
     runDirectory = file("run/paper")
-    minecraftVersion("26.1.2")
+    minecraftVersion("26.3")
 }
 
 tasks.register<RunServer>("runLegacyServer") {
+    group = "run paper"
     description = "Runs a legacy server with Minecraft 1.21.6 for testing purposes."
     downloadPlugins {
         modrinth("openinv", "5.3.1")
