@@ -159,8 +159,8 @@ jobs:
             footer=""
           fi
 
-          if [ "${#CHANGELOG}" -gt 2000 ]; then
-            CHANGELOG="${CHANGELOG:0:1997}..."
+          if [ "${#CHANGELOG}" -gt 1000 ]; then
+            CHANGELOG="${CHANGELOG:0:997}..."
           fi
 
           modrinth_version_id=$(curl --silent --show-error --fail "https://api.modrinth.com/v2/project/${MODRINTH_PROJECT_ID}/version" \
