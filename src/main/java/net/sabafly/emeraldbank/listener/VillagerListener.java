@@ -5,7 +5,6 @@ import io.papermc.paper.event.player.PlayerTradeEvent;
 import net.sabafly.emeraldbank.EmeraldBank;
 import net.sabafly.emeraldbank.util.LogUtils;
 import net.sabafly.emeraldbank.util.PlayerInventoryUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.AbstractVillager;
 import org.bukkit.entity.Player;
