@@ -59,8 +59,7 @@ public class VillagerListener implements Listener {
         if (amount <= 0) return;
 
         if (event.getWhoClicked().getPersistentDataContainer().has(TRADE_AMOUNT, org.bukkit.persistence.PersistentDataType.INTEGER) &&
-            event.getWhoClicked().getPersistentDataContainer().has(TRADE_CURRENCY, org.bukkit.persistence.PersistentDataType.STRING))
-        {
+                event.getWhoClicked().getPersistentDataContainer().has(TRADE_CURRENCY, org.bukkit.persistence.PersistentDataType.STRING)) {
             if (Objects.equals(event.getWhoClicked().getPersistentDataContainer().get(TRADE_CURRENCY, org.bukkit.persistence.PersistentDataType.STRING), currencyKey)) {
                 amount += Optional.ofNullable(event.getWhoClicked().getPersistentDataContainer().get(TRADE_AMOUNT, org.bukkit.persistence.PersistentDataType.INTEGER)).orElse(0);
             }
@@ -100,7 +99,7 @@ public class VillagerListener implements Listener {
             final var amount = event.getPlayer().getPersistentDataContainer().get(TRADE_AMOUNT, org.bukkit.persistence.PersistentDataType.INTEGER);
             final var currencyKey = event.getPlayer().getPersistentDataContainer().get(TRADE_CURRENCY, org.bukkit.persistence.PersistentDataType.STRING);
             if (amount != null && currencyKey != null) {
-                Bukkit.getScheduler().runTask(EmeraldBank.getInstance(), () -> {
+                event.getPlayer().getScheduler().run(EmeraldBank.getInstance(), _ -> {
                     final var currency = config().getCurrency(Objects.requireNonNull(NamespacedKey.fromString(currencyKey)));
                     if (PlayerInventoryUtils.removeCurrency((Player) event.getPlayer(), currency, amount)) {
                         if (!economy().depositPlayer((Player) event.getPlayer(), amount).transactionSuccess())
@@ -109,7 +108,7 @@ public class VillagerListener implements Listener {
                         LogUtils.getLogger().debug("Failed to remove {} of currency {} from player {} for villager trade", amount, currencyKey, event.getPlayer().getName());
                     }
                     ((Player) event.getPlayer()).updateInventory();
-                });
+                }, null);
             }
         }
 
