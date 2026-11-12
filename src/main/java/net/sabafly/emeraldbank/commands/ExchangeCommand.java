@@ -32,7 +32,7 @@ import static net.sabafly.emeraldbank.util.EmeraldUtils.tagResolver;
 public class ExchangeCommand {
     public static LiteralCommandNode<CommandSourceStack> command() {
         return Commands.literal("exchange")
-                .requires(context -> config().exchangeEnabled)
+                .requires(_ -> config().exchangeEnabled)
                 .then(Commands.literal("from")
                         .requires(context -> context.getSender().hasPermission("emeraldbank.currency.exchange"))
                         .then(Commands.argument("amount", IntegerArgumentType.integer(1))
@@ -141,7 +141,9 @@ public class ExchangeCommand {
             throw createCommandException(config().messages.errorExchangeTooLow, tagResolver("value", Component.text(realAmount)), tagResolver("currency", Component.text(currency.name)));
         if (currencyAmount < realAmount + costAmount)
             throw createCommandException(config().messages.errorNotEnoughCurrency, tagResolver("value", Component.text(realAmount + costAmount)), tagResolver("currency", Component.text(currency.name)));
-        Preconditions.checkState(PlayerInventoryUtils.removeCurrency(player, currency, realAmount + costAmount));
+        if (player.getInventory().getStorageContents().length >= 36)
+            throw createCommandException(config().messages.errorInventoryFull);
+        Preconditions.checkState(PlayerInventoryUtils.removeCurrency(player, currency, realAmount + costAmount) == realAmount + costAmount);
         PlayerInventoryUtils.addCurrencyItem(player, target, receive);
         return realAmount;
     }

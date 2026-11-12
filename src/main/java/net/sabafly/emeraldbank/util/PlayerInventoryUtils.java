@@ -1,6 +1,5 @@
 package net.sabafly.emeraldbank.util;
 
-import com.google.common.base.Preconditions;
 import net.sabafly.emeraldbank.configuration.Settings.Currency;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -91,13 +90,11 @@ public class PlayerInventoryUtils {
         return count - remain;
     }
 
-    public static boolean removeCurrency(Player player, Currency currency, final int count) {
+    public static int removeCurrency(Player player, Currency currency, final int count) {
         if (getCurrencyAmount(player, currency) < count) {
-            return false;
+            return 0;
         }
-        int removed = removeCurrency0(player, currency, count);
-        Preconditions.checkArgument(removed == count, "Removed " + removed + " items, but expected " + count);
-        return true;
+        return removeCurrency0(player, currency, count);
     }
 
     private static int addCurrency1(Player player, ItemType type, final int count) {

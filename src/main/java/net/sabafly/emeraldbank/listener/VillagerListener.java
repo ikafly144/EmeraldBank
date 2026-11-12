@@ -100,11 +100,11 @@ public class VillagerListener implements Listener {
             if (amount != null && currencyKey != null) {
                 event.getPlayer().getScheduler().run(EmeraldBank.getInstance(), _ -> {
                     final var currency = config().getCurrency(Objects.requireNonNull(NamespacedKey.fromString(currencyKey)));
-                    if (PlayerInventoryUtils.removeCurrency((Player) event.getPlayer(), currency, amount)) {
+                    if (PlayerInventoryUtils.removeCurrency((Player) event.getPlayer(), currency, amount) == amount) {
                         if (!economy().depositPlayer((Player) event.getPlayer(), amount).transactionSuccess())
-                            LogUtils.getLogger().debug("Failed to deposit {} to player {} for villager trade", amount, event.getPlayer().getName());
+                            LogUtils.getLogger().warn("Failed to deposit {} to player {} for villager trade", amount, event.getPlayer().getName());
                     } else {
-                        LogUtils.getLogger().debug("Failed to remove {} of currency {} from player {} for villager trade", amount, currencyKey, event.getPlayer().getName());
+                        LogUtils.getLogger().warn("Failed to remove {} of currency {} from player {} for villager trade", amount, currencyKey, event.getPlayer().getName());
                     }
                     ((Player) event.getPlayer()).updateInventory();
                 }, null);

@@ -72,12 +72,16 @@ public class User {
                 remain -= (int) wallet;
                 wallet = 0;
             } else if (!useWalletFirst && getCurrencyCount(p, config().getDefaultCurrency()) < count) {
-                remain -= getCurrencyCount(p, config().getDefaultCurrency());
-                removeCurrency(p, config().getDefaultCurrency(), getCurrencyCount(p, config().getDefaultCurrency()));
+                remain -= removeCurrency(p, config().getDefaultCurrency(), getCurrencyCount(p, config().getDefaultCurrency()));
                 removeWallet(remain);
                 return true;
             }
-            return removeCurrency(p, config().getDefaultCurrency(), remain);
+            remain -= removeCurrency(p, config().getDefaultCurrency(), remain);
+            if (remain < 0) {
+                addWallet(-remain);
+                return true;
+            }
+            return remain == 0;
         }).or(() -> {
             if (isOffline() && wallet >= count) {
                 wallet -= count;

@@ -48,9 +48,8 @@ public class WalletCommand {
                                     final int amount = context.getArgument("amount", Integer.class);
                                     if (getCurrencyCount(player, config().getDefaultCurrency()) < amount)
                                         throw createCommandException(getMessages().errorAddWallet, tagResolver("value", formatCurrency(amount)), tagResolver("player", player.name()));
-                                    removeCurrency(player, config().getDefaultCurrency(), amount);
                                     User user = database().getUser(player.getUniqueId());
-                                    user.addWallet(amount);
+                                    user.addWallet(removeCurrency(player, config().getDefaultCurrency(), amount));
                                     database().saveUser(user);
                                     context.getSource().getSender().sendMessage(miniMessage().deserialize(getMessages().addWallet, tagResolver("value", formatCurrency(amount)), tagResolver("player", player.name())));
                                     return amount;
@@ -62,9 +61,8 @@ public class WalletCommand {
                                     if (!(context.getSource().getExecutor() instanceof Player player))
                                         throw net.minecraft.commands.CommandSourceStack.ERROR_NOT_PLAYER.create();
                                     final int count = getCurrencyCount(player, config().getDefaultCurrency());
-                                    removeCurrency(player, config().getDefaultCurrency(), count);
                                     User user = database().getUser(player.getUniqueId());
-                                    user.addWallet(count);
+                                    user.addWallet(removeCurrency(player, config().getDefaultCurrency(), count));
                                     database().saveUser(user);
                                     context.getSource().getSender().sendMessage(miniMessage().deserialize(getMessages().addWallet, tagResolver("value", formatCurrency(count)), tagResolver("player", player.name())));
                                     return count;
